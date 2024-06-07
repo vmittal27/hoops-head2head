@@ -4,6 +4,7 @@ import sys
 import time
 
 START = "jamesle01"
+TOTAL_PLAYERS_IN_NBA = 5209
 
 class BasketballReferenceWebScraper:
     '''
@@ -23,6 +24,19 @@ class BasketballReferenceWebScraper:
         Given a player id, returns the URL that containes that players' teammmates
         '''
         return f"https://www.basketball-reference.com/friv/teammates_and_opponents.fcgi?pid={player_id}&type=t"
+
+    def _print_progress(self, count, total, info=''):
+        '''
+        Prints a progress bar of the scaper
+        '''
+    
+        TOTAL_LEN = 50
+        filled_len = min(TOTAL_LEN, int(round(TOTAL_LEN * count / float(total))))
+
+        percent = 100.0 * count / float(total)
+
+        sys.stderr.write(f"[{'█' * filled_len}{'-' * (TOTAL_LEN - filled_len)}] {count}/{total} {percent:.2f}% ... {info}\r")
+        sys.stderr.flush()
 
     def get_teammates(self, file) -> None:
         '''
@@ -90,8 +104,7 @@ class BasketballReferenceWebScraper:
 
                 counter += 1
 
-                if counter % 10 == 0:
-                    print(f"Players Checked: {counter}\nCurrent Player: {player}", file=sys.stderr)
+                self._print_progress(counter, TOTAL_PLAYERS_IN_NBA, f"Current Player: {player}")
                     
             except Exception as e:
 
