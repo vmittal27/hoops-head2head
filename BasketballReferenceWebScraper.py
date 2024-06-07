@@ -36,7 +36,7 @@ class BasketballReferenceWebScraper:
 
         counter = 0
 
-        while self.need_to_scrape_players:
+        while self.need_to_scrape_players and counter < 7000: # second condition ensures any messed up code doesn't destroy computer
     
             player_id = self.need_to_scrape_players.pop()
             url = self._get_url(player_id)
