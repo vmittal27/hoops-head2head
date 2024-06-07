@@ -37,8 +37,6 @@ class BasketballReferenceWebScraper:
         counter = 0
 
         while self.need_to_scrape_players:
-
-            counter += 1
     
             player_id = self.need_to_scrape_players.pop()
             url = self._get_url(player_id)
@@ -75,9 +73,6 @@ class BasketballReferenceWebScraper:
                 player = soup.find('span', class_='ac-prefill-name').get_text()
                 table = soup.find('table', id='teammates-and-opponents')
                 entries = table.find_all('a')
-
-                if counter % 10 == 0:
-                    print(f"Players Checked: {counter}\nCurrent Player: {player}", file=sys.stderr)
         
                 for entry in entries:
 
@@ -91,6 +86,11 @@ class BasketballReferenceWebScraper:
                         print(f"{games_played},{player},{teammate}", file=file)
 
                 self.scraped_players.add(player_id)
+
+                counter += 1
+
+                if counter % 10 == 0:
+                    print(f"Players Checked: {counter}\nCurrent Player: {player}", file=sys.stderr)
                     
             except Exception as e:
 
