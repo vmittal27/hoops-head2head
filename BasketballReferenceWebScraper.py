@@ -54,6 +54,7 @@ class BasketballReferenceWebScraper:
                     )
 
                     time.sleep(int(response.headers['Retry-After']))
+                    response = requests.get(url)
 
                 else:
 
