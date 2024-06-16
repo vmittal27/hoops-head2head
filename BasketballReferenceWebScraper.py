@@ -2,7 +2,12 @@ from bs4 import BeautifulSoup
 import requests
 import sys
 import time
-
+'''
+If running on own machine: make sure you have dependencies installed
+First cd to the requested directory, then: 
+-pip3 install bs4
+-pip3 install requests
+'''
 START = "jamesle01"
 TOTAL_PLAYERS_IN_NBA = 5208
 
@@ -17,11 +22,15 @@ class BasketballReferenceWebScraper:
     checked_players: set[str]
     need_to_check_players: set[str]
     failures: list[str]
+    players : dict[str, tuple]
+    idx : int
 
     def __init__(self) -> None:
         self.checked_players = set()
         self.need_to_check_players = set([START])
         self.failures = []
+        self.players = dict()
+        self.idx = 0
 
     def _get_url(self, player_id: str) -> str:
         '''
@@ -74,85 +83,94 @@ class BasketballReferenceWebScraper:
             print(f"{time.asctime()}-ERROR parsing HTML at {url} for {player}: {e}", file=sys.stderr)
             self.failures.append(player_id)
 
-    def get_teammates(self, file) -> None:
+    def _player_in_bounds(self, soup: BeautifulSoup, url: str, year: int) -> None:
         '''
-        Scrapes https://www.basketball-reference.com/ given a starting player ID,
-        using the page to get other player IDS.
+        https://www.basketball-reference.com/leagues/NBA_2024_per_game.html gives a list of players
+        Get this until 2000, add every player to a csv doc.
+        '''
 
-        Stores data as a CSV in the passed in file with the first column containing games played together,
-        second containing the player, and third containing the teammmate.
+        table = soup.find('table', id = "per_game_stats")
+        entries = table.find_all('a')
+        try:
 
-        Contains a hard limit on number of iterations at 1.5x the constant for TOTAL_PLAYERS_IN_NBA
-        ''' 
+            for entry in entries:
+                player_id = entry['href'].split("/")[-1][:-5]
+                player_name = entry.get_text()
+                if player_id not in self.players:
+                    self.players[player_id] = (self.idx, player_name, year) 
+                    self.idx += 1
 
-        num_checked_players = 0
 
-        print("Games Played,Player,Teammate", file=file)
+        except Exception as e:
+            print(f"{time.asctime()}-ERROR parsing HTML at {url} for {player_id}: {e}", file=sys.stderr)
+            self.failures.append(player_id)
+        
+    def _player_in_bounds(self, soup: BeautifulSoup, url: str, year: int) -> None:
+        '''
+        https://www.basketball-reference.com/leagues/NBA_2024_per_game.html gives a list of players
+        Get this until 2000, add every player to a csv doc.
+        '''
+        try:
+            table = soup.find('table', id="per_game_stats")  # Corrected ID
+            if table is None:
+                raise ValueError("Table with ID 'per_game_stats' not found")
 
-        while self.need_to_check_players and num_checked_players < 1.5*TOTAL_PLAYERS_IN_NBA:
+            entries = table.find_all('a')
 
-            player_id = self.need_to_check_players.pop()
-            url = self._get_url(player_id)
+            for entry in entries:
+                player_id = entry['href'].split("/")[-1][:-5]
+                player_name = entry.get_text()
+                self.idx += 1
+                if player_id not in self.players:
+                    self.players[player_id] = (self.idx, player_name, year) 
 
+        except Exception as e:
+            print(f"{time.asctime()}-ERROR parsing HTML at {url} for {year}: {e}", file=sys.stderr)
+            self.failures.append(player_id)
+
+    def get_players(self, file) -> None:
+        year = 2024
+        while year >= 2000:
             time.sleep(3.1) # basketball-reference maxes at 20 requests/min
+            url = f'https://www.basketball-reference.com/leagues/NBA_{year}_per_game.html'
             response = requests.get(url)
 
             if response.status_code != 200:
-
                 if response.status_code == 429:
-
                     print(
-                        f"{time.asctime()}-Accessing {url} for {player_id}. Reason: {response.status_code} {response.reason}. Waiting {response.headers['Retry-After']} secs to retry.",
+                        f"{time.asctime()}-Accessing {url} for {year} players. Reason: {response.status_code} {response.reason}. Waiting {response.headers['Retry-After']} secs to retry.",
                         file=sys.stderr
                     )
-
-                    self.need_to_check_players.add(player_id)
                     time.sleep(int(response.headers['Retry-After']))
-
                 else:
-
                     print(
-                        f"{time.asctime()}-ERROR accessing {url} for {player_id}. Reason: {response.status_code} {response.reason}", 
+                        f"{time.asctime()}-ERROR accessing {url} for {year}. Reason: {response.status_code} {response.reason}", 
                         file=sys.stderr
                     )
-                    self.failures.append(player_id)
-                
+                    self.failures.append(year)
             else: 
                 soup = BeautifulSoup(response.content, 'html.parser')
-                teammate_data = self._parse_html(soup, url, player_id)
+                self._player_in_bounds(soup, url, year)
+                for player_id, info in self.players.items():
+                    print(f"{player_id},{info[0]},{info[1]},{info[2]}", file=file)
 
-                for games_played, player, teammate, teammate_id  in teammate_data:
-        
-                    if teammate_id not in self.checked_players:
-    
-                        self.need_to_check_players.add(teammate_id)
-                        print(f"{games_played},{player},{teammate}", file=file)
-                
-                self.checked_players.add(player_id)
-                num_checked_players += 1
-
-                self._print_progress(
-                    num_checked_players,
-                    TOTAL_PLAYERS_IN_NBA,
-                    f"\033[91m Current Player\033[00m: {player} \033[92m Players in Queue\033[00m: {len(self.need_to_check_players)}"
-                )
-        
-        for i, failure in enumerate(self.failures):
-            if failure in self.checked_players:
-                self.failures.pop(i)
+            year -= 1
 
 
 if __name__ == "__main__":
 
     scraper = BasketballReferenceWebScraper()
 
-    with open('teammates.csv', 'w+') as file:
+    with open('players2000-2024.csv', 'w+') as file:
 
-        scraper.get_teammates(file)
+        scraper.get_players(file) 
+    # with open('teammates.csv', 'w+') as file:
+
+    #     scraper.get_teammates(file)
     
-    with open('checked_players.txt', 'w+') as file:
-        print(scraper.checked_players, file=file)
+    # with open('checked_players.txt', 'w+') as file:
+    #     print(scraper.checked_players, file=file)
     
-    with open('failed_players.txt', 'w+') as file:
-        print(scraper.failures, file=file)
+    # with open('failed_players.txt', 'w+') as file:
+    #     print(scraper.failures, file=file)
 
