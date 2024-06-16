@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import sys
 import time
+import re
 '''
 If running on own machine: make sure you have dependencies installed
 First cd to the requested directory, then: 
@@ -90,14 +91,14 @@ class BasketballReferenceWebScraper:
         '''
 
         table = soup.find('table', id = "per_game_stats")
-        entries = table.find_all('a')
+        entries = table.find_all('a', href=re.compile("players"))
         try:
 
             for entry in entries:
                 player_id = entry['href'].split("/")[-1][:-5]
                 player_name = entry.get_text()
                 if player_id not in self.players:
-                    self.players[player_id] = (self.idx, player_name, year) 
+                    self.players[player_id] = (self.idx, player_name, year)
                     self.idx += 1
 
 
@@ -105,28 +106,28 @@ class BasketballReferenceWebScraper:
             print(f"{time.asctime()}-ERROR parsing HTML at {url} for {player_id}: {e}", file=sys.stderr)
             self.failures.append(player_id)
         
-    def _player_in_bounds(self, soup: BeautifulSoup, url: str, year: int) -> None:
-        '''
-        https://www.basketball-reference.com/leagues/NBA_2024_per_game.html gives a list of players
-        Get this until 2000, add every player to a csv doc.
-        '''
-        try:
-            table = soup.find('table', id="per_game_stats")  # Corrected ID
-            if table is None:
-                raise ValueError("Table with ID 'per_game_stats' not found")
+    # def _player_in_bounds(self, soup: BeautifulSoup, url: str, year: int) -> None:
+    #     '''
+    #     https://www.basketball-reference.com/leagues/NBA_2024_per_game.html gives a list of players
+    #     Get this until 2000, add every player to a csv doc.
+    #     '''
+    #     try:
+    #         table = soup.find('table', id="per_game_stats")  # Corrected ID
+    #         if table is None:
+    #             raise ValueError("Table with ID 'per_game_stats' not found")
 
-            entries = table.find_all('a')
+    #         entries = table.find_all('a')
 
-            for entry in entries:
-                player_id = entry['href'].split("/")[-1][:-5]
-                player_name = entry.get_text()
-                self.idx += 1
-                if player_id not in self.players:
-                    self.players[player_id] = (self.idx, player_name, year) 
+    #         for entry in entries:
+    #             player_id = entry['href'].split("/")[-1][:-5]
+    #             player_name = entry.get_text()
+    #             self.idx += 1
+    #             if player_id not in self.players:
+    #                 self.players[player_id] = (self.idx, player_name, year) 
 
-        except Exception as e:
-            print(f"{time.asctime()}-ERROR parsing HTML at {url} for {year}: {e}", file=sys.stderr)
-            self.failures.append(player_id)
+    #     except Exception as e:
+    #         print(f"{time.asctime()}-ERROR parsing HTML at {url} for {year}: {e}", file=sys.stderr)
+    #         self.failures.append(player_id)
 
     def get_players(self, file) -> None:
         year = 2024
