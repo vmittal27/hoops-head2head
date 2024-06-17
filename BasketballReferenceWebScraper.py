@@ -3,6 +3,9 @@ import requests
 import sys
 import time
 import re
+import pickle
+import os
+
 '''
 If running on own machine: make sure you have dependencies installed
 First cd to the requested directory, then: 
@@ -32,6 +35,26 @@ class BasketballReferenceWebScraper:
         self.failures = []
         self.players = dict()
         self.idx = 0
+        self.players_file = 'players.pkl'
+        self.load_players()
+    
+    def load_players(self) -> None:
+        ''' 
+        Load players dictionary from file if it exists.
+        Ensures that we need not continue running get_players every time
+        May want to switch this to json later on, but pickle is good for storing dicts
+        '''
+        if os.path.exists(self.players_file):
+            with open(self.players_file, 'rb') as file:
+                self.players = pickle.load(file)
+                self.idx = max(info[0] for info in self.players.values()) + 1
+            print(f"Loaded {len(self.players)} players from {self.players_file}")
+    
+    def save_players(self) -> None:
+        '''Save players dictionary to file.'''
+        with open(self.players_file, 'wb') as file:
+            pickle.dump(self.players, file)
+        print(f"Saved {len(self.players)} players to {self.players_file}")
 
     def _get_url(self, player_id: str) -> str:
         '''
@@ -106,30 +129,8 @@ class BasketballReferenceWebScraper:
             print(f"{time.asctime()}-ERROR parsing HTML at {url} for {player_id}: {e}", file=sys.stderr)
             self.failures.append(player_id)
         
-    # def _player_in_bounds(self, soup: BeautifulSoup, url: str, year: int) -> None:
-    #     '''
-    #     https://www.basketball-reference.com/leagues/NBA_2024_per_game.html gives a list of players
-    #     Get this until 2000, add every player to a csv doc.
-    #     '''
-    #     try:
-    #         table = soup.find('table', id="per_game_stats")  # Corrected ID
-    #         if table is None:
-    #             raise ValueError("Table with ID 'per_game_stats' not found")
-
-    #         entries = table.find_all('a')
-
-    #         for entry in entries:
-    #             player_id = entry['href'].split("/")[-1][:-5]
-    #             player_name = entry.get_text()
-    #             self.idx += 1
-    #             if player_id not in self.players:
-    #                 self.players[player_id] = (self.idx, player_name, year) 
-
-    #     except Exception as e:
-    #         print(f"{time.asctime()}-ERROR parsing HTML at {url} for {year}: {e}", file=sys.stderr)
-    #         self.failures.append(player_id)
-
-    def get_players(self, file) -> None:
+   
+    def get_players(self, file_path : str) -> None:
         year = 2024
         while year >= 2000:
             time.sleep(3.1) # basketball-reference maxes at 20 requests/min
@@ -152,19 +153,80 @@ class BasketballReferenceWebScraper:
             else: 
                 soup = BeautifulSoup(response.content, 'html.parser')
                 self._player_in_bounds(soup, url, year)
-                for player_id, info in self.players.items():
-                    print(f"{player_id},{info[0]},{info[1]},{info[2]}", file=file)
+            
+            print(f"Total players collected: {len(self.players)}")
 
             year -= 1
+        
+
+        with open(file_path, 'w', encoding='utf-8') as file:
+            for player_id, info in self.players.items():    
+                file.write(f"{player_id},{info[0]},{info[1]},{info[2]}\n")
+        self.save_players()
+    
+    def get_teammates(self, file_path : str) -> None:
+        '''
+        Uses dict players to generate list of teammates in order of index/year
+        ''' 
+        self.load_players()
+        for player_id in self.players:
+            time.sleep(3.1)
+            url = self._get_url(player_id)
+            response = requests.get(url)
+        
+            if response.status_code != 200:
+
+                if response.status_code == 429:
+
+                    print(
+                        f"Accesing {url} caused ERROR 429. Waiting {response.headers['Retry-After']} secs to retry.",
+                        f"{time.asctime()}-Accessing {url} for {player_id}. Reason: {response.status_code} {response.reason}. Waiting {response.headers['Retry-After']} secs to retry.",
+                        file=sys.stderr
+                    )
+
+                    self.need_to_check_players.add(player_id)
+                    time.sleep(int(response.headers['Retry-After']))
+                    response = requests.get(url)
+
+                else:
+
+                    print(
+                        f"""ERROR: {player_id}. Something went wrong accessing {url}.
+                        Error code {response.status_code}.
+                        Reason: {response.reason}""", 
+                        f"{time.asctime()}-ERROR accessing {url} for {player_id}. Reason: {response.status_code} {response.reason}", 
+                        file=sys.stderr
+                    )
+                    self.failures.append(player_id)
+
+            else:
+
+                soup = BeautifulSoup(response.content, 'html.parser')
+                teammate_data = self._parse_html(soup, url, player_id)
+
+                with open(file_path, 'a', encoding='utf-8') as file:
+                    for games_played, player, teammate, teammate_id in teammate_data:    
+                        print(f"{player_id},{teammate_id},{player},{teammate}, {games_played}", file=file)
+
+                    
+
+                    
+
+        
+    
+            
+
 
 
 if __name__ == "__main__":
 
     scraper = BasketballReferenceWebScraper()
 
-    with open('players2000-2024.csv', 'w+') as file:
+    # with open('players2000-2024.csv', 'w+') as file:
 
-        scraper.get_players(file) 
+    # scraper.get_players('players2000-2024.csv') 
+    scraper.get_teammates('teammates-inorder.csv')
+    
     # with open('teammates.csv', 'w+') as file:
 
     #     scraper.get_teammates(file)
