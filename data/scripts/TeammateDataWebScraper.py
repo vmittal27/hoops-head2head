@@ -4,14 +4,12 @@ import sys
 import time
 
 START = "jamesle01"
-TOTAL_PLAYERS_IN_NBA = 5208
+MAX_ITERATONS = 7000
 
 class TeammateDataWebScraper:
     '''
     Class to manage data collection of all players'
     teammates from https://www.basketball-reference.com/
-
-    TOTAL_PLAYERS_IN_NBA constant needs to be updated manually periodically
     '''
 
     checked_players: set[str]
@@ -82,19 +80,18 @@ class TeammateDataWebScraper:
         Stores data as a CSV in the passed in file with the first column containing games played together,
         second containing the player, and third containing the teammmate.
 
-        Contains a hard limit on number of iterations at 1.5x the constant for TOTAL_PLAYERS_IN_NBA
+        Contains a hard limit on number of iterations at 7000
         ''' 
 
         num_checked_players = 0
 
-        print("Games Played,Player,Teammate", file=file)
+        print("Games Played,Player ID,Player,Teammate ID,Teammate", file=file)
 
-        while self.need_to_check_players and num_checked_players < 1.5*TOTAL_PLAYERS_IN_NBA:
+        while self.need_to_check_players and num_checked_players < MAX_ITERATONS:
 
             player_id = self.need_to_check_players.pop()
             url = self._get_url(player_id)
 
-            time.sleep(3.1) # basketball-reference maxes at 20 requests/min
             response = requests.get(url)
 
             if response.status_code != 200:
@@ -102,7 +99,7 @@ class TeammateDataWebScraper:
                 if response.status_code == 429:
 
                     print(
-                        f"{time.asctime()}-Accessing {url} for {player_id}. Reason: {response.status_code} {response.reason}. Waiting {response.headers['Retry-After']} secs to retry.",
+                        f"\n{time.asctime()}-Accessing {url} for {player_id}. Reason: {response.status_code} {response.reason}. Waiting {response.headers['Retry-After']} secs to retry.",
                         file=sys.stderr
                     )
 
@@ -112,7 +109,7 @@ class TeammateDataWebScraper:
                 else:
 
                     print(
-                        f"{time.asctime()}-ERROR accessing {url} for {player_id}. Reason: {response.status_code} {response.reason}", 
+                        f"\n{time.asctime()}-ERROR accessing {url} for {player_id}. Reason: {response.status_code} {response.reason}", 
                         file=sys.stderr
                     )
                     self.failures.append(player_id)
@@ -126,32 +123,42 @@ class TeammateDataWebScraper:
                     if teammate_id not in self.checked_players:
     
                         self.need_to_check_players.add(teammate_id)
-                        print(f"{games_played},{player},{teammate}", file=file)
+                        print(f"{games_played},{player_id},{player},{teammate_id},{teammate}", file=file)
                 
                 self.checked_players.add(player_id)
                 num_checked_players += 1
 
                 self._print_progress(
                     num_checked_players,
-                    TOTAL_PLAYERS_IN_NBA,
+                    len(self.need_to_check_players) + num_checked_players,
                     f"\033[91m Current Player\033[00m: {player} \033[92m Players in Queue\033[00m: {len(self.need_to_check_players)}"
                 )
+
+                time.sleep(3)
         
         for i, failure in enumerate(self.failures):
             if failure in self.checked_players:
-                self.failures.pop(i)
+                self.failures.remove(failure)
 
 
 if __name__ == "__main__":
 
     scraper = TeammateDataWebScraper()
 
-    with open('teammates.csv', 'w+') as file:
+    date = time.strftime('%Y-%m-%d')
+
+    with open(f'data/teammates-{date}.csv', 'w+', encoding='utf-8') as file:
 
         scraper.get_teammates(file)
     
-    with open('checked_players.txt', 'w+') as file:
+    print(f"\nWrote the teammates of {len(scraper.checked_players)} players to teammates.csv")
+    
+    with open(f'data/checked_players-{date}.txt', 'w+', encoding='utf-8') as file:
         print(scraper.checked_players, file=file)
     
-    with open('failed_players.txt', 'w+') as file:
+    print(f"Wrote all checked players to checked_players-{date}.txt")
+
+    with open(f'data/failed_players-{date}.txt', 'w+', encoding='utf-8') as file:
         print(scraper.failures, file=file)
+
+    print(f"Wrote all failed players to failed_players-{date}.txt")
