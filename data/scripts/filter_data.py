@@ -28,4 +28,4 @@ if player_diff:
     print("\tBecause there is a difference, a new players-filtered.csv has been created")
     print(f"\tContains {filtered_players['Player ID'].size} different players")
 
-filtered_players.to_csv("data/players-filtered.csv")
+filtered_players.to_csv("data/players-filtered.csv", index=False)
