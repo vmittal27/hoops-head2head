@@ -103,7 +103,7 @@ class PlayerDataWebScraper():
 
         for player in self.data:
             rel = self.relevance_score(player['games'], player['winShare']/player['games'], self.min_year, game_max, max_pg_ws, player['year'])
-            player['peak'] = rel
+            player['relevancy'] = rel
                   
         return self.data
 
@@ -114,7 +114,7 @@ if __name__ == "__main__":
         print("Player ID,Player,Year,Games Played,Win Share, Relevancy", file=file)
         
         for datum in scraper.data:
-            print(f"{datum['id']},{datum['player']},{datum['year']},{datum['games']},{datum['winShare']}, {datum['peak']}", file=file)
+            print(f"{datum['id']},{datum['player']},{datum['year']},{datum['games']},{datum['winShare']}, {datum['relevancy']}", file=file)
 
 
 
