@@ -1,8 +1,17 @@
 from neo4j import GraphDatabase
 
-uri = "neo4j+s://f14256f5.databases.neo4j.io"
-username = "neo4j"
-password = "95yimwnb1mOk28HVhnHGJUuP2mGzF3UqEYrwKhAtVKQ"
+def read_credentials(file):
+    credentials = {}
+    with open(file, 'r') as file:
+        for line in file:
+            key, value = line.strip().split('=')
+            credentials[key] = value
+    return credentials
+
+cred = read_credentials('credentials.txt')
+uri = cred['NEO4J_URI']
+username = cred['NEO4J_USER']
+password = cred['NEO4J_PASSWORD']
 
 #Driver instance
 driver = GraphDatabase.driver(uri, auth=(username, password))
