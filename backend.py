@@ -27,6 +27,7 @@ def get_two_players():
         return [record["p"] for record in result]
 
 #Grabs two players (returns their node)
+#Adjust later
 rand_players = get_two_players()
 for player in rand_players:
     print(player)
