@@ -19,6 +19,25 @@ password = cred['NEO4J_PASSWORD']
 #Driver instance
 driver = GraphDatabase.driver(uri, auth=(username, password))
 
+def get_two_players(rel_min, rel_max, year_min, year_max):
+    """
+    Gets 2 random players based on relevancy and year criteria.
+
+    """
+    query = f"""
+    MATCH (p:Player)
+    WITH p, rand() AS r
+    WHERE p.Relevancy >= {rel_min} AND p.Relevancy <= {rel_max} AND p.year >= {year_min} AND p.year <= {year_max} AND NOT (p1)-[:CONNECTED]-(p2)
+    RETURN p
+    ORDER BY r
+    LIMIT 1
+    RETURN p1, p2
+    """
+    with driver.session() as session:
+        result = session.run(query)
+        return [record["p"] for record in result]
+    
+
 @app.route('/<difficulty>')
 def get_players(difficulty):
     """
@@ -40,23 +59,7 @@ def get_players(difficulty):
     else:
         return jsonify({'error': 'Difficulty level not found'}), 404
 
-def get_two_players(rel_min, rel_max, year_min, year_max):
-    """
-    Gets 2 random players based on relevancy and year criteria.
 
-    """
-    query = f"""
-    MATCH (p:Player)
-    WITH p, rand() AS r
-    WHERE p.Relevancy >= {rel_min} AND p.Relevancy <= {rel_max} AND p.year >= {year_min} AND p.year <= {year_max}
-    RETURN p
-    ORDER BY r
-    LIMIT 2
-    """
-    with driver.session() as session:
-        result = session.run(query)
-        return [record["p"] for record in result]
-    
 
 #Function to close driver connection
 def close_driver():
