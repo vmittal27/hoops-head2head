@@ -27,11 +27,10 @@ def get_two_players(rel_min, rel_max, year_min, year_max):
     query = f"""
     MATCH (p:Player)
     WITH p, rand() AS r
-    WHERE p.Relevancy >= {rel_min} AND p.Relevancy <= {rel_max} AND p.year >= {year_min} AND p.year <= {year_max} AND NOT (p1)-[:CONNECTED]-(p2)
+    WHERE p.Relevancy >= {rel_min} AND p.Relevancy <= {rel_max} AND p.year >= {year_min} AND p.year <= {year_max}
     RETURN p
     ORDER BY r
-    LIMIT 1
-    RETURN p1, p2
+    LIMIT 2
     """
     with driver.session() as session:
         result = session.run(query)
