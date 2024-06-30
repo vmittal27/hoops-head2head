@@ -1,4 +1,7 @@
+from flask import Flask, jsonify
 from neo4j import GraphDatabase
+
+app = Flask(__name__)
 
 def read_credentials(file):
     credentials = {}
@@ -16,9 +19,26 @@ password = cred['NEO4J_PASSWORD']
 #Driver instance
 driver = GraphDatabase.driver(uri, auth=(username, password))
 
-#Function to close driver connection
-def close_driver():
-    driver.close()
+@app.route('/<difficulty>')
+def get_players(difficulty):
+    """
+    Endpoint to get players based on difficulty level.
+    """
+    difficulties = {
+        'easy': (3.5, float('inf'), 2020, 2024),
+        'medium': (2, 3, 2015, 2024),
+        'hard': (0.5, 1.5, 2015, 2024),
+        'extreme': (1.5, 2.5, 2000, 2024),
+        'legacy': (3.7, float('inf'), 1947, 2024)
+    }
+    if difficulty in difficulties:
+        rel_min, rel_max, year_min, year_max = difficulties[difficulty]
+        players = get_two_players(rel_min, rel_max, year_min, year_max)
+        for player in players:
+            print(player)
+        return jsonify([dict(player) for player in players])
+    else:
+        return jsonify({'error': 'Difficulty level not found'}), 404
 
 def get_two_players(rel_min, rel_max, year_min, year_max):
     """
@@ -36,17 +56,13 @@ def get_two_players(rel_min, rel_max, year_min, year_max):
     with driver.session() as session:
         result = session.run(query)
         return [record["p"] for record in result]
+    
 
-
-cur_easy = get_two_players(3.5, float('inf'), 2020, 2024)
-cur_medium = get_two_players(2, 3, 2015, 2024)
-cur_hard = get_two_players(0.5, 1.5, 2015, 2024)
-cur_extreme = get_two_players(1.5, 2.5, 2000, 2024)
-legacy = get_two_players(3.7, float('inf'), 1947, 2024)
-#Grabs two players (returns their node)
-#Adjust later
-rand_players = cur_easy
-for player in rand_players:
-    print(player)
+#Function to close driver connection
+def close_driver():
+    driver.close()
 
 close_driver()
+
+if __name__ == '__main__':
+    app.run(debug=True)
