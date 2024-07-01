@@ -22,19 +22,28 @@ driver = GraphDatabase.driver(uri, auth=(username, password))
 def get_two_players(rel_min, rel_max, year_min, year_max):
     """
     Gets 2 random players based on relevancy and year criteria.
-
     """
     query = f"""
-    MATCH (p:Player)
-    WITH p, rand() AS r
-    WHERE p.Relevancy >= {rel_min} AND p.Relevancy <= {rel_max} AND p.year >= {year_min} AND p.year <= {year_max}
-    RETURN p
-    ORDER BY r
-    LIMIT 2
+    MATCH (p1:Player), (p2:Player)
+    WHERE 
+        p1 <> p2 AND
+        NOT EXISTS((p1)-[]-(p2)) AND
+        p1.Relevancy >= {rel_min} AND p1.Relevancy <= {rel_max} AND p1.year >= {year_min} AND p1.year <= {year_max} AND
+        p2.Relevancy >= {rel_min} AND p2.Relevancy <= {rel_max} AND p2.year >= {year_min} AND p2.year <= {year_max}
+    WITH p1, p2
+    MATCH path = shortestPath((p1)-[*]-(p2))
+    RETURN p1, p2, path
+    ORDER BY rand()
+    LIMIT 1
     """
     with driver.session() as session:
         result = session.run(query)
-        return [record["p"] for record in result]
+        all_info = [{
+            'player1': dict(record['p1']),
+            'player2': dict(record['p2']),
+            'shortest_path': [dict(node) for node in record['path'].nodes]
+        } for record in result]
+        return all_info
     
 
 @app.route('/<difficulty>')
@@ -51,13 +60,10 @@ def get_players(difficulty):
     }
     if difficulty in difficulties:
         rel_min, rel_max, year_min, year_max = difficulties[difficulty]
-        players = get_two_players(rel_min, rel_max, year_min, year_max)
-        for player in players:
-            print(player)
-        return jsonify([dict(player) for player in players])
+        info = get_two_players(rel_min, rel_max, year_min, year_max)
+        return info
     else:
         return jsonify({'error': 'Difficulty level not found'}), 404
-
 
 
 #Function to close driver connection
