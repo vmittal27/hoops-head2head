@@ -32,16 +32,16 @@ def get_two_players(rel_min, rel_max, year_min, year_max):
         p2.Relevancy >= {rel_min} AND p2.Relevancy <= {rel_max} AND p2.year >= {year_min} AND p2.year <= {year_max}
     WITH p1, p2
     MATCH path = shortestPath((p1)-[*]-(p2))
-    RETURN p1, p2, path
+    RETURN p1.name AS player1Name, p2.name AS player2Name, [node IN nodes(path) | node.name] AS pathNames
     ORDER BY rand()
     LIMIT 1
     """
     with driver.session() as session:
         result = session.run(query)
         all_info = [{
-            'player1': dict(record['p1']),
-            'player2': dict(record['p2']),
-            'shortest_path': [dict(node) for node in record['path'].nodes]
+            'player1': record['player1Name'],
+            'player2': record['player2Name'],
+            'shortest_path': record['pathNames']
         } for record in result]
         return all_info
     
