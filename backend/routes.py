@@ -1,7 +1,6 @@
-from flask import Flask, jsonify
+from flask import jsonify
 from neo4j import GraphDatabase
-
-app = Flask(__name__)
+from backend import app
 
 def read_credentials(file):
     credentials = {}
@@ -45,6 +44,12 @@ def get_two_players(rel_min, rel_max, year_min, year_max):
         } for record in result]
         return all_info
     
+@app.route('/')
+def welcome():
+    """
+    Default screen for the standard URL
+    """
+    return "Welcome to Hoops H2H!"
 
 @app.route('/<difficulty>')
 def get_players(difficulty):
