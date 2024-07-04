@@ -65,6 +65,25 @@ def get_players(difficulty):
     else:
         return jsonify({'error': 'Difficulty level not found'}), 404
 
+@app.route("/path/shortest")
+def get_shortest_path(src_id: str, dst_id: str):
+    records, summary, keys = driver.execute_query(
+        f'''
+        MATCH (src {{`id`: '{src_id}'}}), (dst {{`id`: '{dst_id}'}})
+        MATCH p = ShortestPath((src)-[:PLAYED_WITH*]-(dst))
+        RETURN [node IN nodes(p)]
+        ''',
+        database_="neo4j"
+    )
+
+    players = []
+
+    for record, key in zip(records, keys):
+        data = record.data()[key]
+        for datum in data:
+            players.append(datum['name'])
+    
+    return players
 
 #Function to close driver connection
 def close_driver():
