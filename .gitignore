@@ -1,4 +1,8 @@
 credentials.txt
+
+# Frontend stuff
+react-frontend/node_modules
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
