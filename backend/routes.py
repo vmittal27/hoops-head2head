@@ -51,24 +51,31 @@ def welcome():
     """
     return "Welcome to Hoops H2H!"
 
-@app.route('/<difficulty>')
+@app.route('/players/<difficulty>')
 def get_players(difficulty):
     """
     Endpoint to get players based on difficulty level.
     """
-    difficulties = {
-        'easy': (3.5, float('inf'), 2020, 2024),
-        'medium': (2.3, 3.5, 2015, 2024),
-        'hard': (0.5, 1.5, 2015, 2024),
-        'extreme': (1.5, 2.3, 2000, 2024),
-        'legacy': (4.2, float('inf'), 1947, 2024)
-    }
-    if difficulty in difficulties:
-        rel_min, rel_max, year_min, year_max = difficulties[difficulty]
-        info = get_two_players(rel_min, rel_max, year_min, year_max)
-        return info
-    else:
-        return jsonify({'error': 'Difficulty level not found'}), 404
+    query = f"""
+    MATCH (n:Player {{difficulty: "{difficulty}"}})
+    WITH n
+    ORDER BY rand()
+    LIMIT 2
+    RETURN n;
+    """
+
+    neighbors = True
+    while neighbors:
+        records, summary, keys = driver.execute_query(query)
+
+        p1 = records[0].data()[keys[0]]
+        p2 = records[1].data()[keys[0]]
+
+        path = get_shortest_path(p1['id'], p2['id'])
+        neighbors = len(path) == 2 # true if direct neighbors, false otherwise
+    
+    return jsonify({"Player 1": p1, "Player 2": p2, "Path": path})
+
 
 @app.route("/path/shortest")
 def get_shortest_path(src_id: str, dst_id: str):
@@ -98,3 +105,4 @@ close_driver()
 
 if __name__ == '__main__':
     app.run(debug=True)
+    close_driver()
