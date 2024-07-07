@@ -1,5 +1,6 @@
 import os
 from PlayerDataWebScraper import PlayerDataWebScraper
+import pandas as pd
 
 difficulties = {
             'easy': (2.0, 100, 2020, 2024),
@@ -55,5 +56,32 @@ def update_diffs():
 
         print("File updated successfully.")
 
+
+def get_difficulty_sheets():
+    #from test-data.csv, separates by difficulty into distinct spreadsheets, this is to make getting random players way easier
+    script_dir = os.path.dirname(__file__)
+    file_path = os.path.join(script_dir, 'test-players.csv') #change this to players-filtered in the future
+
+    # Print to verify the path
+    print(file_path)
+
+    # Check if the file exists
+    if not os.path.exists(file_path):
+        print(f"The file {file_path} does not exist.")
+    else:
+
+        # Open the file and read lines
+        with open(file_path, 'r', encoding='utf-8') as file:
+            lines = file.readlines()
+        for line in lines[1:]:
+            l = line.split(",")
+            if l[-1][:-1] != 'N/A':
+                with open(f'{l[-1][:-1]}_players.txt', 'a', encoding='utf-8') as file:
+                    file.write(line)
+        
+        print("Files Created")
+
+
+get_difficulty_sheets()
 update_diffs()
 

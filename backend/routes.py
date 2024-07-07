@@ -29,7 +29,7 @@ def get_two_players(rel_min, rel_max, year_min, year_max):
         NOT EXISTS((p1)-[]-(p2)) AND
         p1.Relevancy >= {rel_min} AND p1.Relevancy <= {rel_max} AND p1.year >= {year_min} AND p1.year <= {year_max} AND
         p2.Relevancy >= {rel_min} AND p2.Relevancy <= {rel_max} AND p2.year >= {year_min} AND p2.year <= {year_max}
-    WITH p1, p2
+    WITH p1, p2 
     MATCH path = shortestPath((p1)-[*]-(p2))
     RETURN p1.name AS player1Name, p2.name AS player2Name, [node IN nodes(path) | node.name] AS pathNames
     ORDER BY rand()
@@ -58,10 +58,10 @@ def get_players(difficulty):
     """
     difficulties = {
         'easy': (3.5, float('inf'), 2020, 2024),
-        'medium': (2, 3, 2015, 2024),
+        'medium': (2.3, 3.5, 2015, 2024),
         'hard': (0.5, 1.5, 2015, 2024),
-        'extreme': (1.5, 2.5, 2000, 2024),
-        'legacy': (3.7, float('inf'), 1947, 2024)
+        'extreme': (1.5, 2.3, 2000, 2024),
+        'legacy': (4.2, float('inf'), 1947, 2024)
     }
     if difficulty in difficulties:
         rel_min, rel_max, year_min, year_max = difficulties[difficulty]
