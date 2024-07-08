@@ -97,6 +97,16 @@ def get_shortest_path(src_id: str, dst_id: str):
     
     return players
 
+def check_teammates(player1_name, player2_name):
+
+    query = f"""
+    MATCH (p1 {{`name`: '{player1_name}'}}), (p2 {{`name`: '{player2_name}'}})
+    RETURN EXISTS((p1)-[]-(p2)) AS areNeighbors
+    """
+    with driver.session() as session:
+        result = session.run(query)
+        return result.data()[0]
+
 #Function to close driver connection
 def close_driver():
     driver.close()
