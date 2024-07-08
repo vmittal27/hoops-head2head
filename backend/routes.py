@@ -74,8 +74,8 @@ def get_players(difficulty):
         path = get_shortest_path(p1['id'], p2['id'])
         neighbors = len(path) == 2 # true if direct neighbors, false otherwise
     
-    return jsonify({"Player 1": p1, "Player 2": p2, "Path": path})
-
+    {"Player 1": p1, "Player 2": p2, "Path": path}
+    return {"Player 1": p1, "Player 2": p2, "Path": path}
 
 @app.route("/path/shortest")
 def get_shortest_path(src_id: str, dst_id: str):
