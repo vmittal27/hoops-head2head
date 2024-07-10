@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, request
 from neo4j import GraphDatabase
 from backend import app
 
@@ -107,6 +107,24 @@ def check_teammates(player1_name, player2_name):
     with driver.session() as session:
         result = session.run(query)
         return result.data()[0]
+    
+@app.route("/autocomplete")
+def autocomplete_players():
+    search = request.args.get('search')
+    if len(search) < 3:
+        return {}
+    query = f"""
+    MATCH (n: Player)
+    WHERE toLower(n.name) CONTAINS toLower("{search}")
+    RETURN n.name as name, n.year as year, n.id as id
+    LIMIT 7
+    """
+
+    with driver.session() as session:
+        result = session.run(query)
+        return {
+            record['id']: [record['year'], record['name']] for record in result
+        }
 
 #Function to close driver connection
 def close_driver():
