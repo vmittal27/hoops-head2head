@@ -7,6 +7,8 @@ function App() {
     player2: ""
 }])
 
+  const [players, setPlayers] = useState(initialList)
+  
   useEffect(() => {
     // Using fetch to fetch the api from 
     // flask server it will be redirected to proxy
@@ -33,12 +35,18 @@ function App() {
           console.error("Error fetching data:", error);
       });
   }, []);
+  
   console.log(data);
   console.log('hello');
   return (
       <div>
         <p> HoopsHead2Head Demo</p>
         <p> Player 1: {data.player1} </p>
+        <form>
+          <label for="fname">Teammate:</label><br></br>
+          <input type="text" id="fname" name="fname" value="John" /><br></br>
+          <input type="submit" value="Submit" /> 
+        </form>
         <p> Player 2: {data.player2} </p>
       </div>
   )

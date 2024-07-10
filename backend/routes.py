@@ -97,6 +97,7 @@ def get_shortest_path(src_id: str, dst_id: str):
     
     return players
 
+@app.route("/check", methods=['POST'])
 def check_teammates(player1_name, player2_name):
 
     query = f"""
