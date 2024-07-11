@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react'
+//import axios from 'axios'
 
+let idIndex = 0
 
 function App() {
   const [data, setData] = useState([{
-    player1: "",
-    player2: ""
+    currPlayer: "lol",
+    lastPlayer: ""
+    //changed names to make it more clear what they are
 }])
 
   const [players, setPlayers] = useState([])
@@ -30,9 +33,13 @@ function App() {
             console.log('fuck you');
             console.log(data);
             setData({
-                player1: data["Player 1"]["name"],
-                player2: data["Player 2"]["name"]
+                currPlayer: data["Player 1"]["name"],
+                lastPlayer: data["Player 2"]["name"]
             });
+            //adding initial player to player list
+            console.log('adding first player');
+            setPlayers([data["Player 1"]["name"]]);
+            console.log(players);
         })
         .catch((error) => {
           console.error("Error fetching data:", error);
@@ -46,31 +53,40 @@ function App() {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ player1_name: data.player1, player2_name: userInput })
+      body: JSON.stringify({ player1_name: data.currPlayer, player2_name: userInput })
     })
     .then(response => response.json())
     .then(response => {
-        const getBool = response[0].areTeammates;
+        console.log(response)
+        const getBool = response.areTeammates;
         setAreTeammates(getBool); 
+        if (getBool) {
+            setPlayers(p => [...p,  userInput])
+            setData(
+                {...data, currPlayer: userInput})
+        }
       })
       .catch(error => console.error('Error finding teammates:', error));
     };
   
 //   console.log(data);
 //   console.log('hello');
-
   
   return (
       <div>
         <p> HoopsHead2Head Demo</p>
-        <p> Player 1: {data.player1} </p>
+        <p> Player 1: {players[0]} </p>
         <form onSubmit={checkIfTeammates}>
           <label for="fname">Teammate:</label><br></br>
           <input type="text" id="fname" name="fname" value={userInput} onChange={e => setUserInput(e.target.value)} /><br />
           <input type="submit" value="Check if Teammates"/> 
         </form>
         <p>{String(areTeammates)}</p>
-        <p> Player 2: {data.player2} </p>
+        <p> Player 2: {data.lastPlayer} </p>
+        <h4>List of Players:</h4>
+            <ul>
+                {players.map((player, index) => <li key={index}>{player}</li>)}
+            </ul>
       </div>
   )
 }
