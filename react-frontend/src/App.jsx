@@ -7,7 +7,10 @@ function App() {
     player2: ""
 }])
 
-  const [players, setPlayers] = useState(initialList)
+  const [players, setPlayers] = useState([])
+  const [userInput, setUserInput] = useState("Enter Player"); 
+  const [areTeammates, setAreTeammates] = useState("teammates?");
+
   
   useEffect(() => {
     // Using fetch to fetch the api from 
@@ -35,21 +38,41 @@ function App() {
           console.error("Error fetching data:", error);
       });
   }, []);
+
+  const checkIfTeammates = (event) => {
+    event.preventDefault();
+    fetch('http://localhost:5000/check', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ player1_name: data.player1, player2_name: userInput })
+    })
+    .then(response => response.json())
+    .then(response => {
+        const getBool = response[0].areTeammates;
+        setAreTeammates(getBool); 
+      })
+      .catch(error => console.error('Error finding teammates:', error));
+    };
   
-  console.log(data);
-  console.log('hello');
+//   console.log(data);
+//   console.log('hello');
+
+  
   return (
       <div>
         <p> HoopsHead2Head Demo</p>
         <p> Player 1: {data.player1} </p>
-        <form>
+        <form onSubmit={checkIfTeammates}>
           <label for="fname">Teammate:</label><br></br>
-          <input type="text" id="fname" name="fname" value="John" /><br></br>
-          <input type="submit" value="Submit" /> 
+          <input type="text" id="fname" name="fname" value={userInput} onChange={e => setUserInput(e.target.value)} /><br />
+          <input type="submit" value="Check if Teammates"/> 
         </form>
+        <p>{String(areTeammates)}</p>
         <p> Player 2: {data.player2} </p>
       </div>
   )
 }
 
-export default App
+export default App;
