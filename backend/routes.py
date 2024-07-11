@@ -98,15 +98,21 @@ def get_shortest_path(src_id: str, dst_id: str):
     return players
 
 @app.route("/check", methods=['POST'])
-def check_teammates(player1_name, player2_name):
-
+def check_teammates():
+    data = request.get_json()
+    player1_name = data.get('player1_name')
+    player2_name = data.get('player2_name')
+    if not player1_name or not player2_name:
+        return jsonify({'error': 'Missing player names'}), 400
+    
     query = f"""
     MATCH (p1 {{`name`: '{player1_name}'}}), (p2 {{`name`: '{player2_name}'}})
-    RETURN EXISTS((p1)-[]-(p2)) AS areNeighbors
+    RETURN EXISTS((p1)-[]-(p2)) AS areTeammates
     """
     with driver.session() as session:
         result = session.run(query)
-        return result.data()[0]
+        are_teammates = result.single()['areTeammates']
+        return jsonify({'areTeammates': are_teammates})
     
 @app.route("/autocomplete")
 def autocomplete_players():
