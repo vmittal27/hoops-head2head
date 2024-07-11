@@ -5,7 +5,7 @@ let idIndex = 0
 
 function App() {
   const [data, setData] = useState([{
-    currPlayer: "lol",
+    currPlayer: "",
     lastPlayer: ""
     //changed names to make it more clear what they are
 }])
