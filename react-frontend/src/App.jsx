@@ -84,6 +84,7 @@ function App() {
         }
       })
       .catch(error => console.error('Error finding teammates:', error));
+      setUserInput('');
     };
 
   const modalOff = () => {
