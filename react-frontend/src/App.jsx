@@ -12,9 +12,10 @@ function App() {
 }])
 
   const [players, setPlayers] = useState([])
-  const [userInput, setUserInput] = useState("Enter Player"); 
+  const [userInput, setUserInput] = useState(""); 
   const [areTeammates, setAreTeammates] = useState("teammates?");
   const [toggle, setToggle] = useState(false); //Temporary; for displaying modal
+  const[guesses, setGuesses] = useState(5)
 
   
   useEffect(() => {
@@ -61,6 +62,7 @@ function App() {
     .then(response => {
         console.log(response);
         const getBool = response.areTeammates;
+        setGuesses(guesses - 1)
         setAreTeammates(getBool); 
         if (getBool) {
             setPlayers(p => [...p,  userInput])
@@ -100,10 +102,10 @@ function App() {
         <p> Player 1: {players[0]} </p>
         <form onSubmit={checkIfTeammates}>
           <label for="fname">Teammate:</label><br></br>
-          <input type="text" id="fname" name="fname" value={userInput} onChange={e => setUserInput(e.target.value)} /><br />
-          <input type="submit" value="Check if Teammates"/> 
+          <input type="text" id="fname" name="fname" placeholder="Enter Player"value={userInput} onChange={e => setUserInput(e.target.value)} /><br />
+          <input type="submit" value="Check Connection"/> 
         </form>
-        <p>{String(areTeammates)}</p>
+        <p>Remaining Guesses: {guesses}</p>
         <p> Player 2: {data.lastPlayer} </p>
         <h4>List of Players:</h4>
             <ul>
