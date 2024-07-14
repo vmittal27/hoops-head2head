@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import './components/Modal.css' //Only need this for now, 
 //import axios from 'axios'
-
+import './components/SearchBar'
+import SearchBar from './components/SearchBar'
 let idIndex = 0
 
 function App() {
@@ -11,12 +12,17 @@ function App() {
     //changed names to make it more clear what they are
 }])
 
+  // for search bar
+  const [search, setSearchBar] = useState("");
+  const [results, setResults] = useState([]);
+  const [index, setIndex] = useState(null);
+
   const [players, setPlayers] = useState([])
-  const [userInput, setUserInput] = useState(""); 
+
   const [areTeammates, setAreTeammates] = useState("teammates?");
   const [toggle, setToggle] = useState(false); //Temporary; for displaying modal
   const[guesses, setGuesses] = useState(5)
-  const API_BASE_URL = "http://localhost:5000/"
+  const API_BASE_URL = "http://localhost:3000/"
 
   
   useEffect(() => {
@@ -52,58 +58,62 @@ function App() {
 
   const checkIfTeammates = (event) => {
     event.preventDefault();
-    fetch(API_BASE_URL + 'check', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ player1_name: data.currPlayer, player2_name: userInput })
-    })
-    .then(response => response.json())
-    .then(response => {
-        console.log(response);
-        const getBool = response.areTeammates;
-        setGuesses(guesses - 1)
-        setAreTeammates(getBool); 
-        if (getBool) {
-            setPlayers(p => [...p,  userInput])
-            setData({...data, currPlayer: userInput})
-            //Now, running second fetch to see if guess is teammate of last player
-            fetch(API_BASE_URL + 'check', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ player1_name: data.lastPlayer, player2_name: userInput })
-            })
-            .then(responseTwo => responseTwo.json())
-            .then(responseTwo => {
-                const boolDone = responseTwo.areTeammates;
-                if(boolDone) {
-                    console.log('Game Complete! Well done!');
-                    setToggle(true);
-                }
-            });
-        }
+    if (index !== null) {
+      fetch(API_BASE_URL + 'check', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ player1_name: data.currPlayer, player2_name: search })
       })
-      .catch(error => console.error('Error finding teammates:', error));
-      setUserInput('');
+      .then(response => response.json())
+      .then(response => {
+          console.log(response);
+          const getBool = response.areTeammates;
+          setGuesses(guesses - 1)
+          setAreTeammates(getBool); 
+          if (getBool) {
+              setPlayers(p => [...p,  search])
+              setData({...data, currPlayer: search})
+              //Now, running second fetch to see if guess is teammate of last player
+              fetch(API_BASE_URL + 'check', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({ player1_name: data.lastPlayer, player2_name: search })
+              })
+              .then(responseTwo => responseTwo.json())
+              .then(responseTwo => {
+                  const boolDone = responseTwo.areTeammates;
+                  if(boolDone) {
+                      console.log('Game Complete! Well done!');
+                      setToggle(true);
+                  }
+              });
+          }
+        })
+        .catch(error => console.error('Error finding teammates:', error));
+        setSearchBar('');
+        setResults([]);
+        setIndex(null);
+      }
+      else
+        alert("Please select a valid player from the search bar!")
     };
 
   const modalOff = () => {
         setToggle(false)
         window.location.reload();
     }
-//   console.log(data);
-//   console.log('hello');
-  
+
   return (
       <div>
         <p> HoopsHead2Head Demo</p>
         <p> Player 1: {players[0]} </p>
         <form onSubmit={checkIfTeammates}>
           <label for="fname">Teammate:</label><br></br>
-          <input type="text" id="fname" name="fname" placeholder="Enter Player"value={userInput} onChange={e => setUserInput(e.target.value)} /><br />
+          <SearchBar search={search} setSearchBar={setSearchBar} results={results} setResults={setResults} index={index} setIndex={setIndex}/>
           <input type="submit" value="Check Connection"/> 
         </form>
         <p>Remaining Guesses: {guesses}</p>
