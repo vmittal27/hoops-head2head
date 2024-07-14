@@ -16,12 +16,13 @@ function App() {
   const [areTeammates, setAreTeammates] = useState("teammates?");
   const [toggle, setToggle] = useState(false); //Temporary; for displaying modal
   const[guesses, setGuesses] = useState(5)
+  const API_BASE_URL = "http://localhost:5000/"
 
   
   useEffect(() => {
     // Using fetch to fetch the api from 
     // flask server it will be redirected to proxy
-    fetch("http://localhost:5000/players/easy")
+    fetch(API_BASE_URL + "players/easy")
         .then((res) =>{
           // Check if response is OK
           if (!res.ok) {
@@ -51,7 +52,7 @@ function App() {
 
   const checkIfTeammates = (event) => {
     event.preventDefault();
-    fetch('http://localhost:5000/check', {
+    fetch(API_BASE_URL + 'check', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -68,7 +69,7 @@ function App() {
             setPlayers(p => [...p,  userInput])
             setData({...data, currPlayer: userInput})
             //Now, running second fetch to see if guess is teammate of last player
-            fetch('http://localhost:5000/check', {
+            fetch(API_BASE_URL + 'check', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json'
