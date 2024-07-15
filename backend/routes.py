@@ -131,6 +131,24 @@ def autocomplete_players():
         return {
             record['id']: [record['year'], record['name']] for record in result
         }
+@app.route("/scoring", methods = ['POST'])
+def get_scoring_data():
+    data = request.get_json()
+    player1_name = data.get('player1_name')
+    player2_name = data.get('player2_name')
+    if not player1_name or not player2_name:
+        return jsonify({'error': 'Missing player names'}), 400
+    
+    query = f"""
+    MATCH (p1 {{`name`: "{player1_name}"}}), (p2 {{`name`: "{player2_name}"}})
+    MATCH (p1)-[r]-(p2)
+    return r.weight as weight, p2.Relevancy as relevancy
+    """
+    with driver.session() as session:
+        result = session.run(query)
+        return { 
+            'Weight': result['weight'], 'Relevancy' : result['Relevancy']
+        }
 
 #Function to close driver connection
 def close_driver():
