@@ -89,10 +89,13 @@ function App() {
               .then(scoreResponse => scoreResponse.json())
               .then(scoreResponse => {
                 console.log('adding correct pts')
-                gPlayed = scoreResponse['Weight'];
-                relevancy = scoreResponse['Relevancy'];
-                addScore = ((0.7 * gPlayed / 1584) + (0.3 * relevancy / 9.622)) * 50 + 100;
-                setScore(score + addScore)
+                console.log(scoreResponse)
+                const gPlayed = scoreResponse['Weight'];
+                console.log(gPlayed)
+                const relevancy = scoreResponse['Relevancy'];
+                const addScore = ((0.7 * gPlayed / 1584) + (0.3 * relevancy / 9.622)) * 50 + 100;
+                setScore(Math.ceil(score + addScore))
+                console.log(score)
               })
               .catch (error => console.log('Error getting score:', error))
               //Now, running second fetch to see if guess is teammate of last player
