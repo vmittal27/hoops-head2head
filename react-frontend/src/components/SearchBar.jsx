@@ -5,7 +5,7 @@ const SearchBar = ({search, setSearchBar, results, setResults, index, setIndex})
     const handleChange = (e) => {
         setSearchBar(e.target.value);
 
-        fetch(`http://localhost:3000/autocomplete?search=${e.target.value}`)
+        fetch(`http://localhost:5000/autocomplete?search=${e.target.value}`)
             .then((response) => response.json())
             .then((data) =>{
                 const suggestions = []

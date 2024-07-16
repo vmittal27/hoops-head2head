@@ -1,3 +1,4 @@
+import logging
 from flask import jsonify, request
 from neo4j import GraphDatabase
 from backend import app
@@ -104,7 +105,7 @@ def check_teammates():
     player2_name = data.get('player2_name')
     if not player1_name or not player2_name:
         return jsonify({'error': 'Missing player names'}), 400
-    
+
     query = f"""
     MATCH (p1 {{`name`: "{player1_name}"}}), (p2 {{`name`: "{player2_name}"}})
     RETURN EXISTS((p1)-[]-(p2)) AS areTeammates
@@ -138,16 +139,19 @@ def get_scoring_data():
     player2_name = data.get('player2_name')
     if not player1_name or not player2_name:
         return jsonify({'error': 'Missing player names'}), 400
-    
+
     query = f"""
     MATCH (p1 {{`name`: "{player1_name}"}}), (p2 {{`name`: "{player2_name}"}})
     MATCH (p1)-[r]-(p2)
-    return r.weight as weight, p2.Relevancy as relevancy
+    RETURN r.weight AS weight, p2.Relevancy AS relevancy
     """
     with driver.session() as session:
         result = session.run(query)
-        return { 
-            'Weight': result['weight'], 'Relevancy' : result['Relevancy']
+        record = result.single()
+        logging.info('record')
+        return {
+            'Weight': record["weight"],
+            'Relevancy' : record["relevancy"]
         }
 
 #Function to close driver connection

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import './components/Modal.css' //Only need this for now, 
+import './css/Modal.css' //Only need this for now, 
 //import axios from 'axios'
 import './components/SearchBar'
 import SearchBar from './components/SearchBar'
 let idIndex = 0
+let wrongStreak = 0
 
 function App() {
   const [data, setData] = useState([{
@@ -16,13 +17,14 @@ function App() {
   const [search, setSearchBar] = useState("");
   const [results, setResults] = useState([]);
   const [index, setIndex] = useState(null);
+  const [score, setScore] = useState(0);
 
   const [players, setPlayers] = useState([])
 
   const [areTeammates, setAreTeammates] = useState("teammates?");
   const [toggle, setToggle] = useState(false); //Temporary; for displaying modal
   const[guesses, setGuesses] = useState(5)
-  const API_BASE_URL = "http://localhost:3000/"
+  const API_BASE_URL = "http://localhost:5000/"
 
   
   useEffect(() => {
@@ -69,12 +71,30 @@ function App() {
       .then(response => response.json())
       .then(response => {
           console.log(response);
+          //checking if guess is valid
           const getBool = response.areTeammates;
           setGuesses(guesses - 1)
           setAreTeammates(getBool); 
           if (getBool) {
+              wrongStreak = 0    
               setPlayers(p => [...p,  search])
               setData({...data, currPlayer: search})
+              fetch(API_BASE_URL + 'scoring', {
+                method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({ player1_name: data.currPlayer, player2_name: search })
+              })
+              .then(scoreResponse => scoreResponse.json())
+              .then(scoreResponse => {
+                console.log('adding correct pts')
+                gPlayed = scoreResponse['Weight'];
+                relevancy = scoreResponse['Relevancy'];
+                addScore = ((0.7 * gPlayed / 1584) + (0.3 * relevancy / 9.622)) * 50 + 100;
+                setScore(score + addScore)
+              })
+              .catch (error => console.log('Error getting score:', error))
               //Now, running second fetch to see if guess is teammate of last player
               fetch(API_BASE_URL + 'check', {
                   method: 'POST',
@@ -91,6 +111,10 @@ function App() {
                       setToggle(true);
                   }
               });
+          }
+          else {
+            setScore(score + 50 + (10 * wrongStreak));
+            wrongStreak += 1;
           }
         })
         .catch(error => console.error('Error finding teammates:', error));
@@ -118,6 +142,7 @@ function App() {
         </form>
         <p>Remaining Guesses: {guesses}</p>
         <p> Player 2: {data.lastPlayer} </p>
+        <h4>Score: {score}</h4>
         <h4>List of Players:</h4>
             <ul>
                 {players.map((player, index) => <li key={index}>{player}</li>)}
