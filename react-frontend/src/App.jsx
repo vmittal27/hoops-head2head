@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import './css/Modal.css' //Only need this for now, 
-//import axios from 'axios'
 import './components/SearchBar'
 import SearchBar from './components/SearchBar'
 let idIndex = 0
