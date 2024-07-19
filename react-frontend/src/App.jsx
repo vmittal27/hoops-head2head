@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import './App.css'
 import './css/Modal.css' //Only need this for now, 
 import './components/SearchBar'
 import SearchBar from './components/SearchBar'
@@ -134,8 +135,8 @@ function App() {
     }
 
   return (
-      <div>
-        <p> HoopsHead2Head Demo</p>
+      <div className = "container">
+        <h1> Welcome to HoopsHead2Head! </h1>
         <p> Player 1: {players[0]} </p>
         <form onSubmit={checkIfTeammates}>
           <label for="fname">Teammate:</label><br></br>
