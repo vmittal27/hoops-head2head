@@ -202,6 +202,26 @@ function App() {
                 </ModalFooter>
             </ModalContent>
       </Modal>
+      <Modal closeOnOverlayClick={false} isOpen={guesses===0} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+            <ModalHeader>Game Over!</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+                <Text mb='1rem'>
+                    You ran out of guesses!
+                </Text>
+            </ModalBody>
+        </ModalContent>
+        <ModalFooter>
+                    <Button variant='ghost' mr={3} onClick={onClose}>
+                    Close
+                    </Button>
+                    <Button colorScheme='blue' onClick={() => window.location.reload()}>
+                    Restart
+                    </Button>
+                </ModalFooter>
+      </Modal>
       </Container>
         
       
