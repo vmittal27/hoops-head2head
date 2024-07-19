@@ -136,9 +136,9 @@ function App() {
     }
 
   return (
-      <div>
-        <p> HoopsHead2Head Demo</p>
-        <p> Player 1: {players[0]} </p>
+    <Container>
+        <h1 className = "header"> Welcome to HoopsHead2Head!</h1>
+        <p> Current Player: {players[0]} </p>
         <form onSubmit={checkIfTeammates}>
           <FormControl>
             <FormLabel>Teammate:</FormLabel>
@@ -147,12 +147,14 @@ function App() {
           </FormControl>
         </form>
         <Text>Remaining Guesses: {guesses}</Text>
-        <Text fontSize='xl'> Player 2: {data.lastPlayer} </Text>
+        <Text fontSize='xl'> Final Player: {data.lastPlayer} </Text>
+        <div className = "score-box">
         <Heading size='md'>Score: {score}</Heading>
         <Heading size='md'>List of Players:</Heading>
             <UnorderedList>
                 {players.map(player => <ListItem>{player}</ListItem>)}
             </UnorderedList>
+        </div>
         {toggle && (
         <div className="modal">
         <div className="overlay"></div>

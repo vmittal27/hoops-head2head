@@ -9,12 +9,36 @@ body {
     height: 100vh;
   }
 
+.header {
+    font-size : 1.5em;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
 .container {
     text-align: center;
-    background: white;
+    background: rgb(38, 134, 218);
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.score-box {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+  
+.score-box strong {
+    display: block;
+    font-size: 1.2em;
+    margin-bottom: 10px;
 }
 
 h1 {
