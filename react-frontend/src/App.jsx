@@ -212,15 +212,16 @@ function App() {
                     You ran out of guesses!
                 </Text>
             </ModalBody>
-        </ModalContent>
-        <ModalFooter>
-                    <Button variant='ghost' mr={3} onClick={onClose}>
+
+            <ModalFooter>
+                <Button variant='ghost' mr={3} onClick={onClose}>
                     Close
-                    </Button>
-                    <Button colorScheme='blue' onClick={() => window.location.reload()}>
+                </Button>
+                <Button colorScheme='blue' onClick={() => window.location.reload()}>
                     Restart
-                    </Button>
-                </ModalFooter>
+                </Button>
+            </ModalFooter>
+        </ModalContent>
       </Modal>
       </Container>
         
