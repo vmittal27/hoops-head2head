@@ -4,6 +4,19 @@ import './css/Modal.css' //Only need this for now,
 import './components/SearchBar'
 import SearchBar from './components/SearchBar'
 import { Container, FormControl, FormLabel, Heading, Text, UnorderedList, ListItem } from '@chakra-ui/react'
+import {
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    ModalCloseButton,
+    useDisclosure,
+    Button,
+    Image
+  } from '@chakra-ui/react'
+import myImage from './components/wedidit.jpeg'
 let idIndex = 0
 let wrongStreak = 0
 
@@ -112,7 +125,8 @@ function App() {
                   const boolDone = responseTwo.areTeammates;
                   if(boolDone) {
                       console.log('Game Complete! Well done!');
-                      setToggle(true);
+                      setPlayers(p => [...p, data.lastPlayer])
+                      onOpen();
                   }
               });
           }
@@ -130,10 +144,7 @@ function App() {
         alert("Please select a valid player from the search bar!")
     };
 
-  const modalOff = () => {
-        setToggle(false)
-        window.location.reload();
-    }
+    const { isOpen, onOpen, onClose } = useDisclosure()
 
   return (
     <Container>
@@ -155,21 +166,42 @@ function App() {
                 {players.map(player => <ListItem>{player}</ListItem>)}
             </UnorderedList>
         </div>
-        {toggle && (
-        <div className="modal">
-        <div className="overlay"></div>
-        <div className="modal-content">
-            <h2>Game Complete!</h2>
-            <p>
-                You connected the two players! Press restart to play again.
-            </p>                
-        <button 
-            className="close-modal"
-            onClick={modalOff}>
-            RESTART</button>
-        </div>
-        </div>
-        )}
+        <Modal blockScrollOnMount={false} isOpen={isOpen} onClose={onClose}>
+            <ModalOverlay />
+            <ModalContent backgroundColor="green.300">
+                <ModalHeader>WE DID ITTTTTT!</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                    <Image src={myImage} alt="Description of Image" />
+                    <Text mb='1rem'>
+                    Your path was:
+                    <Text fontWeight='bold'>
+                    {players.map((player, index) => (
+                        <React.Fragment key={index}>
+                            {player}
+                            {index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
+                        </React.Fragment>
+                        ))}
+                    </Text>
+                    </Text>
+                    <Text mb='1rem'>
+                    Score: 
+                    <Text as="span" fontWeight='bold'>
+                    {score}
+                    </Text>
+                    </Text>
+                </ModalBody>
+
+                <ModalFooter>
+                    <Button variant='ghost' mr={3} onClick={onClose}>
+                    Close
+                    </Button>
+                    <Button colorScheme='blue' onClick={() => window.location.reload()}>
+                    Restart
+                    </Button>
+                </ModalFooter>
+            </ModalContent>
+      </Modal>
       </Container>
         
       
