@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import './css/Modal.css' //Only need this for now, 
 import './components/SearchBar'
 import SearchBar from './components/SearchBar'
+import { Container, FormControl, FormLabel, Heading, Text, UnorderedList, ListItem } from '@chakra-ui/react'
 let idIndex = 0
 let wrongStreak = 0
 
@@ -134,21 +135,23 @@ function App() {
     }
 
   return (
-      <div>
-        <p> HoopsHead2Head Demo</p>
-        <p> Player 1: {players[0]} </p>
+      <Container>
+        <Heading size='xl'> HoopsHead2Head Demo</Heading>
+        <Text fontSize='xl'> Player 1: {players[0]} </Text>
         <form onSubmit={checkIfTeammates}>
-          <label for="fname">Teammate:</label><br></br>
-          <SearchBar search={search} setSearchBar={setSearchBar} results={results} setResults={setResults} index={index} setIndex={setIndex}/>
-          <input type="submit" value="Check Connection"/> 
+          <FormControl>
+            <FormLabel>Teammate:</FormLabel>
+            <SearchBar search={search} setSearchBar={setSearchBar} results={results} setResults={setResults} index={index} setIndex={setIndex}/>
+            <input type="submit" value="Check Connection"/> 
+          </FormControl>
         </form>
-        <p>Remaining Guesses: {guesses}</p>
-        <p> Player 2: {data.lastPlayer} </p>
-        <h4>Score: {score}</h4>
-        <h4>List of Players:</h4>
-            <ul>
-                {players.map((player, index) => <li key={index}>{player}</li>)}
-            </ul>
+        <Text>Remaining Guesses: {guesses}</Text>
+        <Text fontSize='xl'> Player 2: {data.lastPlayer} </Text>
+        <Heading size='md'>Score: {score}</Heading>
+        <Heading size='md'>List of Players:</Heading>
+            <UnorderedList>
+                {players.map(player => <ListItem>{player}</ListItem>)}
+            </UnorderedList>
         {toggle && (
         <div className="modal">
         <div className="overlay"></div>
@@ -164,7 +167,7 @@ function App() {
         </div>
         </div>
         )}
-      </div>
+      </Container>
         
       
   )
