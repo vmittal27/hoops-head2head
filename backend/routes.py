@@ -107,8 +107,8 @@ def check_teammates():
         return jsonify({'error': 'Missing player names'}), 400
 
     query = f"""
-    MATCH (p1 {{`name`: "{player1_name}"}}), (p2 {{`name`: "{player2_name}"}})
-    RETURN EXISTS((p1)-[]-(p2)) AS areTeammates
+    MATCH (a {{`name`: "{player1_name}"}})--(b {{`name`: "{player2_name}"}})
+    RETURN COUNT(*) > 0 AS areTeammates
     """
     with driver.session() as session:
         result = session.run(query)
