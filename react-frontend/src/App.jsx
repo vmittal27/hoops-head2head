@@ -138,7 +138,7 @@ function App() {
   return (
     <Container>
         <h1 className = "header"> Welcome to HoopsHead2Head!</h1>
-        <p> Current Player: {players[0]} </p>
+        <p> Current Player: {data.currPlayer} </p>
         <form onSubmit={checkIfTeammates}>
           <FormControl>
             <FormLabel>Teammate:</FormLabel>
