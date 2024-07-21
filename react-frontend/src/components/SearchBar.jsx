@@ -1,62 +1,61 @@
-import { useState } from "react";
+import { useState, useEffect} from "react";
+import Select from "react-select"
 
-const SearchBar = ({search, setSearchBar, results, setResults, index, setIndex}) => {
+const SearchBar = ({guess, setGuess, onKeyDown}) => {
 
-    const handleChange = (e) => {
-        setSearchBar(e.target.value);
+    const [suggestions, setSuggestions] = useState([])
+    const [isLoading, setIsLoading] = useState(false); 
 
-        fetch(`http://localhost:5000/autocomplete?search=${e.target.value}`)
-            .then((response) => response.json())
-            .then((data) =>{
-                const suggestions = []
-                for (var key in data) {
-                    suggestions.push({'id': key, 'name': data[key][1], 'year': data[key][0]})
-                }
-                setResults(suggestions)
-            })
-        
+    const handleInput = (inputValue) => {
+        if (inputValue) {
+            setIsLoading(true)
+            fetch(`http://localhost:3000/autocomplete?search=${inputValue}`)
+                .then((response) => response.json())
+                .then((data) =>{
+                    const results = []
+                    for (var key in data) {
+                        results.push({label: `${data[key][1]} (${data[key][0]})`, value: data[key][1]})
+                    }
+                    setSuggestions(results)
+                })
+
+                setIsLoading(false)
+        }
     }
 
-    const handleKeyDown = (e) => {
-        if (results.length != 0) {
-            if (e.key === "ArrowDown") {
-                if (index >= results.length - 1)
-                    setIndex(0)
-                else
-                    setIndex(index + 1)
-
-                setSearchBar(results[index].name)
-            }
-            if (e.key === "ArrowUp") {
-                if (index <= 0)
-                    setIndex(results.length - 1)
-                else
-                    setIndex(index - 1)
-
-                setSearchBar(results[index].name)
-            }
+    const HandleKeyDown = (e) => {
+        if (!guess &&  suggestions.length > 0 && e.key === "Enter") {
+            setGuess(suggestions[0].value);
         }
+        onKeyDown(e);
+    }
+
+    const handleChange = (option) => {
+        if (option) {
+            console.log("value", option.value)
+            setGuess(option.value)
+        }
+        if (!guess &&  suggestions.length > 0) {
+            setGuess(suggestions[0].value);
+        }
+        onKeyDown();
 
     }
 
     return (
-        <div className="SearchBar">
-            <input type="text" placeholder="Enter a Player..."
-            value = {search} 
+        <Select
+            placeholder="Enter a Player's Name..."
             onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            />
-            <div className="Dropdown">
-                <ul>
-                    {results.map((result, index) =>
-                        <li key={result.id} onClick={() => {setSearchBar(result.name); setIndex(index)}}>
-                            {`${result.name} (${result.year})`}
-                        </li>
-                    )}
-                </ul>
-            </div>
-        </div>
+            isLoading={isLoading}
+            isSearchable="true"
+            isClearable="true"
+            options={suggestions}
+            onInputChange={handleInput}
+            // onKeyDown={HandleKeyDown}
+            // value={guess}
+        />
     )
 }
+
 
 export default SearchBar
