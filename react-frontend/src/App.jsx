@@ -3,7 +3,9 @@ import './App.css'
 import './css/Modal.css' //Only need this for now, 
 import './components/SearchBar'
 import GuessForm from './components/GuessForm'
+import { QuestionOutlineIcon } from '@chakra-ui/icons'
 import { Container, FormControl, FormLabel, Heading, Text, UnorderedList, ListItem } from '@chakra-ui/react'
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 import {
 	Modal,
 	ModalOverlay,
@@ -58,7 +60,9 @@ function App() {
 			.catch((error) => {console.error("Error fetching data:", error);});
 	}, []);
 
-	const { isOpen, onOpen, onClose } = useDisclosure()
+	const { isOpen: isRulesOpen , onOpen: onRulesOpen, onClose: onRulesClose } = useDisclosure()
+    const { isOpen: isWinOpen , onOpen: onWinOpen, onClose: onWinClose } = useDisclosure()
+    const { isOpen: isLoseOpen , onOpen: onLoseOpen, onClose: onLoseClose } = useDisclosure()
 
 	return (
 		<Container>
@@ -72,13 +76,15 @@ function App() {
 				setPlayers={setPlayers}
 				data={data}
 				setData={setData}
-				modalOpen={onOpen}
+				modalOpen={onLoseOpen}
 				score={score}
 				setScore={setScore}
 			/>
 	
 			<Text>Remaining Guesses: {guesses}</Text>
 			<Text fontSize='xl'> Final Player: {data.lastPlayer} </Text>
+        
+            <QuestionOutlineIcon onClick={onRulesOpen} className = "rules" boxSize={8}/>
 
 			<div className = "score-box">
 				<Heading size='md'>Score: {score}</Heading>
@@ -88,7 +94,7 @@ function App() {
 				</UnorderedList>
 			</div>
 
-			<Modal blockScrollOnMount={false} isOpen={isOpen} onClose={onClose}>
+			<Modal blockScrollOnMount={false} isOpen={isWinOpen} onClose={onWinClose}>
 				<ModalOverlay/>
 				<ModalContent backgroundColor="green.300">
 					<ModalHeader>WE DID ITTTTTT!</ModalHeader>
@@ -111,13 +117,65 @@ function App() {
 					</ModalBody>
 
 					<ModalFooter>
-						<Button variant='ghost' mr={3} onClick={onClose}>Close</Button>
+						<Button variant='ghost' mr={3} onClick={onWinClose}>Close</Button>
 						<Button colorScheme='blue' onClick={() => window.location.reload()}>Restart</Button>
 					</ModalFooter>
 				</ModalContent>
 			</Modal>
 
-			<Modal closeOnOverlayClick={false} isOpen={guesses===0} onClose={onClose}>
+            <Modal blockScrollOnMount={false} size ={'lg'} isOpen={isRulesOpen} onClose={onRulesClose}>
+				<ModalOverlay/>
+				<ModalContent>
+					<ModalHeader>Rules</ModalHeader>
+					<ModalCloseButton color="black"/>
+					<ModalBody>
+                    <Tabs variant='enclosed'>
+                        <TabList>
+                            <Tab>How to Play</Tab>
+                            <Tab>Scoring</Tab>
+                        </TabList>
+                        <TabPanels>
+                            <TabPanel>
+                            <UnorderedList>
+                                <ListItem>
+                                    Connect two NBA players based on mutual teammates
+                                </ListItem>
+                                <ListItem>
+                                    Complete the connection in as few guesses as possible
+                                </ListItem>
+                                <ListItem>
+                                    The game ends when the connection is complete or you have exhausted all your guesses
+                                </ListItem>
+				            </UnorderedList>
+                            </TabPanel>
+                            <TabPanel>
+                            <UnorderedList>
+                                <ListItem>
+                                    The lower the score the better
+                                </ListItem>
+                                <ListItem>
+                                    (I forget the exact scoring rules)
+                                </ListItem>
+                                <ListItem>
+                                    (Rule 1)
+                                </ListItem>
+                                <ListItem>
+                                    (Rule 2)
+                                </ListItem>
+                                </UnorderedList>
+                            </TabPanel>
+                        </TabPanels>
+                        </Tabs>
+
+					</ModalBody>
+
+					<ModalFooter>
+
+					</ModalFooter>
+				</ModalContent>
+			</Modal>
+
+			<Modal closeOnOverlayClick={false} isOpen={guesses===0} onClose={onLoseClose}>
 				<ModalOverlay/>
 				<ModalContent>
 					<ModalHeader>Game Over!</ModalHeader>
@@ -127,7 +185,7 @@ function App() {
 					<ModalBody><Text mb='1rem'>You ran out of guesses!</Text></ModalBody>
 
 					<ModalFooter>
-						<Button variant='ghost' mr={3} onClick={onClose}>Close</Button>
+						<Button variant='ghost' mr={3} onClick={onLoseClose}>Close</Button>
 						<Button colorScheme='blue' onClick={() => window.location.reload()}>Restart</Button>
 					</ModalFooter>
 
