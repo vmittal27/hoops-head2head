@@ -35,6 +35,16 @@ body {
     text-align: left;
 }
   
+.rules {
+    position: absolute;
+    top: 20px;
+    right: 210px;
+}
+
+.rules:hover {
+    color: #ADD8E6;
+    cursor: pointer;
+  }
 .score-box strong {
     display: block;
     font-size: 1.2em;
@@ -80,4 +90,4 @@ button:disabled {
 button:hover {
     background-color: #0056b3;
 }
-    
+
