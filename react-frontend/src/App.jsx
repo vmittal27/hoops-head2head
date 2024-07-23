@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import './App.css'
 import './css/Modal.css' //Only need this for now, 
 import './components/SearchBar'
+import './components/Difficulty'
 import GuessForm from './components/GuessForm'
 import { QuestionOutlineIcon } from '@chakra-ui/icons'
 import { Container, FormControl, FormLabel, Heading, Text, UnorderedList, ListItem } from '@chakra-ui/react'
@@ -20,21 +21,24 @@ import {
 } from '@chakra-ui/react'
 
 import myImage from './components/wedidit.jpeg'
+import DifficultyButton from './components/Difficulty'
 
 function App() {
 	const [data, setData] = useState([{currPlayer: "", lastPlayer: ""}])
-
+	
 	const [score, setScore] = useState(0);
 
 	const [players, setPlayers] = useState([])
+	const [difficulty, setDifficulty] = useState('easy')
 
 	const [toggle, setToggle] = useState(false); //Temporary; for displaying modal
 	const[guesses, setGuesses] = useState(5)
 	const API_BASE_URL = "http://localhost:5000/"
-
+	
 	useEffect(() => {
 		// Using fetch to fetch the api from flask server it will be redirected to proxy
-		fetch(API_BASE_URL + "players/easy")
+		fetch(API_BASE_URL + "players/" + difficulty)
+			
 			.then(
 				(res) => {
 
@@ -58,15 +62,23 @@ function App() {
 				}
 			)
 			.catch((error) => {console.error("Error fetching data:", error);});
-	}, []);
+	}, [difficulty]);
+
+	
 
 	const { isOpen: isRulesOpen , onOpen: onRulesOpen, onClose: onRulesClose } = useDisclosure()
     const { isOpen: isWinOpen , onOpen: onWinOpen, onClose: onWinClose } = useDisclosure()
     const { isOpen: isLoseOpen , onOpen: onLoseOpen, onClose: onLoseClose } = useDisclosure()
+	// const diffText = toUpperCase(difficulty);
+	// console.log(diffText);
 
 	return (
 		<Container>
 			<h1 className = "header"> Welcome to Hoops Head2Head!</h1>
+			<p> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </p>
+			<div> 
+				<DifficultyButton changeDifficulty={setDifficulty} />
+			</div> 
 			<p> Current Player: {data.currPlayer} </p>
 		
 			<GuessForm

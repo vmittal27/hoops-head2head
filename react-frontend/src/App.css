@@ -87,6 +87,23 @@ button:disabled {
     background-color: #ccc;
 }
 
+.difficulty-button {
+    padding: 10px 20px;
+    margin-top: 10px;
+    font-size: 1em;
+    background-color: #ffffff;
+    color: black;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px; /* Add horizontal space between buttons */
+}
+
 button:hover {
     background-color: #0056b3;
 }
