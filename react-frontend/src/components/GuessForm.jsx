@@ -1,19 +1,23 @@
-import React, { useState, useRef} from 'react'
-import SearchBar from './SearchBar'
-import { FormControl, FormLabel, useToast} from '@chakra-ui/react'
+import React, { useState} from 'react'
+import {useToast} from '@chakra-ui/react'
 import Select from "react-select"
 
 const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, modalOpen, score, setScore}) => {
 
     const API_BASE_URL = "http://localhost:5000"
 
-    const [wrongStreak, setWrongStreak] = useState(0); 
-    const [guess, setGuess] = useState(""); 
+    const [wrongStreak, setWrongStreak] = useState(0); // for scoring
+
+    // states for search bar
+    const [value, setValue] = useState(""); 
+    const [suggestions, setSuggestions] = useState([]);
+    const [isLoading, setIsLoading] = useState(false); 
 
     const toast = useToast();
 
-    const processScoring = (teammates) => {
-        if (teammates) {
+    // updates scores for a given guess
+    const processScoring = (areTeammates, guess) => {
+        if (areTeammates) {
             fetch(
                 `${API_BASE_URL}/scoring`, 
                 {
@@ -24,18 +28,19 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
             )
                 .then(scoreResponse => scoreResponse.json())
                 .then(scoreResponse => {
-                    console.log(scoreResponse);
                     const gPlayed = scoreResponse['Weight'];
                     const relevancy = scoreResponse['Relevancy'];
-                    const addScore = ((0.7 * gPlayed / 1584) + (0.3 * relevancy / 9.622)) * 50 + 100;
+
+                    const addScore = ((0.7 * gPlayed / 1584) + (0.3 * relevancy / 9.622)) * 25;
+
                     setScore(Math.ceil(score + addScore));
-                    console.log(`New Score: ${score}`);
+                    setWrongStreak(0); 
                 })
                 .catch(error => console.log('Error getting score:', error))
         }
 
         else {
-            setScore(score + 50 + (10 * wrongStreak));
+            setScore(score + 25 + (5 * wrongStreak));
             setWrongStreak(wrongStreak + 1);
         }
 
@@ -52,7 +57,7 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
         )
             .then((response) => response.json())
             .then((response) => {
-                console.log(response.areTeammates);
+                console.log(`${p1} and ${p2} are teammates: ${response.areTeammates}`);
                 return response.areTeammates; 
             })
             .catch(error => console.log('Error checking teammates:', error))
@@ -61,17 +66,15 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
     const handleSubmit = (guess) => {
 
         if (guess) {
-            console.log(`Guessed ${guess}`); 
+
             setGuesses(guesses - 1)
 
             checkTeammates(data.currPlayer, guess)
                 .then((teammates) => {
                     if (teammates) {
-                        setWrongStreak(0);
+
                         setPlayers(p => [...p,  guess]);
-                        console.log(players);
                         setData({...data, currPlayer: guess})
-                        console.log(data);
 
                         checkTeammates(data.lastPlayer, guess)
                             .then((gameOver) => {
@@ -83,12 +86,11 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                             })
                     }
                 
-                    processScoring(teammates);
-                    setGuess('');
+                    processScoring(teammates, guess);
                 }); 
         }
         else {
-            console.log("user submitted nothing"); 
+            console.log("User submitted nothing"); 
             toast({
                 title: "Please select a player!",
                 status: "error", 
@@ -100,57 +102,56 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
         }
     }
 
-    // for search bar
-
-    const [suggestions, setSuggestions] = useState([]);
-    const [isLoading, setIsLoading] = useState(false); 
-    const selectRef = useRef();
-    // const [value, setValue] = useState("");
-
     const autocomplete = (inputValue) => {
+        setValue(inputValue);
+
         if (inputValue) {
-            setIsLoading(true)
-            fetch(`http://localhost:3000/autocomplete?search=${inputValue}`)
+            setIsLoading(true);
+
+            fetch(`${API_BASE_URL}/autocomplete?search=${inputValue}`)
                 .then((response) => response.json())
                 .then((data) =>{
                     const results = []
-                    for (var key in data) {
+
+                    for (var key in data) 
                         results.push({label: `${data[key][1]} (${data[key][0]})`, value: data[key][1]})
-                    }
+                    
                     setSuggestions(results)
+                    setIsLoading(false);
                 })
 
-                setIsLoading(false);
-            // setValue(inputValue);
         }
     }
 
-    const handleChange = (option) => {
-        if (option) {
-            setGuess(option.value);
-            selectRef.current.clearValue();
-            handleSubmit(option.value); 
+    const handleChange = (option, action) => {
+
+        if (action.action === 'select-option') {
+            const data_len = players.length; 
+            
+            console.log(`Guessed ${option.value}`);
+
+            handleSubmit(option.value);
+
+            console.log(`Score: ${score}`);
+
+            if (players.length != data_len)
+                setValue('');
+            
+
         }
     }
 
     return (
-        // <form onSubmit={handleSubmit}>
-        //     <FormControl>
-        //     <FormLabel>Teammate:</FormLabel>
-        //     {/* <SearchBar guess={guess} setGuess={setGuess} onKeyDown={handleSubmit} /> */}
-        //     <input type="submit" value="Check Connection"/> 
-        //     </FormControl>
-        // </form>
         <Select
-        ref={selectRef}
-        placeholder="Enter a Player's Name..."
-        onInputChange={autocomplete}
-        isSearchable="true"
-        isClearable="true"
-        isLoading={isLoading}
-        options={suggestions}
-        onChange={handleChange}
-        closeMenuOnSelect="true"
+            placeholder="Enter a Player's Name..."
+            onInputChange={autocomplete}
+            isSearchable="true"
+            isClearable="true"
+            isLoading={isLoading}
+            options={suggestions}
+            onChange={handleChange}
+            closeMenuOnSelect="true"
+            value={value}
         />
     )
 }

@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import './App.css'
 import './css/Modal.css' //Only need this for now, 
-import './components/SearchBar'
 import './components/Difficulty'
 import GuessForm from './components/GuessForm'
 import { QuestionOutlineIcon } from '@chakra-ui/icons'
-import { Container, FormControl, FormLabel, Heading, Text, UnorderedList, ListItem } from '@chakra-ui/react'
+import { Container, Heading, Text, UnorderedList, ListItem } from '@chakra-ui/react'
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 import {
 	Modal,
@@ -31,8 +30,9 @@ function App() {
 	const [players, setPlayers] = useState([])
 	const [difficulty, setDifficulty] = useState('easy')
 
-	const [toggle, setToggle] = useState(false); //Temporary; for displaying modal
 	const[guesses, setGuesses] = useState(5)
+
+	const [optimalPath, setOptimalPath] = useState([]);
 	const API_BASE_URL = "http://localhost:5000/"
 	
 	useEffect(() => {
@@ -54,13 +54,18 @@ function App() {
 				(data) => {
 					console.log(data);
 					setData({currPlayer: data["Player 1"]["name"], lastPlayer: data["Player 2"]["name"]});
+					setOptimalPath(data['Path']);
+					console.log(typeof optimalPath);
+					console.log(optimalPath);
 
 					//adding initial player to player list
 					console.log('adding first player');
 					setPlayers([data["Player 1"]["name"]]);
 					console.log(players);
+
 				}
 			)
+
 			.catch((error) => {console.error("Error fetching data:", error);});
 	}, [difficulty]);
 
@@ -69,8 +74,6 @@ function App() {
 	const { isOpen: isRulesOpen , onOpen: onRulesOpen, onClose: onRulesClose } = useDisclosure()
     const { isOpen: isWinOpen , onOpen: onWinOpen, onClose: onWinClose } = useDisclosure()
     const { isOpen: isLoseOpen , onOpen: onLoseOpen, onClose: onLoseClose } = useDisclosure()
-	// const diffText = toUpperCase(difficulty);
-	// console.log(diffText);
 
 	return (
 		<Container>
@@ -88,23 +91,25 @@ function App() {
 				setPlayers={setPlayers}
 				data={data}
 				setData={setData}
-				modalOpen={onLoseOpen}
+				modalOpen={onWinOpen}
 				score={score}
 				setScore={setScore}
 			/>
 	
 			<Text>Remaining Guesses: {guesses}</Text>
 			<Text fontSize='xl'> Final Player: {data.lastPlayer} </Text>
-        
-            <QuestionOutlineIcon onClick={onRulesOpen} className = "rules" boxSize={8}/>
+			<div className='left-container'>
+				<QuestionOutlineIcon onClick={onRulesOpen} className = "rules" boxSize={8}/>
 
-			<div className = "score-box">
-				<Heading size='md'>Score: {score}</Heading>
-				<Heading size='md'>List of Players:</Heading>
-				<UnorderedList>
-					{players.map(player => <ListItem>{player}</ListItem>)}
-				</UnorderedList>
+				<div className = "score-box">
+					<Heading size='md'>Score: {score}</Heading>
+					<Heading size='md'>List of Players:</Heading>
+					<UnorderedList>
+						{players.map(player => <ListItem>{player}</ListItem>)}
+					</UnorderedList>
+				</div>
 			</div>
+
 
 			<Modal blockScrollOnMount={false} isOpen={isWinOpen} onClose={onWinClose}>
 				<ModalOverlay/>
@@ -116,6 +121,14 @@ function App() {
 						<Text mb='1rem'>
 							Your path was:
 							<Text fontWeight='bold'>{players.map((player, index) => (
+									<React.Fragment key={index}>
+										{player}
+										{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
+									</React.Fragment>
+								))}
+							</Text>
+							The shortest path was:
+							<Text fontWeight='bold'>{optimalPath.map((player, index) => (
 									<React.Fragment key={index}>
 										{player}
 										{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
@@ -163,16 +176,13 @@ function App() {
                             <TabPanel>
                             <UnorderedList>
                                 <ListItem>
-                                    The lower the score the better
+                                    Lowest score wins
                                 </ListItem>
                                 <ListItem>
-                                    (I forget the exact scoring rules)
+                                    For correct guesses, obvious teammates add more points than guessing less well-known teammates do
                                 </ListItem>
                                 <ListItem>
-                                    (Rule 1)
-                                </ListItem>
-                                <ListItem>
-                                    (Rule 2)
+                                    Incorrect guesses add the most points, with more points being added for a streak of wrong guesses
                                 </ListItem>
                                 </UnorderedList>
                             </TabPanel>
@@ -194,7 +204,15 @@ function App() {
 
 					<ModalCloseButton />
 
-					<ModalBody><Text mb='1rem'>You ran out of guesses!</Text></ModalBody>
+					<ModalBody>
+						<Text mb='1rem'>
+							You ran out of guesses!
+							<br/><br/>The shortest path was:<br/>
+							<Text fontWeight='bold'>
+								{optimalPath.join(' ➡️ ')}
+							</Text>
+						</Text>
+					</ModalBody>
 
 					<ModalFooter>
 						<Button variant='ghost' mr={3} onClick={onLoseClose}>Close</Button>
