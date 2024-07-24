@@ -20,11 +20,12 @@ import {
 } from '@chakra-ui/react'
 
 import myImage from './components/wedidit.jpeg'
+import logoImage from './components/hoopsh2hlogo1-removebg-preview.png'
 import DifficultyButton from './components/Difficulty'
 
 function App() {
 	const [data, setData] = useState([{currPlayer: "", lastPlayer: ""}])
-	
+	const [pics, setPics] = useState([{currPlayerURL: "", lastPlayerURL: ""}])
 	const [score, setScore] = useState(0);
 
 	const [players, setPlayers] = useState([])
@@ -54,6 +55,7 @@ function App() {
 				(data) => {
 					console.log(data);
 					setData({currPlayer: data["Player 1"]["name"], lastPlayer: data["Player 2"]["name"]});
+					setPics({currPlayerURL: data["Player 1"]["picture_url"], lastPlayerURL: data["Player 2"]["picture_url"]})
 					setOptimalPath(data['Path']);
 					console.log(typeof optimalPath);
 					console.log(optimalPath);
@@ -77,13 +79,21 @@ function App() {
 
 	return (
 		<Container>
-			<h1 className = "header"> Welcome to Hoops Head2Head!</h1>
-			<p> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </p>
-			<div> 
+			<div className = "header">
+				<p> Welcome to Hoops Head2Head!</p>
+ 			</div>
+			<div className = "hoops-logo">
+				<img src={logoImage} width = "400" height = "400" />
+			</div>
+
+			<div className = "start-box">
+				<p> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </p>
 				<DifficultyButton changeDifficulty={setDifficulty} />
 			</div> 
-			<p> Current Player: {data.currPlayer} </p>
-		
+			<div className = "start-player"> 
+			<img src = {pics.currPlayerURL} />
+				<Text fontSize='xl'> Current Player: {data.currPlayer} </Text>
+			</div>
 			<GuessForm
 				guesses={guesses}
 				setGuesses={setGuesses}
@@ -94,10 +104,16 @@ function App() {
 				modalOpen={onWinOpen}
 				score={score}
 				setScore={setScore}
+				pics={pics}
+				setPics={setPics}
 			/>
 	
 			<Text>Remaining Guesses: {guesses}</Text>
+			<div className = "end-player"> 
+			<img src = {pics.lastPlayerURL} />
 			<Text fontSize='xl'> Final Player: {data.lastPlayer} </Text>
+				
+			</div>
 			<div className='left-container'>
 				<QuestionOutlineIcon onClick={onRulesOpen} className = "rules" boxSize={8}/>
 

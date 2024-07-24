@@ -2,7 +2,7 @@ import React, { useState} from 'react'
 import {useToast} from '@chakra-ui/react'
 import Select from "react-select"
 
-const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, modalOpen, score, setScore}) => {
+const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, modalOpen, score, setScore, pics, setPics}) => {
 
     const API_BASE_URL = "http://localhost:5000"
 
@@ -75,7 +75,7 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
 
                         setPlayers(p => [...p,  guess]);
                         setData({...data, currPlayer: guess})
-
+                    
                         checkTeammates(data.lastPlayer, guess)
                             .then((gameOver) => {
                                 if (gameOver) {

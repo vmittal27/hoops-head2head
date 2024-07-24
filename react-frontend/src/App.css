@@ -90,6 +90,31 @@ button {
     cursor: pointer;
 }
 
+.start-box {
+    position: absolute;
+    left: center;
+    top: 20px;
+}
+
+.start-player {
+    position: absolute;
+    top: 225px; 
+    left: 400px;
+}
+
+.end-player {
+    position: absolute;
+    top: 225px;
+    right: 350px;
+}
+
+.hoops-logo {
+    position: absolute;
+    top: 60px;
+    left: -50px;
+}
+
+
 button:disabled {
     background-color: #ccc;
 }
