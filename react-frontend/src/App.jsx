@@ -21,6 +21,7 @@ import {
 
 import myImage from './components/wedidit.jpeg'
 import logoImage from './components/hoopsh2hlogo1-removebg-preview.png'
+import defaultImage from './components/default-pic.png'
 import DifficultyButton from './components/Difficulty'
 
 function App() {
@@ -83,16 +84,23 @@ function App() {
 				<p> Welcome to Hoops Head2Head!</p>
  			</div>
 			<div className = "hoops-logo">
-				<img src={logoImage} width = "400" height = "400" />
+				<Image src={logoImage} boxSize = '200' objectFit='cover' position='fixed' top='6%' left='7%' />
 			</div>
 
 			<div className = "start-box">
-				<p> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </p>
+				<Text as='b' fontSize='xl'> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Text>
 				<DifficultyButton changeDifficulty={setDifficulty} />
 			</div> 
 			<div className = "start-player"> 
-			<img src = {pics.currPlayerURL} />
-				<Text fontSize='xl'> Current Player: {data.currPlayer} </Text>
+			<Image 
+                src = {pics.currPlayerURL}
+                fallbackSrc = {defaultImage} 
+                position='relative' 
+                top='50' 
+                objectFit='contain' 
+                boxSize='180'
+            />
+				<Text fontSize='xl' position='relative' top='50'> Current Player: {data.currPlayer} </Text>
 			</div>
 			<GuessForm
 				guesses={guesses}
@@ -110,8 +118,16 @@ function App() {
 	
 			<Text>Remaining Guesses: {guesses}</Text>
 			<div className = "end-player"> 
-			<img src = {pics.lastPlayerURL} />
-			<Text fontSize='xl'> Final Player: {data.lastPlayer} </Text>
+			<Image 
+                src = {pics.lastPlayerURL}
+                fallbackSrc = {defaultImage} 
+                position='fixed' 
+                top='33.5%' 
+                left='60%' 
+                objectFit='contain' 
+                boxSize='180'
+            />
+			<Text fontSize='xl' position='fixed' top='55.5%' left='60%'> Final Player: {data.lastPlayer} </Text>
 				
 			</div>
 			<div className='left-container'>
