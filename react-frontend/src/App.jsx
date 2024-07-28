@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import './App.css'
 import './css/Modal.css' //Only need this for now, 
 import './components/Difficulty'
 import GuessForm from './components/GuessForm'
 import { QuestionOutlineIcon } from '@chakra-ui/icons'
+import { IoHome } from "react-icons/io5";
 import { Container, Heading, Text, UnorderedList, ListItem } from '@chakra-ui/react'
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 import {
@@ -16,7 +18,8 @@ import {
 	ModalCloseButton,
 	useDisclosure,
 	Button,
-	Image
+	Image,
+    Icon
 } from '@chakra-ui/react'
 
 import myImage from './components/wedidit.jpeg'
@@ -81,10 +84,11 @@ function App() {
 	return (
 		<Container>
 			<div className = "header">
-				<p> Welcome to Hoops Head2Head!</p>
+				<p> Singleplayer Mode</p>
+                <Link to='..'><Icon as={IoHome} /></Link>
  			</div>
 			<div className = "hoops-logo">
-				<Image src={logoImage} boxSize = '200' objectFit='cover' position='fixed' top='6%' left='7%' />
+				<Image src={logoImage} boxSize = '200' objectFit='cover' position='fixed' top='6%' left='5%' />
 			</div>
 
 			<div className = "start-box">
