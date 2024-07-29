@@ -6,7 +6,7 @@ import './components/Difficulty'
 import GuessForm from './components/GuessForm'
 import { QuestionOutlineIcon } from '@chakra-ui/icons'
 import { IoHome } from "react-icons/io5";
-import { Container, Heading, Text, UnorderedList, ListItem } from '@chakra-ui/react'
+import { VStack,Container, Heading, Text, UnorderedList, ListItem } from '@chakra-ui/react'
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 import {
 	Modal,
@@ -86,27 +86,27 @@ function App() {
 	return (
 		<Container>
 			<div className = "header">
-				<p> Singleplayer Mode</p>
-                <Link to='..'><Icon as={IoHome} /></Link>
+            <Link to='..'><Image src={logoImage} top = '-20px' boxSize = '150' objectFit='cover' position='relative'/></Link>
  			</div>
-			<div className = "hoops-logo">
-				<Image src={logoImage} boxSize = '200' objectFit='cover' position='fixed' top='6%' left='5%' />
-			</div>
+			
 
 			<div className = "start-box">
-				<Text as='b' fontSize='xl'> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Text>
+                <Text fontWeight='bold' fontSize='xl'> Single Player Mode </Text>
+				<Text fontWeight='bold' fontSize='xl'> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Text>
 				<DifficultyButton changeDifficulty={setDifficulty} />
 			</div> 
 			<div className = "start-player"> 
+            <Text fontSize='xl' align= 'center' position='relative' top='50'> Current Player: </Text>
 			<Image 
                 src = {pics.currPlayerURL}
                 fallbackSrc = {defaultImage} 
                 position='relative' 
+                borderRadius='full'
                 top='50' 
                 objectFit='contain' 
                 boxSize='180'
             />
-				<Text fontSize='xl' position='relative' top='50'> Current Player: {data.currPlayer} </Text>
+				<Text fontSize='xl' align= 'center' position='relative' top='50'>{data.currPlayer} </Text>
 			</div>
 			<GuessForm
 				guesses={guesses}
@@ -122,18 +122,20 @@ function App() {
 				setPics={setPics}
 			/>
 	
-			<Text>Remaining Guesses: {guesses}</Text>
+			<Text align= 'center'>Remaining Guesses: {guesses}</Text>
 			<div className = "end-player"> 
+            <Text fontSize='xl' align= 'center' position='relative' top='50'> Final Player: </Text>
 			<Image 
                 src = {pics.lastPlayerURL}
+                borderRadius='full'
                 fallbackSrc = {defaultImage} 
-                position='fixed' 
-                top='33.5%' 
-                left='60%' 
+                position='relative' 
+                top='50' 
+                left='' 
                 objectFit='contain' 
                 boxSize='180'
             />
-			<Text fontSize='xl' position='fixed' top='55.5%' left='60%'> Final Player: {data.lastPlayer} </Text>
+			<Text fontSize='xl' align= 'center' position='relative' top='50'> {data.lastPlayer} </Text>
 				
 			</div>
 			<div className='left-container'>
@@ -141,18 +143,25 @@ function App() {
 
 				<div className = "score-box">
 					<Heading size='md'>Score: {score}</Heading>
-					<Heading size='md'>List of Players:</Heading>
-					<UnorderedList>
-						{players.map(player => <ListItem>{player}</ListItem>)}
-					</UnorderedList>
 				</div>
 			</div>
-
+            <div className='path'>
+                <VStack spacing={4} align="stretch">
+                <Heading size='md'>Current Path:</Heading>
+                <Text fontWeight='bold'>{players.map((player, index) => (
+									<React.Fragment key={index}>
+										{player}
+										{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
+									</React.Fragment>
+								))}
+							</Text>
+                </VStack>
+            </div>
 
 			<Modal blockScrollOnMount={false} isOpen={isWinOpen} onClose={onWinClose}>
 				<ModalOverlay/>
 				<ModalContent backgroundColor="green.300">
-					<ModalHeader>WE DID ITTTTTT!</ModalHeader>
+					<ModalHeader>YOU DID ITTTTTT!</ModalHeader>
 					<ModalCloseButton/>
 					<ModalBody>
 						<Image src={myImage} alt="Description of Image" />
