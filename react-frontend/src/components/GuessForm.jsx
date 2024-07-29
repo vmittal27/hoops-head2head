@@ -23,7 +23,7 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                 {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ player1_name: data.currPlayer, player2_name: guess })
+                    body: JSON.stringify({ player1_id: data.currPlayerID, player2_id: guess })
                 }
             )
                 .then(scoreResponse => scoreResponse.json())
@@ -52,7 +52,7 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
             {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ player1_name: p1, player2_name: p2})
+                body: JSON.stringify({ player1_id: p1, player2_id: p2})
             }
         )
             .then((response) => response.json())
@@ -63,27 +63,54 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
             .catch(error => console.log('Error checking teammates:', error))
     }
 
+    const getJson = async (p1) => {
+        return fetch(
+            `${API_BASE_URL}/player`,
+            {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ player_id: p1})
+            }
+        )
+        .then((response) => response.json())
+            .then((response) => {
+                console.log(`${p1}'s JSON data:  ${response.name}`);
+                return {
+                    'name' : response.name,
+                    'id' : response.id,
+                    'url' : response.url
+                }; 
+            })
+            .catch(error => console.log('Error fetching JSON data', error))
+    }
+
     const handleSubmit = (guess) => {
 
         if (guess) {
 
             setGuesses(guesses - 1)
 
-            checkTeammates(data.currPlayer, guess)
+            checkTeammates(data.currPlayerID, guess)
                 .then((teammates) => {
                     if (teammates) {
-
-                        setPlayers(p => [...p,  guess]);
-                        setData({...data, currPlayer: guess})
-                    
-                        checkTeammates(data.lastPlayer, guess)
-                            .then((gameOver) => {
-                                if (gameOver) {
-                                    console.log('Game Complete! Well done!');
-                                    setPlayers(p => [...p, data.lastPlayer])
-                                    modalOpen();
-                                }
-                            })
+                        getJson(guess)
+                        .then((jsonData) => {
+                            console.log('shit', jsonData);
+                            setPlayers(p => [...p, jsonData.name ]);
+                            setData({...data, currPlayer : jsonData.name, currPlayerID: jsonData.id});
+                            setPics({...pics, currPlayerURL : jsonData.url});
+                            console.log(jsonData.name, jsonData.id, jsonData.url);
+                            console.log(data.currPlayer, pics.currPlayerURL);
+                            checkTeammates(data.lastPlayerID, guess)
+                                .then((gameOver) => {
+                                    if (gameOver) {
+                                        console.log('Game Complete! Well done!');
+                                        setPlayers(p => [...p, data.lastPlayer])
+                                        modalOpen();
+                                    }
+                                })
+                        })
+    
                     }
                 
                     processScoring(teammates, guess);
@@ -114,7 +141,7 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                     const results = []
 
                     for (var key in data) 
-                        results.push({label: `${data[key][1]} (${data[key][0]})`, value: data[key][1]})
+                        results.push({label: `${data[key][1]} (${data[key][0]})`, value: key}) //value = key, to index by player_id
                     
                     setSuggestions(results)
                     setIsLoading(false);

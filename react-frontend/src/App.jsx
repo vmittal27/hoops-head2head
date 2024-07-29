@@ -28,7 +28,7 @@ import defaultImage from './components/default-pic.png'
 import DifficultyButton from './components/Difficulty'
 
 function App() {
-	const [data, setData] = useState([{currPlayer: "", lastPlayer: ""}])
+	const [data, setData] = useState([{currPlayer: "", lastPlayer: "", currPlayerID: "", lastPlayerID: ""}])
 	const [pics, setPics] = useState([{currPlayerURL: "", lastPlayerURL: ""}])
 	const [score, setScore] = useState(0);
 
@@ -58,8 +58,11 @@ function App() {
 			.then(
 				(data) => {
 					console.log(data);
-					setData({currPlayer: data["Player 1"]["name"], lastPlayer: data["Player 2"]["name"]});
+					setData({currPlayer: data["Player 1"]["name"], lastPlayer: data["Player 2"]["name"],
+						currPlayerID : data["Player 1"]["id"], lastPlayerID: data["Player 2"]["id"]
+					});
 					setPics({currPlayerURL: data["Player 1"]["picture_url"], lastPlayerURL: data["Player 2"]["picture_url"]})
+				
 					setOptimalPath(data['Path']);
 					console.log(typeof optimalPath);
 					console.log(optimalPath);
@@ -75,7 +78,6 @@ function App() {
 			.catch((error) => {console.error("Error fetching data:", error);});
 	}, [difficulty]);
 
-	
 
 	const { isOpen: isRulesOpen , onOpen: onRulesOpen, onClose: onRulesClose } = useDisclosure()
     const { isOpen: isWinOpen , onOpen: onWinOpen, onClose: onWinClose } = useDisclosure()

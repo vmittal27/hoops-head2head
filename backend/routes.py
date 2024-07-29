@@ -52,6 +52,7 @@ def welcome():
     """
     return "Welcome to Hoops H2H!"
 
+
 @app.route('/players/<difficulty>')
 def get_players(difficulty):
     """
@@ -101,13 +102,14 @@ def get_shortest_path(src_id: str, dst_id: str):
 @app.route("/check", methods=['POST'])
 def check_teammates():
     data = request.get_json()
-    player1_name = data.get('player1_name')
-    player2_name = data.get('player2_name')
-    if not player1_name or not player2_name:
+    player1_id = data.get('player1_id')
+    player2_id = data.get('player2_id')
+    print(player1_id, player2_id)
+    if not player1_id or not player2_id:
         return jsonify({'error': 'Missing player names'}), 400
 
     query = f"""
-    MATCH (a {{`name`: "{player1_name}"}})--(b {{`name`: "{player2_name}"}})
+    MATCH (a {{`id`: "{player1_id}"}})--(b {{`id`: "{player2_id}"}})
     RETURN COUNT(*) > 0 AS areTeammates
     """
     with driver.session() as session:
@@ -135,13 +137,13 @@ def autocomplete_players():
 @app.route("/scoring", methods = ['POST'])
 def get_scoring_data():
     data = request.get_json()
-    player1_name = data.get('player1_name')
-    player2_name = data.get('player2_name')
-    if not player1_name or not player2_name:
+    player1_id = data.get('player1_id')
+    player2_id = data.get('player2_id')
+    if not player1_id or not player2_id:
         return jsonify({'error': 'Missing player names'}), 400
 
     query = f"""
-    MATCH (p1 {{`name`: "{player1_name}"}}), (p2 {{`name`: "{player2_name}"}})
+    MATCH (p1 {{`id`: "{player1_id}"}}), (p2 {{`id`: "{player2_id}"}})
     MATCH (p1)-[r]-(p2)
     RETURN r.weight AS weight, p2.Relevancy AS relevancy
     """
@@ -153,6 +155,34 @@ def get_scoring_data():
             'Weight': record["weight"],
             'Relevancy' : record["relevancy"]
         }
+
+@app.route("/player", methods = ['POST'])
+def get_player_json_data():
+    '''
+    endpoint for getting player json data based on id
+    '''
+    data = request.get_json()
+    player_id = data.get('player_id')
+    if not player_id:
+        return jsonify({'error' : 'Missing player id'}), 400
+    
+    query = """
+    MATCH (n:Player {id: $player_id})
+    RETURN n
+    """
+    with driver.session() as session:
+        result = session.run(query, player_id=player_id)
+        player_record = result.single()
+        if player_record:
+            player_node = player_record["n"]
+            return jsonify({
+                'name': player_node.get("name"),
+                'id' : player_node.get("id"),
+                'url': player_node.get("picture_url")
+            })
+        else:
+            return jsonify({'error': 'Player not found'}), 404
+
 
 #Function to close driver connection
 def close_driver():
