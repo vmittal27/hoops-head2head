@@ -9,11 +9,20 @@ body {
     height: 100vh;
   }
 
+.game {
+    justify-content: center;
+    align-items: center;
+
+  }
 .header {
     font-size : 1.5em;
     position: absolute;
     top: 20px;
     left: 20px;
+    display: flex; 
+    align-items: flex-start;
+    justify-content: start;
+    padding-top: 0%;
 }
 
 .container {
@@ -25,11 +34,11 @@ body {
 }
 
 .left-container {
-    position: fixed;
+    position: absolute;
     top: 20px;
     right: 20px;
     display: flex;
-    align-items: center;
+    /* align-items: center; */
 }
 
 .score-box {
@@ -92,14 +101,16 @@ button {
 
 .start-box {
     position: absolute;
-    left: center;
+    /* left: center; */
     top: 20px;
+    /* flex-direction: column; */
 }
 
 .start-player {
     position: absolute;
     top: 225px; 
     left: 400px;
+    justify-content: center;
 }
 
 .end-player {
@@ -109,9 +120,9 @@ button {
 }
 
 .hoops-logo {
-    position: absolute;
-    top: 60px;
-    left: -50px;
+    position: relative;
+    top: 0px;
+    left: 0px;
 }
 
 
@@ -140,3 +151,14 @@ button:hover {
     background-color: #0056b3;
 }
 
+.path {
+    display: flex;
+    justify-content: center;
+    background: white;
+    padding: 15px;
+    align-items: center;
+    position: absolute;
+    bottom: 0;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
