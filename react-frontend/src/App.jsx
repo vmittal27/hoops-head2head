@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { gsap } from 'gsap'
 import './App.css'
 import './css/Modal.css' //Only need this for now, 
 import './components/Difficulty'
@@ -78,6 +79,10 @@ function App() {
 			.catch((error) => {console.error("Error fetching data:", error);});
 	}, [difficulty]);
 
+    useEffect(() => {
+        gsap.fromTo('#curr-image', {borderColor: '#6ba9fa'}, {borderColor: '#ffffff', duration: 1})
+    },[data])
+
 
 	const { isOpen: isRulesOpen , onOpen: onRulesOpen, onClose: onRulesClose } = useDisclosure()
     const { isOpen: isWinOpen , onOpen: onWinOpen, onClose: onWinClose } = useDisclosure()
@@ -97,11 +102,12 @@ function App() {
 			</div> 
 			<div className = "start-player"> 
             <Text fontSize='xl' align= 'center' position='relative' top='50'> Current Player: </Text>
-			<Image 
+			<Image id='curr-image'
                 src = {pics.currPlayerURL}
                 fallbackSrc = {defaultImage} 
                 position='relative' 
                 borderRadius='full'
+                border='5px solid #ffffff'
                 top='50' 
                 objectFit='contain' 
                 boxSize='180'
