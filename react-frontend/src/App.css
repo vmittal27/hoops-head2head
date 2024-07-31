@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    background-color: #142650;
     margin: 0;
     padding: 0;
     display: flex;
@@ -14,6 +14,13 @@ body {
     align-items: center;
 
   }
+
+.dark-theme {
+--primary-color: #bb86fc;
+--secondary-color: #03dac6;
+--background-color: #121212;
+--text-color: #ffffff;
+}
 .header {
     font-size : 1.5em;
     position: absolute;
@@ -27,7 +34,7 @@ body {
 
 .container {
     text-align: center;
-    background: rgb(38, 134, 218);
+    background: rgb(158, 175, 191);
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

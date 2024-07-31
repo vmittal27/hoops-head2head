@@ -4,7 +4,8 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import App from './App.jsx'
 import Homepage from './pages/Homepage.jsx'
 import './index.css'
-import { ChakraProvider } from '@chakra-ui/react'
+import theme from './Theme.jsx'
+import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 
 const router = createBrowserRouter([
     {
@@ -19,8 +20,10 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ChakraProvider>
-        <RouterProvider router={router} />
+    <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+    <ChakraProvider theme={theme}>
+      <RouterProvider router={router} />
     </ChakraProvider>
-  </React.StrictMode>,
+  </React.StrictMode>
+
 )
