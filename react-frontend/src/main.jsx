@@ -1,11 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import App from './App.jsx'
+import SinglePlayer from './pages/SinglePlayer.jsx'
 import Homepage from './pages/Homepage.jsx'
-import './index.css'
-import theme from './Theme.jsx'
-import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
+import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
+import './css/index.css'
+import { extendTheme } from '@chakra-ui/react'
 
 const router = createBrowserRouter([
     {
@@ -14,13 +14,20 @@ const router = createBrowserRouter([
     },
     {
         path:'/singleplayer',
-        element: <App />
+        element: <SinglePlayer />
     }
 ])
 
+
+const config = {
+  initialColorMode: 'system',
+  useSystemColorMode: true,
+}
+
+const theme = extendTheme({ config })
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ColorModeScript initialColorMode={theme.config.initialColorMode} />
     <ChakraProvider theme={theme}>
       <RouterProvider router={router} />
     </ChakraProvider>

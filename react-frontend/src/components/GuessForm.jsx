@@ -1,6 +1,8 @@
 import React, { useState} from 'react'
-import {useToast} from '@chakra-ui/react'
+import {useToast, useColorModeValue} from '@chakra-ui/react'
+import { useTheme } from '@chakra-ui/system'
 import Select from "react-select"
+import '../css/SinglePlayer.css'
 
 const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, modalOpen, score, setScore, pics, setPics}) => {
 
@@ -95,7 +97,6 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                     if (teammates) {
                         getJson(guess)
                         .then((jsonData) => {
-                            console.log('shit', jsonData);
                             setPlayers(p => [...p, jsonData.name ]);
                             setData({...data, currPlayer : jsonData.name, currPlayerID: jsonData.id});
                             setPics({...pics, currPlayerURL : jsonData.url});
@@ -163,13 +164,66 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
 
             if (players.length != data_len)
                 setValue('');
-            
 
         }
     }
 
+    const theme = useTheme();
+
+    const bg = useColorModeValue(theme.colors.white, theme.colors.gray[800])
+    const text = useColorModeValue(theme.colors.gray[800], theme.colors.whiteAlpha[900]);
+    const border = useColorModeValue(theme.colors.gray[200], theme.colors.whiteAlpha[300])
+    const menuBg = useColorModeValue(theme.colors.gray[100], theme.colors.gray[700]);
+    const placeholder_color = useColorModeValue(theme.colors.gray[500], theme.colors.whiteAlpha[400])
+    const optionBgHover = useColorModeValue(theme.colors.blue[100], theme.colors.blue[700]);
+
     return (
         <Select
+            styles={{
+                control: (baseStyles, state) => ({
+                    ...baseStyles, 
+                    backgroundColor: bg, 
+                    borderColor: border,
+                    color: text, 
+                    '&:hover': {
+                        borderColor: optionBgHover,
+                    }
+                }), 
+                menu: (baseStyles, state) => ({
+                    ...baseStyles, 
+                    backgroundColor: menuBg
+
+                }), 
+                option: (baseStyles, state) => ({
+                    ...baseStyles, 
+                    backgroundColor: state.isFocused ? optionBgHover: menuBg,
+                    '&:hover': {
+                        backgroundColor: optionBgHover,
+                    }
+                }), 
+                input: (baseStyles, state) => ({
+                    ...baseStyles, 
+                    color: text
+
+                }), 
+                placeholder: (baseStyles, state) => ({
+                    ...baseStyles, 
+                    color: placeholder_color
+
+                }), 
+                dropdownIndicator: (provided) => ({
+                    ...provided,
+                    color: border,
+                    '&:hover': {
+                      color: optionBgHover,
+                    }
+                }),
+                indicatorSeparator: (provided) => ({
+                    ...provided,
+                    backgroundColor: border,
+                }),
+            }}
+            className='search-bar'
             placeholder="Enter a Player's Name..."
             onInputChange={autocomplete}
             isSearchable="true"

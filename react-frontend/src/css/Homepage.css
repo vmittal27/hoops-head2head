@@ -1,0 +1,11 @@
+.Homepage-Container {
+    align-content: center;
+    padding: 5em;
+    text-align: center;
+}
+  
+.Homepage-Box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

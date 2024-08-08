@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
-import './App.css'
-import './css/Modal.css' //Only need this for now, 
-import './components/Difficulty'
-import GuessForm from './components/GuessForm'
+import '../components/Difficulty'
+
+import '../css/SinglePlayer.css'
+import GuessForm from '../components/GuessForm'
 import { QuestionOutlineIcon } from '@chakra-ui/icons'
 import { IoHome } from "react-icons/io5";
 import { VStack,Container, Heading, Text, UnorderedList, ListItem } from '@chakra-ui/react'
@@ -23,12 +23,12 @@ import {
     Icon
 } from '@chakra-ui/react'
 
-import myImage from './components/wedidit.jpeg'
-import logoImage from './components/hoopsh2hlogo1-removebg-preview.png'
-import defaultImage from './components/default-pic.png'
-import DifficultyButton from './components/Difficulty'
+import myImage from '../components/wedidit.jpeg'
+import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
+import defaultImage from '../components/default-pic.png'
+import DifficultyButton from '../components/Difficulty'
 
-function App() {
+function SinglePlayer() {
 	const [data, setData] = useState([{currPlayer: "", lastPlayer: "", currPlayerID: "", lastPlayerID: ""}])
 	const [pics, setPics] = useState([{currPlayerURL: "", lastPlayerURL: ""}])
 	const [score, setScore] = useState(0);
@@ -58,15 +58,12 @@ function App() {
 	
 			.then(
 				(data) => {
-					console.log(data);
 					setData({currPlayer: data["Player 1"]["name"], lastPlayer: data["Player 2"]["name"],
 						currPlayerID : data["Player 1"]["id"], lastPlayerID: data["Player 2"]["id"]
 					});
 					setPics({currPlayerURL: data["Player 1"]["picture_url"], lastPlayerURL: data["Player 2"]["picture_url"]})
 				
 					setOptimalPath(data['Path']);
-					console.log(typeof optimalPath);
-					console.log(optimalPath);
 
 					//adding initial player to player list
 					console.log('adding first player');
@@ -89,31 +86,16 @@ function App() {
     const { isOpen: isLoseOpen , onOpen: onLoseOpen, onClose: onLoseClose } = useDisclosure()
 
 	return (
-		<Container>
-			<div className = "header">
-            <Link to='..'><Image src={logoImage} top = '-20px' boxSize = '150' objectFit='cover' position='relative'/></Link>
- 			</div>
-			
+		<Container className='App-Container'>
+			<Link to='..'>
+				<Image src={logoImage} boxSize = '150' objectFit='cover' position='relative'/>
+			</Link>
+		
+			<Text fontWeight='bold' fontSize='3xl'> Hoops Head 2 Head </Text>
+			<Text fontWeight='bold' fontSize='xl'> Single Player Mode </Text>
+			{/* <Text fontWeight='bold' fontSize='xl'> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Text> */}
+			<DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty} />
 
-			<div className = "start-box">
-                <Text fontWeight='bold' fontSize='xl'> Single Player Mode </Text>
-				<Text fontWeight='bold' fontSize='xl'> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Text>
-				<DifficultyButton changeDifficulty={setDifficulty} />
-			</div> 
-			<div className = "start-player"> 
-            <Text fontSize='xl' align= 'center' position='relative' top='50'> Current Player: </Text>
-			<Image id='curr-image'
-                src = {pics.currPlayerURL}
-                fallbackSrc = {defaultImage} 
-                position='relative' 
-                borderRadius='full'
-                border='5px solid #ffffff'
-                top='50' 
-                objectFit='contain' 
-                boxSize='180'
-            />
-				<Text fontSize='xl' align= 'center' position='relative' top='50'>{data.currPlayer} </Text>
-			</div>
 			<GuessForm
 				guesses={guesses}
 				setGuesses={setGuesses}
@@ -129,31 +111,10 @@ function App() {
 			/>
 	
 			<Text align= 'center'>Remaining Guesses: {guesses}</Text>
-			<div className = "end-player"> 
-            <Text fontSize='xl' align= 'center' position='relative' top='50'> Final Player: </Text>
-			<Image 
-                src = {pics.lastPlayerURL}
-                borderRadius='full'
-                fallbackSrc = {defaultImage} 
-                position='relative' 
-                top='50' 
-                left='' 
-                objectFit='contain' 
-                boxSize='180'
-            />
-			<Text fontSize='xl' align= 'center' position='relative' top='50'> {data.lastPlayer} </Text>
-				
-			</div>
-			<div className='left-container'>
-				<QuestionOutlineIcon onClick={onRulesOpen} className = "rules" boxSize={8}/>
 
-				<div className = "score-box">
-					<Heading size='md'>Score: {score}</Heading>
-				</div>
-			</div>
-            <div className='path'>
+			<div className='path'>
                 <VStack spacing={4} align="stretch">
-                <Heading size='md'>Current Path:</Heading>
+				<Text fontSize='xl' fontWeight='bold'>Current Path</Text>
                 <Text fontWeight='bold'>{players.map((player, index) => (
 									<React.Fragment key={index}>
 										{player}
@@ -163,6 +124,40 @@ function App() {
 							</Text>
                 </VStack>
             </div>
+			<div className='player-container'>
+				<div className='player'> 
+					<Text fontSize='xl' align= 'center'> Current Player </Text>
+					<Image id='curr-image'
+						src = {pics.currPlayerURL}
+						fallbackSrc = {defaultImage} 
+						borderRadius='full'
+						border='5px solid #ffffff'
+						objectFit='contain' 
+						boxSize='180'
+					/>
+					<Text fontSize='xl' align= 'center'>{data.currPlayer} </Text>
+				</div>
+
+				<div className='player'> 
+					<Text fontSize='xl' align= 'center'> Target Player </Text>
+					<Image 
+						src = {pics.lastPlayerURL}
+						borderRadius='full'
+						fallbackSrc = {defaultImage} 
+						border='5px solid #ffffff'
+						objectFit='contain' 
+						boxSize='180'
+					/>
+					<Text fontSize='xl' align= 'center'> {data.lastPlayer} </Text>
+				</div>
+			</div>
+			<div className='right-container'>
+				<QuestionOutlineIcon onClick={onRulesOpen} className = "rules" boxSize={8}/>
+
+				<div className = "score-box">
+					<Heading size='md'>Score: {score}</Heading>
+				</div>
+			</div>
 
 			<Modal blockScrollOnMount={false} isOpen={isWinOpen} onClose={onWinClose}>
 				<ModalOverlay/>
@@ -279,4 +274,4 @@ function App() {
 	)
 }
 
-export default App;
+export default SinglePlayer;
