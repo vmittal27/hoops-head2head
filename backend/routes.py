@@ -2,6 +2,7 @@ import logging
 from flask import jsonify, request
 from neo4j import GraphDatabase
 from backend import app
+from flask_socketio import SocketIO, emit
 
 def read_credentials(file):
     credentials = {}
@@ -183,6 +184,21 @@ def get_player_json_data():
         else:
             return jsonify({'error': 'Player not found'}), 404
 
+socketio = SocketIO(app)
+
+# WebSocket event handlers
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
+
+@socketio.on('message')
+def handle_message(data):
+    print('Received message: ' + data)
+    emit('response', 'Server received: ' + data)
 
 #Function to close driver connection
 def close_driver():

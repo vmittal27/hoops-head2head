@@ -14,6 +14,7 @@ function Homepage() {
                 <Heading pos='relative' as='h3' size='lg'>Please select a game mode below</Heading>
                 <br/>
                 <Link to='/singleplayer'><Button>Single Player</Button></Link>
+                <Link to='/lobby'><Button>Join Lobby</Button></Link>
             </Box>
             <Container>
             </Container>
