@@ -1,7 +1,9 @@
 import logging
 from flask import jsonify, request
+from flask_socketio import emit,join_room, leave_room
+from flask_cors import CORS
 from neo4j import GraphDatabase
-from backend import app
+from backend import app, socketio
 
 def read_credentials(file):
     credentials = {}
@@ -183,6 +185,44 @@ def get_player_json_data():
         else:
             return jsonify({'error': 'Player not found'}), 404
 
+@app.route("/http-call")
+def http_call():
+    """return JSON with string data as the value"""
+    data = {'data':'This text was fetched using an HTTP call to server on render'}
+    return jsonify(data)
+
+@socketio.on("connect")
+def connected():
+    """event listener when client connects to the server"""
+    print(request.sid)
+    print("client has connected")
+    # emit("connect",{"data":f"id: {request.sid} is connected"})
+
+@socketio.on("disconnect")
+def disconnected():
+    """event listener when client disconnects to the server"""
+    print("user disconnected")
+    # emit("disconnect",f"user {request.sid} disconnected",broadcast=True)
+
+@socketio.on('data')
+def handle_message(data):
+    """event listener when client types a message"""
+    print("data from the front end: ",str(data))
+    emit("data",{'data':data,'id':request.sid},broadcast=True)
+
+@socketio.on('join')
+def on_join(data):
+    username = data['username']
+    room = data['room']
+    join_room(room)
+    emit(username + ' has entered the room.', to=room)
+
+@socketio.on('leave')
+def on_leave(data):
+    username = data['username']
+    room = data['room']
+    leave_room(room)
+    emit(username + ' has left the room.', to=room)
 
 #Function to close driver connection
 def close_driver():
