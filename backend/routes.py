@@ -1,4 +1,5 @@
 import logging
+import random
 from flask import jsonify, request
 from flask_socketio import emit,join_room, leave_room
 from flask_cors import CORS
@@ -210,19 +211,50 @@ def handle_message(data):
     print("data from the front end: ",str(data))
     emit("data",{'data':data,'id':request.sid},broadcast=True)
 
-@socketio.on('join')
+
+'''
+all room functionality below
+'''
+
+rooms = {}
+
+def generate_room_id(n):
+    #n digit code, usually use n=6
+    return random.randint(10**(n-1)+1, 10**(n))
+    
+@app.route('/create_room', methods=['POST'])
+def create_room():
+    room_id = generate_room_id(6)
+    while room_id in rooms:
+        room_id = generate_room_id(6)
+    rooms[room_id] = {"players": []}
+    return jsonify({"room_id": room_id})
+
+@socketio.on('player_joined')
 def on_join(data):
-    username = data['username']
-    room = data['room']
-    join_room(room)
-    emit(username + ' has entered the room.', to=room)
+    room_id = data['room_id']
+    if room_id in rooms:
+        join_room(room_id)
+        rooms[room_id]["players"].append(request.sid)
+        socketio.emit('join_success', {"room_id": room_id, "player_count": len(rooms[room_id]["players"])}, room=request.sid)
+        socketio.emit('player_joined', {"player_count": len(rooms[room_id]["players"])}, room=room_id)
+    else:
+        socketio.emit('error', {"message": "Room not found"}, room=request.sid)
 
 @socketio.on('leave')
 def on_leave(data):
-    username = data['username']
-    room = data['room']
-    leave_room(room)
-    emit(username + ' has left the room.', to=room)
+    room_id = data['room_id']
+    if room_id in rooms and request.sid in rooms[room_id]["players"]:
+        leave_room(room_id)
+        rooms[room_id]["players"].remove(request.sid)
+        socketio.emit('player_left', {"player_count": len(rooms[room_id]["players"])}, room=room_id)
+        if len(rooms[room_id]["players"]) == 0:
+            del rooms[room_id]
+
+
+#create_room
+#join_room
+#generate_code (not a route)
 
 #Function to close driver connection
 def close_driver():
