@@ -48,6 +48,7 @@ function Lobby() {
     try {
       const response = await fetch('http://localhost:5000/create_room', { method: 'POST' });
       const data = await response.json();
+      console.log("room id" + data.room_id);
       joinRoom(data.room_id);
     } catch (err) {
       setError('Failed to create room');
@@ -55,7 +56,7 @@ function Lobby() {
   };
 
   const joinRoom = (id) => {
-    socket.emit('join', { room_id: id });
+    socket.emit('player_joined', { room_id: id });
   };
 
   const leaveRoom = () => {
@@ -68,6 +69,7 @@ function Lobby() {
     e.preventDefault();
     if (joinRoomId) {
       joinRoom(joinRoomId);
+      console.log("test" + joinRoomId);
       setJoinRoomId('');
     }
   };

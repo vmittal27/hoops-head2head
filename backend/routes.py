@@ -227,28 +227,30 @@ def create_room():
     room_id = generate_room_id(6)
     while room_id in rooms:
         room_id = generate_room_id(6)
-    rooms[room_id] = {"players": []}
+    rooms[room_id] = []
+    print(rooms)
     return jsonify({"room_id": room_id})
 
 @socketio.on('player_joined')
 def on_join(data):
-    room_id = data['room_id']
+    room_id = int(data['room_id'])
+    # print(room_id, rooms, int(room_id) in [key for key in rooms.keys()])
     if room_id in rooms:
         join_room(room_id)
-        rooms[room_id]["players"].append(request.sid)
-        socketio.emit('join_success', {"room_id": room_id, "player_count": len(rooms[room_id]["players"])}, room=request.sid)
-        socketio.emit('player_joined', {"player_count": len(rooms[room_id]["players"])}, room=room_id)
+        rooms[room_id].append(request.sid)
+        socketio.emit('join_success', {"room_id": room_id, "player_count": len(rooms[room_id])}, room=request.sid)
+        socketio.emit('player_joined', {"player_count": len(rooms[room_id])}, room=room_id)
     else:
         socketio.emit('error', {"message": "Room not found"}, room=request.sid)
 
 @socketio.on('leave')
 def on_leave(data):
-    room_id = data['room_id']
-    if room_id in rooms and request.sid in rooms[room_id]["players"]:
+    room_id = int(data['room_id'])
+    if room_id in rooms and request.sid in rooms[room_id]:
         leave_room(room_id)
-        rooms[room_id]["players"].remove(request.sid)
-        socketio.emit('player_left', {"player_count": len(rooms[room_id]["players"])}, room=room_id)
-        if len(rooms[room_id]["players"]) == 0:
+        rooms[room_id].remove(request.sid)
+        socketio.emit('player_left', {"player_count": len(rooms[room_id])}, room=room_id)
+        if len(rooms[room_id]) == 0:
             del rooms[room_id]
 
 
