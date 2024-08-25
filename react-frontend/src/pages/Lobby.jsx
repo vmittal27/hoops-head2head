@@ -2,7 +2,11 @@ import HttpCall from "../components/HttpCall";
 import WebSocketCall from "../components/WebSocketCall";
 import { io } from "socket.io-client";
 import { useEffect, useState } from "react";
+import "../css/Lobby.css"
+import {Link, Image, Text, Container, NumberInput, NumberInputField, Button, Box} from "@chakra-ui/react";
 
+import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
+import { Form } from "react-router-dom";
 
 const socket = io("localhost:5000/", {
   transports: ["websocket"],
@@ -75,21 +79,27 @@ function Lobby() {
   };
 
   return (
-    <div>
-      <h1>Multiplayer Room Example</h1>
-      {error && <p style={{color: 'red'}}>{error}</p>}
+    <Container className="App-Container">
+      <div class='header'>
+        <Link to='..'>
+          <Image src={logoImage} boxSize = '150' objectFit='cover' position='relative'/>
+        </Link>
+        <Text fontWeight='bold' fontSize='3xl'> Hoops Head 2 Head </Text>
+      </div>
+      <Text fontWeight='bold' fontSize='xl'> Multiplayer Mode </Text>
+      {error && <Text style={{color: 'red'}}>{error}</Text>}
       {!roomId ? (
         <>
-          <button onClick={createRoom}>Create Room</button>
-          <form onSubmit={handleJoinSubmit}>
-            <input 
-              type="text" 
-              placeholder="Enter Room ID" 
-              value={joinRoomId}
-              onChange={(e) => setJoinRoomId(e.target.value)}
-            />
-            <button type="submit">Join Room</button>
-          </form>
+          <Box className="Menu-Box">
+            <Button className="Menu-Element" colorScheme="teal" size='lg' onClick={createRoom}>Create a Room</Button>
+            <Form className='Form' onSubmit={handleJoinSubmit}>
+              <Text fontSize='xl'>Join a Room</Text>
+              <NumberInput className='Menu-Element' colorScheme="teal" size='lg' min={100001} max={999999}>
+                <NumberInputField colorScheme='teal' placeholder="Room ID" value={joinRoomId} onChange={(e) => setJoinRoomId(e.target.value)}/>
+              </NumberInput>
+              <Button className="Menu-Element" colorScheme="teal" size='lg' type="submit" isDisabled={!joinRoomId}>Join Room</Button>
+            </Form>
+          </Box>
         </>
       ) : (
         <>
@@ -98,7 +108,7 @@ function Lobby() {
           <button onClick={leaveRoom}>Leave Room</button>
         </>
       )}
-    </div>
+    </Container>
   );
 }
 
