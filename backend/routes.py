@@ -202,6 +202,14 @@ def connected():
 @socketio.on("disconnect")
 def disconnected():
     """event listener when client disconnects to the server"""
+    user_id = request.sid
+    for room in rooms:
+        if user_id in rooms[room]:
+            rooms[room].remove(user_id)
+            socketio.emit('player_left', {"player_count": len(rooms[room]), "players" : rooms[room]}, room=room)
+            if rooms[room] == []:
+                del rooms[room]
+            break
     print("user disconnected")
     # emit("disconnect",f"user {request.sid} disconnected",broadcast=True)
 
@@ -239,7 +247,8 @@ def on_join(data):
         join_room(room_id)
         rooms[room_id].append(request.sid)
         socketio.emit('join_success', {"room_id": room_id, "player_count": len(rooms[room_id])}, room=request.sid)
-        socketio.emit('player_joined', {"player_count": len(rooms[room_id])}, room=room_id)
+        socketio.emit('player_joined', {"player_count": len(rooms[room_id]), "players" : rooms[room_id]}, room=room_id)
+        print(rooms)
     else:
         socketio.emit('error', {"message": "Room not found"}, room=request.sid)
 
@@ -249,7 +258,7 @@ def on_leave(data):
     if room_id in rooms and request.sid in rooms[room_id]:
         leave_room(room_id)
         rooms[room_id].remove(request.sid)
-        socketio.emit('player_left', {"player_count": len(rooms[room_id])}, room=room_id)
+        socketio.emit('player_left', {"player_count": len(rooms[room_id]), "players" : rooms[room_id]}, room=room_id)
         if len(rooms[room_id]) == 0:
             del rooms[room_id]
 

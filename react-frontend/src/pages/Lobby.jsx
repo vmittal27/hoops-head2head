@@ -19,6 +19,7 @@ function Lobby() {
   const [roomId, setRoomId] = useState('');
   const [joinRoomId, setJoinRoomId] = useState('');
   const [playerCount, setPlayerCount] = useState(0);
+  const [players, setPlayers] = useState([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -30,15 +31,22 @@ function Lobby() {
 
     socket.on('player_joined', (data) => {
       setPlayerCount(data.player_count);
+      console.log("players" + data.players);
+      setPlayers(data.players);
+      // console.log("players:" + [...players, data.player]);
+      // console.log("test" + data.player);  
     });
 
     socket.on('player_left', (data) => {
       setPlayerCount(data.player_count);
+      setPlayers(data.players);
     });
 
     socket.on('error', (data) => {
       setError(data.message);
     });
+
+  
 
     return () => {
       socket.off('join_success');
@@ -46,7 +54,7 @@ function Lobby() {
       socket.off('player_left');
       socket.off('error');
     };
-  }, []);
+  }, [players]);
 
   const createRoom = async () => {
     try {
@@ -61,6 +69,7 @@ function Lobby() {
 
   const joinRoom = (id) => {
     socket.emit('player_joined', { room_id: id });
+    console.log("test" + players);
   };
 
   const leaveRoom = () => {
@@ -106,6 +115,11 @@ function Lobby() {
           <p>Room ID: {roomId}</p>
           <p>Players: {playerCount}</p>
           <button onClick={leaveRoom}>Leave Room</button>
+          <ul>
+            {players.map((player, ind) => {
+              return <li key={ind}>{player}</li>;
+            })}
+          </ul>
         </>
       )}
     </Container>
