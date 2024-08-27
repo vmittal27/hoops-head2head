@@ -117,7 +117,7 @@ function Lobby() {
             Toggle {colorMode === 'light' ? 'Dark' : 'Light'}
         </IconButton>
       </div>
-      <Text fontWeight='bold' fontSize='xl'> Multiplayer Mode </Text>
+      <Heading fontWeight='bold' size='lg'> Multiplayer </Heading>
       {error && <Text style={{color: 'red'}}>{error}</Text>}
       {!roomId ? (
         <>
@@ -134,26 +134,26 @@ function Lobby() {
         </>
       ) : (
         <>
-          <Container bg='#b84e07' borderRadius='20px' position='absolute' top='70%' left='3%' h='300px'>
+          <Container class="lobbycontain">
             <Heading size='lg' m='10px'>Lobby Info</Heading>
             <Flex>
-                <Text as='b' fontSize='md' m='10px'>Room ID: {roomId}</Text>
+                <Text as='b' fontSize='lg' m='10px'>Room ID: {roomId}</Text>
                 <IconButton icon={<CopyIcon />} onClick={copyRoom}></IconButton>
             </Flex>
             <Button onClick={leaveRoom} position='absolute' top='5%' right='5%'>Leave Room</Button>
-            <Text textAlign='left' mx='10px' my='5px'>Players: {playerCount}</Text>
-            <UnorderedList textAlign='left' mx='10px'>
+            <Text fontSize='lg' textAlign='left' mx='10px' my='5px'>Players: {playerCount}</Text>
+            <UnorderedList styleType="''" textAlign='left' fontSize='lg' mx='10px'>
                 {players.map((player) => {
                 return <ListItem >Guest {player.substring(0,5)}</ListItem>;
                 })}
             </UnorderedList>
           </Container>    
           <Chat socket = {socket} />
-          <Container bg='#b84e07' borderRadius='20px' position='absolute' top='70%' right='3%' h='300px'>
-            <Text fontWeight='bold' fontSize='xl' m='10px'> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Text>
+          <Container class="selectDif">
+            <Heading fontWeight='bold' size='lg' m='10px'>{difficulty[0].toUpperCase() + difficulty.slice(1)} </Heading>
             <DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty} />
           </Container>
-          <Button colorScheme="green" size='lg' onClick={startGame} isDisabled={playerCount < 2}>
+          <Button top='480px' width='100%' colorScheme="green" size='lg' onClick={startGame} isDisabled={playerCount < 2}>
             Start Game
           </Button>
         </>
