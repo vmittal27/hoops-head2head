@@ -1,9 +1,10 @@
 import HttpCall from "../components/HttpCall";
-import WebSocketCall from "../components/WebSocketCall";
+import Chat from "../components/Chat";
 import { io } from "socket.io-client";
 import { useEffect, useState } from "react";
 import "../css/Lobby.css"
 import {Link, Image, Text, Container, NumberInput, NumberInputField, Button, Box} from "@chakra-ui/react";
+import { UnorderedList, ListItem} from "@chakra-ui/react";
 
 import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
 import { Form } from "react-router-dom";
@@ -117,9 +118,10 @@ function Lobby() {
           <button onClick={leaveRoom}>Leave Room</button>
           <ul>
             {players.map((player, ind) => {
-              return <li key={ind}>{player}</li>;
+              return <li key={ind}>Guest {player.substring(0,5)}</li>;
             })}
           </ul>
+          <Chat socket = {socket} />
         </>
       )}
     </Container>

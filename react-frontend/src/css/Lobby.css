@@ -37,3 +37,7 @@
 .Menu-Element {
     width: 10em; 
 }
+
+.Chat { 
+    list-style-type: none;
+}
