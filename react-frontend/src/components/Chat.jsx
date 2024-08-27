@@ -38,8 +38,8 @@ export default function Chat({ socket }) {
   return (
     <div>
     <DarkMode>
-    <Container bg='#c95508' color='white' position='fixed' bottom='3%' right='3%' borderRadius='15px'>
-      <Heading size='md' mt='10px' color='white'>Chat</Heading>
+    <Container bg='#ff7f26' h='300px' width='100%' color='white' position='absolute' top='130%' bottom='3%' right= '6%'  borderRadius='20px'>
+      <Heading size='lg' mt='10px' color='white'>Chat</Heading>
       <UnorderedList styleType="''" mt='10px' overflowY='auto' maxHeight='120px'>
         {messages.map((message, ind) => (
           <ListItem key={ind}>
@@ -49,7 +49,8 @@ export default function Chat({ socket }) {
       </UnorderedList>
       <InputGroup>
         <Input 
-            pr='4.5rem'
+            position='absolute'
+            pr='4.5 rem'
             mb='10px'
             mt='10px'
             variant='outline'
