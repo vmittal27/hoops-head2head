@@ -41,3 +41,24 @@
 .Chat { 
     list-style-type: none;
 }
+
+.selectDif {
+
+    background: #ff7f26; 
+    border-radius: 20px;
+    position: absolute;
+    width: 96%;  
+    top: 70%;
+    height: 150px;
+    /* padding: 20px; */
+}
+
+.lobbycontain {
+    background: #ff7f26; 
+    border-radius: 20px;
+    position: absolute;
+    top: 130%;
+    left: 2%;
+    width: 48%;
+    height: 300px;
+}
