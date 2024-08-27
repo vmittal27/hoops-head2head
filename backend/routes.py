@@ -225,6 +225,7 @@ all room functionality below
 '''
 
 rooms = {}
+game_states = {}
 
 def generate_room_id(n):
     #n digit code, usually use n=6
@@ -252,6 +253,16 @@ def on_join(data):
     else:
         socketio.emit('error', {"message": "Room not found"}, room=request.sid)
 
+@socketio.on('start_game')
+def on_start_game(data):
+    room_id = int(data['room_id'])
+    if room_id in rooms:
+        #data should have keys room_id, player1_json, player2_json
+        player1 = data['player1_json'] #dict, with 'name', 'id', 'url'
+        player2 = data['player2_json'] #same thing
+        game_states[room_id] = [player1, player2] 
+        socketio.emit('game_started', {'room_id': room_id, 'game_data': game_states[room_id]}, room=room_id)
+
 @socketio.on('leave')
 def on_leave(data):
     room_id = int(data['room_id'])
@@ -263,11 +274,6 @@ def on_leave(data):
             del rooms[room_id]
 
 
-#create_room
-#join_room
-#generate_code (not a route)
-
-#Function to close driver connection
 def close_driver():
     driver.close()
 

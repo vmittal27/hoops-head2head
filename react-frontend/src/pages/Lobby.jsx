@@ -4,6 +4,7 @@ import { io } from "socket.io-client";
 import { useEffect, useState } from "react";
 import "../css/Lobby.css"
 import {Link, Image, Text, Container, NumberInput, NumberInputField, Button, Box} from "@chakra-ui/react";
+import DifficultyButton from '../components/Difficulty'
 import { UnorderedList, ListItem} from "@chakra-ui/react";
 
 import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
@@ -22,6 +23,7 @@ function Lobby() {
   const [playerCount, setPlayerCount] = useState(0);
   const [players, setPlayers] = useState([]);
   const [error, setError] = useState('');
+  const [difficulty, setDifficulty] = useState('easy');
 
   useEffect(() => {
     socket.on('join_success', (data) => {
@@ -88,6 +90,11 @@ function Lobby() {
     }
   };
 
+  const startGame = () => {
+    socket.emit('start_game', { room_id: roomId });
+  };
+
+
   return (
     <Container className="App-Container">
       <div class='header'>
@@ -122,6 +129,10 @@ function Lobby() {
             })}
           </ul>
           <Chat socket = {socket} />
+          <Text fontWeight='bold' fontSize='xl'> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Text>
+          <Button colorScheme="green" size='lg' onClick={startGame} isDisabled={playerCount < 2}>
+            Start Game
+          </Button>
         </>
       )}
     </Container>
