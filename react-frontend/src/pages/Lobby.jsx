@@ -3,9 +3,10 @@ import Chat from "../components/Chat";
 import { io } from "socket.io-client";
 import { useEffect, useState } from "react";
 import "../css/Lobby.css"
-import {Link, Image, Text, Container, NumberInput, NumberInputField, Button, Box} from "@chakra-ui/react";
+import {Link, Image, Text, Container, NumberInput, NumberInputField, Button, Box, IconButton, useColorMode} from "@chakra-ui/react";
 import DifficultyButton from '../components/Difficulty'
-import { UnorderedList, ListItem} from "@chakra-ui/react";
+import { Heading, UnorderedList, ListItem, Flex } from "@chakra-ui/react";
+import { MoonIcon, CopyIcon } from '@chakra-ui/icons'
 
 import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
 import { Form } from "react-router-dom";
@@ -24,6 +25,7 @@ function Lobby() {
   const [players, setPlayers] = useState([]);
   const [error, setError] = useState('');
   const [difficulty, setDifficulty] = useState('easy');
+  const { colorMode, toggleColorMode } = useColorMode();
 
   useEffect(() => {
     socket.on('join_success', (data) => {
@@ -94,6 +96,15 @@ function Lobby() {
     socket.emit('start_game', { room_id: roomId });
   };
 
+  const copyRoom = async () => {
+    try {
+      await navigator.clipboard.writeText(roomId);
+      console.log('Copied to clipboard:', roomId);
+    } catch (error) {
+      console.error('Unable to copy to clipboard:', error);
+    }
+  };
+
 
   return (
     <Container className="App-Container">
@@ -102,6 +113,9 @@ function Lobby() {
           <Image src={logoImage} boxSize = '150' objectFit='cover' position='relative'/>
         </Link>
         <Text fontWeight='bold' fontSize='3xl'> Hoops Head 2 Head </Text>
+        <IconButton onClick={toggleColorMode} icon={<MoonIcon/>} position='absolute' right='50px'>
+            Toggle {colorMode === 'light' ? 'Dark' : 'Light'}
+        </IconButton>
       </div>
       <Text fontWeight='bold' fontSize='xl'> Multiplayer Mode </Text>
       {error && <Text style={{color: 'red'}}>{error}</Text>}
@@ -120,16 +134,25 @@ function Lobby() {
         </>
       ) : (
         <>
-          <p>Room ID: {roomId}</p>
-          <p>Players: {playerCount}</p>
-          <button onClick={leaveRoom}>Leave Room</button>
-          <ul>
-            {players.map((player, ind) => {
-              return <li key={ind}>Guest {player.substring(0,5)}</li>;
-            })}
-          </ul>
+          <Container bg='#b84e07' borderRadius='20px' position='absolute' top='70%' left='3%' h='300px'>
+            <Heading size='lg' m='10px'>Lobby Info</Heading>
+            <Flex>
+                <Text as='b' fontSize='md' m='10px'>Room ID: {roomId}</Text>
+                <IconButton icon={<CopyIcon />} onClick={copyRoom}></IconButton>
+            </Flex>
+            <Button onClick={leaveRoom} position='absolute' top='5%' right='5%'>Leave Room</Button>
+            <Text textAlign='left' mx='10px' my='5px'>Players: {playerCount}</Text>
+            <UnorderedList textAlign='left' mx='10px'>
+                {players.map((player) => {
+                return <ListItem >Guest {player.substring(0,5)}</ListItem>;
+                })}
+            </UnorderedList>
+          </Container>    
           <Chat socket = {socket} />
-          <Text fontWeight='bold' fontSize='xl'> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Text>
+          <Container bg='#b84e07' borderRadius='20px' position='absolute' top='70%' right='3%' h='300px'>
+            <Text fontWeight='bold' fontSize='xl' m='10px'> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Text>
+            <DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty} />
+          </Container>
           <Button colorScheme="green" size='lg' onClick={startGame} isDisabled={playerCount < 2}>
             Start Game
           </Button>
