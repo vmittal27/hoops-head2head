@@ -87,12 +87,6 @@ function Multiplayer() {
 
 	return (
 		<Container className='App-Container'>
-            <div class='header'>
-                <Link to='..'>
-                <Image src={logoImage} boxSize = '150' objectFit='cover' position='relative'/>
-                </Link>
-                <Text fontWeight='bold' fontSize='3xl'> Hoops Head 2 Head </Text>
-            </div>
 			<Text fontWeight='bold' fontSize='xl'> Multiplayer Mode </Text>
 			{/* <Text fontWeight='bold' fontSize='xl'> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Text> */}
 			<DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty} />
