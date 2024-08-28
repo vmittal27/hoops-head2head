@@ -273,12 +273,12 @@ def on_leave(data):
         if len(rooms[room_id]) == 0:
             del rooms[room_id]
 
-@socketio.on('difficulty_changed')
+@socketio.on('settings_changed')
 def handle_difficulty_change(data):
-    room_id = data['room_id']
-    difficulty = data['difficulty']
+    room_id, difficulty, roundTime = data['room_id'], data['difficulty'], data['roundTime']
+    if room_id in rooms:
+        socketio.emit('change_settings', {'difficulty' : difficulty, 'roundTime' : roundTime})
     # Broadcast the difficulty change to all players in the room
-    emit('difficulty_changed', {'difficulty': difficulty}, room=room_id)
 
 
 

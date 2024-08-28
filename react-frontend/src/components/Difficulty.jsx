@@ -9,7 +9,7 @@ const DifficultyButton = ({ changeDifficulty, difficulty, roomId}) => {
         // Emit the difficulty change to the server
         socket.emit('difficulty_changed', { room_id: roomId, difficulty: newDifficulty });
     };
-    return (
+    return (  
       <div>
         <ButtonGroup className='difficulty-buttons-group'>
             <Button className={difficulty === 'easy' ? "selected-difficulty-button": "difficulty-button"} onClick={() => changeDifficulty('easy')}>Easy</Button>

@@ -32,9 +32,10 @@ function Lobby() {
   const [players, setPlayers] = useState([]);
   const [error, setError] = useState('');
   const [difficulty, setDifficulty] = useState('easy');
-  const [roundTime, setRoundTime] = useState(30)
+  const [roundTime, setRoundTime] = useState(75)
   const { colorMode, toggleColorMode } = useColorMode();
   const [currentPlayer, setCurrentPlayer] = useState(null);
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
     setCurrentPlayer(socket.id); //current player socket id fweh
@@ -42,7 +43,6 @@ function Lobby() {
     socket.on('join_success', (data) => {
       setRoomId(data.room_id);
       setPlayerCount(data.player_count);
-      setGroupLeader(players[0]);
       setError('');
     });
 
@@ -50,7 +50,6 @@ function Lobby() {
       setPlayerCount(data.player_count);
       console.log("players" + data.players);
       setPlayers(data.players);
-      setGroupLeader(players[0]);
       // console.log("players:" + [...players, data.player]);
       // console.log("test" + data.player);  
     });
@@ -58,28 +57,33 @@ function Lobby() {
     socket.on('player_left', (data) => {
       setPlayerCount(data.player_count);
       setPlayers(data.players);
-      setGroupLeader(players[0]);
+
     });
 
     socket.on('error', (data) => {
       setError(data.message);
     });
 
-    socket.on('difficulty_changed', (data) => {
+    socket.on('change_settings', (data) => {
       setDifficulty(data.difficulty); 
-      console.log(data.difficulty);
+      setRoundTime(data.roundTime);
+      console.log(data.difficulty, data.roundTime);
     });
 
-  
-
+ 
     return () => {
       socket.off('join_success');
       socket.off('player_joined');
       socket.off('player_left');
       socket.off('error');
-      socket.off('difficulty_changed');
+      socket.off('change_settings')
     };
   }, [players]);
+
+  useEffect(() => {
+    socket.emit('settings_changed', {'room_id' : roomId, 'difficulty': difficulty, 'roundTime' : roundTime})
+    console.log(difficulty, roundTime);
+  }, [difficulty, roundTime]);
 
   const createRoom = async () => {
     try {
@@ -114,6 +118,7 @@ function Lobby() {
 
   const startGame = () => {
     socket.emit('start_game', { room_id: roomId });
+    setStarted(true);
   };
 
   const copyRoom = async () => {
@@ -152,7 +157,8 @@ function Lobby() {
             </Form>
           </Box>
         </>
-      ) : (
+      ) : ( 
+        {!started ? (
         <>
           <Container class="lobbycontain">
             <Heading size='lg' m='10px'>Lobby Info</Heading>
@@ -181,7 +187,7 @@ function Lobby() {
             <Container>
                 <Heading fontWeight='bold' size='lg' m='10px'>Round Length: {roundTime} seconds</Heading>
                 {currentPlayer === players[0] && (
-                <Slider value={roundTime} min='30' max='120' onChange={(val) => setRoundTime(val)}>
+                <Slider min={30} max={120} onChangeEnd={(val) => setRoundTime(val)}>
                     <SliderTrack>
                         <SliderFilledTrack />
                     </SliderTrack>
@@ -190,10 +196,15 @@ function Lobby() {
                 )}
             </Container>
           </Container>
-          <Button top='480px' width='100%' colorScheme="green" size='lg' onClick={startGame} isDisabled={playerCount < 2}>
+        
+          <Button top='480px' width='100%' colorScheme="green" size='lg' onClick={startGame} isDisabled={playerCount < 2 || currentPlayer != players[0]}>
             Start Game
           </Button>
-        </>
+          
+        </> //ok lobby ends below
+        ) : ( <>
+                </>
+              )};
       )}
     </Container>
   );
