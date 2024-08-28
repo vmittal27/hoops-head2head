@@ -37,9 +37,10 @@ export default function Chat({ socket }) {
 
   return (
     <div>
-    <DarkMode>
-    <Container bg='#ff7f26' h='300px' minW='650px' color='white' position='absolute' top='130%' bottom='3%' right= '2%'  borderRadius='20px'>
-      <Heading size='lg' mt='10px' color='white'>Chat</Heading>
+  
+    <Container bg='var(--chakra-colors-chakra-subtle-bg)' h='300px' minW='650px' position='absolute' top='130%' bottom='3%' right= '2%'  borderRadius='20px' borderWidth='3px' borderColor= 
+    '#ff7f26' >
+      <Heading size='lg' mt='10px'>Chat</Heading>
       <UnorderedList styleType="''" mt='10px' overflowY='auto' maxHeight='120px'>
         {messages.map((message, ind) => (
           <ListItem key={ind}>
@@ -50,9 +51,7 @@ export default function Chat({ socket }) {
       <InputGroup position='absolute' bottom='23%' right='1.6%' maxW='625px'>
         <Input 
             position='absolute'
-            focusBorderColor='white'
             placeholder='Enter Message'
-            _placeholder={{ opacity: 0.5, color: 'white'}}
             pr='4.5 rem'
             mb='10px'
             mt='10px'
@@ -69,7 +68,7 @@ export default function Chat({ socket }) {
         </InputRightElement>
       </InputGroup>
     </Container>
-    </DarkMode>
+    
     </div>
   );
 }

@@ -273,6 +273,14 @@ def on_leave(data):
         if len(rooms[room_id]) == 0:
             del rooms[room_id]
 
+@socketio.on('difficulty_changed')
+def handle_difficulty_change(data):
+    room_id = data['room_id']
+    difficulty = data['difficulty']
+    # Broadcast the difficulty change to all players in the room
+    emit('difficulty_changed', {'difficulty': difficulty}, room=room_id)
+
+
 
 def close_driver():
     driver.close()

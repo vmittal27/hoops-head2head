@@ -44,8 +44,10 @@
 
 .selectDif {
 
-    background: #ff7f26; 
+    background: var(--chakra-colors-chakra-subtle-bg); 
     border-radius: 20px;
+    border-color: #ff7f26;
+    border-width: 3px; 
     position: absolute;
     width: 96%;  
     top: 70%;
@@ -56,8 +58,10 @@
 }
 
 .lobbycontain {
-    background: #ff7f26; 
+    background: var(--chakra-colors-chakra-subtle-bg); 
     border-radius: 20px;
+    border-color: #ff7f26;
+    border-width: 3px; 
     position: absolute;
     top: 130%;
     left: 2%;

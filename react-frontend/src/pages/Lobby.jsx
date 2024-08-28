@@ -34,11 +34,15 @@ function Lobby() {
   const [difficulty, setDifficulty] = useState('easy');
   const [roundTime, setRoundTime] = useState(30)
   const { colorMode, toggleColorMode } = useColorMode();
+  const [currentPlayer, setCurrentPlayer] = useState(null);
 
   useEffect(() => {
+    setCurrentPlayer(socket.id); //current player socket id fweh
+
     socket.on('join_success', (data) => {
       setRoomId(data.room_id);
       setPlayerCount(data.player_count);
+      setGroupLeader(players[0]);
       setError('');
     });
 
@@ -46,6 +50,7 @@ function Lobby() {
       setPlayerCount(data.player_count);
       console.log("players" + data.players);
       setPlayers(data.players);
+      setGroupLeader(players[0]);
       // console.log("players:" + [...players, data.player]);
       // console.log("test" + data.player);  
     });
@@ -53,10 +58,16 @@ function Lobby() {
     socket.on('player_left', (data) => {
       setPlayerCount(data.player_count);
       setPlayers(data.players);
+      setGroupLeader(players[0]);
     });
 
     socket.on('error', (data) => {
       setError(data.message);
+    });
+
+    socket.on('difficulty_changed', (data) => {
+      setDifficulty(data.difficulty); 
+      console.log(data.difficulty);
     });
 
   
@@ -66,6 +77,7 @@ function Lobby() {
       socket.off('player_joined');
       socket.off('player_left');
       socket.off('error');
+      socket.off('difficulty_changed');
     };
   }, [players]);
 
@@ -159,17 +171,23 @@ function Lobby() {
           <Chat socket = {socket} />
           <Container class="selectDif">
             <Container>
-                <Heading fontWeight='bold' size='lg' m='10px'>{difficulty[0].toUpperCase() + difficulty.slice(1)} </Heading>
-                <DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty} />
+
+                <Heading fontWeight='bold' size='lg' m='10px'>Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Heading>
+                {currentPlayer === players[0] && (
+                  <DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty} roomId = {roomId} />
+                )} 
+               
             </Container>
             <Container>
-                <Heading fontWeight='bold' size='lg' m='10px'>Round Length: {roundTime}</Heading>
+                <Heading fontWeight='bold' size='lg' m='10px'>Round Length: {roundTime} seconds</Heading>
+                {currentPlayer === players[0] && (
                 <Slider value={roundTime} min='30' max='120' onChange={(val) => setRoundTime(val)}>
                     <SliderTrack>
                         <SliderFilledTrack />
                     </SliderTrack>
                     <SliderThumb />
                 </Slider>
+                )}
             </Container>
           </Container>
           <Button top='480px' width='100%' colorScheme="green" size='lg' onClick={startGame} isDisabled={playerCount < 2}>
