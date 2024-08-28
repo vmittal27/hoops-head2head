@@ -131,6 +131,7 @@ function SinglePlayer() {
 					<Image id='curr-image'
 						src = {pics.currPlayerURL}
 						fallbackSrc = {defaultImage} 
+                        bg = 'white'
 						borderRadius='full'
 						border='5px solid #ffffff'
 						objectFit='contain' 
@@ -143,6 +144,7 @@ function SinglePlayer() {
 					<Text fontSize='xl' align= 'center'> Target Player </Text>
 					<Image 
 						src = {pics.lastPlayerURL}
+                        bg = 'white'
 						borderRadius='full'
 						fallbackSrc = {defaultImage} 
 						border='5px solid #ffffff'

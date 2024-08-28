@@ -6,6 +6,13 @@ import "../css/Lobby.css"
 import {Link, Image, Text, Container, NumberInput, NumberInputField, Button, Box, IconButton, useColorMode} from "@chakra-ui/react";
 import DifficultyButton from '../components/Difficulty'
 import { Heading, UnorderedList, ListItem, Flex } from "@chakra-ui/react";
+import {
+    Slider,
+    SliderTrack,
+    SliderFilledTrack,
+    SliderThumb,
+    SliderMark,
+  } from '@chakra-ui/react'
 import { MoonIcon, CopyIcon } from '@chakra-ui/icons'
 
 import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
@@ -25,6 +32,7 @@ function Lobby() {
   const [players, setPlayers] = useState([]);
   const [error, setError] = useState('');
   const [difficulty, setDifficulty] = useState('easy');
+  const [roundTime, setRoundTime] = useState(30)
   const { colorMode, toggleColorMode } = useColorMode();
 
   useEffect(() => {
@@ -150,8 +158,19 @@ function Lobby() {
           </Container>    
           <Chat socket = {socket} />
           <Container class="selectDif">
-            <Heading fontWeight='bold' size='lg' m='10px'>{difficulty[0].toUpperCase() + difficulty.slice(1)} </Heading>
-            <DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty} />
+            <Container>
+                <Heading fontWeight='bold' size='lg' m='10px'>{difficulty[0].toUpperCase() + difficulty.slice(1)} </Heading>
+                <DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty} />
+            </Container>
+            <Container>
+                <Heading fontWeight='bold' size='lg' m='10px'>Round Length: {roundTime}</Heading>
+                <Slider value={roundTime} min='30' max='120' onChange={(val) => setRoundTime(val)}>
+                    <SliderTrack>
+                        <SliderFilledTrack />
+                    </SliderTrack>
+                    <SliderThumb />
+                </Slider>
+            </Container>
           </Container>
           <Button top='480px' width='100%' colorScheme="green" size='lg' onClick={startGame} isDisabled={playerCount < 2}>
             Start Game

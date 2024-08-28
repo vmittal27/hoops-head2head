@@ -50,6 +50,8 @@
     width: 96%;  
     top: 70%;
     height: 150px;
+    margin-top: 15px;
+    display: flex;
     /* padding: 20px; */
 }
 
@@ -61,4 +63,5 @@
     left: 2%;
     width: 48%;
     height: 300px;
+    padding-left: 10px;
 }
