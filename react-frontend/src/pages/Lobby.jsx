@@ -85,11 +85,64 @@ function Lobby() {
 			socket.off('game_started')
 		};
 	}, [players]);
-
 	useEffect(() => {
-		socket.emit('settings_changed', {'room_id' : roomId, 'difficulty': difficulty, 'roundTime' : roundTime})
-		console.log(difficulty, roundTime);
+		if(currentPlayer === players[0]){
+			socket.emit('settings_changed', {'room_id' : roomId, 'difficulty': difficulty, 'roundTime' : roundTime})
+			console.log(difficulty, roundTime);
+		}
+		
 	}, [difficulty, roundTime, players]);
+	const [data, setData] = useState([{currPlayer: "", lastPlayer: "", currPlayerID: "", lastPlayerID: ""}])
+
+	const [pics, setPics] = useState([{currPlayerURL: "", lastPlayerURL: ""}])
+
+	const [bballPlayers, setBBallPlayers] = useState([])
+
+
+	const [optimalPath, setOptimalPath] = useState([]);
+	const API_BASE_URL = "http://localhost:5000/"
+	
+	useEffect(() => {
+		// Using fetch to fetch the api from flask server it will be redirected to proxy
+		console.log('test');
+		if(currentPlayer === players[0] && started === true){
+			fetch(API_BASE_URL + "players/" + difficulty)
+			
+			.then(
+				(res) => {
+
+					if (!res.ok)
+						throw new Error(`HTTP error! status: ${res.status}`);
+
+					console.log("Raw response:", res);
+					return res.json();
+				}
+			)
+	
+			.then(
+				(data) => {
+					setData({currPlayer: data["Player 1"]["name"], lastPlayer: data["Player 2"]["name"],
+						currPlayerID : data["Player 1"]["id"], lastPlayerID: data["Player 2"]["id"]
+					});
+					setPics({currPlayerURL: data["Player 1"]["picture_url"], lastPlayerURL: data["Player 2"]["picture_url"]})
+				
+					setOptimalPath(data['Path']);
+
+					//adding initial player to player list
+					console.log('adding first player');
+					setBBallPlayers([data["Player 1"]["name"]]);
+					console.log(bballPlayers);
+					console.log(data);
+
+				}
+			)
+
+			.catch((error) => {console.error("Error fetching data:", error);});
+		}
+	}, [started]);
+
+
+
 
 	const createRoom = async () => {
 		try {
@@ -193,7 +246,7 @@ function Lobby() {
 								<Container>
 									<Heading fontWeight='bold' size='lg' m='10px'>Round Length: {roundTime} seconds</Heading>
 									{currentPlayer === players[0] && (
-										<Slider min={30} max={120} step={5} onChange={(val) => setRoundTime(val)}>
+										<Slider min={30} max={120} step={5} onChangeEnd={(val) => setRoundTime(val)}>
 										    <SliderTrack>
 										        <SliderFilledTrack bg='#c76f0a'/>
 										    </SliderTrack>
@@ -209,7 +262,8 @@ function Lobby() {
 					) :
 					(
 						<>
-							<Multiplayer/>
+							<Multiplayer data_m = {data} pics_m = {pics} players_m = {bballPlayers}
+							path_m = {optimalPath} difficulty_m = {difficulty} />
 						</>
 					)
 				)

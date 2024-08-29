@@ -25,56 +25,60 @@ import {
 
 import myImage from '../components/wedidit.jpeg'
 import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
-import defaultImage from '../components/default-pic.png'
+import defaultImage from '../components/default-pic.png'	
 import DifficultyButton from '../components/Difficulty'
 
-function Multiplayer() {
-	const [data, setData] = useState([{currPlayer: "", lastPlayer: "", currPlayerID: "", lastPlayerID: ""}])
-	const [pics, setPics] = useState([{currPlayerURL: "", lastPlayerURL: ""}])
+function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m }) {
+	const [data, setData] = useState(data_m)
+	const [pics, setPics] = useState(pics_m)
 	const [score, setScore] = useState(0);
 
-	const [players, setPlayers] = useState([])
-	const [difficulty, setDifficulty] = useState('easy')
+	const [players, setPlayers] = useState(players_m)
+	const [difficulty, setDifficulty] = useState(difficulty_m)
 
 	const[guesses, setGuesses] = useState(5)
 
-	const [optimalPath, setOptimalPath] = useState([]);
-	const API_BASE_URL = "http://localhost:5000/"
+	const [optimalPath, setOptimalPath] = useState(path_m);
+
+	console.log('fucked shit');
+	console.log(data_m, pics_m, players_m, difficulty_m, path_m);
+	console.log(data, pics, score, players, difficulty, optimalPath);
+	// const API_BASE_URL = "http://localhost:5000/"
 	
-	useEffect(() => {
-		// Using fetch to fetch the api from flask server it will be redirected to proxy
-		fetch(API_BASE_URL + "players/" + difficulty)
+	// useEffect(() => {
+	// 	// Using fetch to fetch the api from flask server it will be redirected to proxy
+	// 	fetch(API_BASE_URL + "players/" + difficulty)
 			
-			.then(
-				(res) => {
+	// 		.then(
+	// 			(res) => {
 
-					if (!res.ok)
-						throw new Error(`HTTP error! status: ${res.status}`);
+	// 				if (!res.ok)
+	// 					throw new Error(`HTTP error! status: ${res.status}`);
 
-					console.log("Raw response:", res);
-					return res.json();
-				}
-			)
+	// 				console.log("Raw response:", res);
+	// 				return res.json();
+	// 			}
+	// 		)
 	
-			.then(
-				(data) => {
-					setData({currPlayer: data["Player 1"]["name"], lastPlayer: data["Player 2"]["name"],
-						currPlayerID : data["Player 1"]["id"], lastPlayerID: data["Player 2"]["id"]
-					});
-					setPics({currPlayerURL: data["Player 1"]["picture_url"], lastPlayerURL: data["Player 2"]["picture_url"]})
+	// 		.then(
+	// 			(data) => {
+	// 				setData({currPlayer: data["Player 1"]["name"], lastPlayer: data["Player 2"]["name"],
+	// 					currPlayerID : data["Player 1"]["id"], lastPlayerID: data["Player 2"]["id"]
+	// 				});
+	// 				setPics({currPlayerURL: data["Player 1"]["picture_url"], lastPlayerURL: data["Player 2"]["picture_url"]})
 				
-					setOptimalPath(data['Path']);
+	// 				setOptimalPath(data['Path']);
 
-					//adding initial player to player list
-					console.log('adding first player');
-					setPlayers([data["Player 1"]["name"]]);
-					console.log(players);
+	// 				//adding initial player to player list
+	// 				console.log('adding first player');
+	// 				setPlayers([data["Player 1"]["name"]]);
+	// 				console.log(players);
 
-				}
-			)
+	// 			}
+	// 		)
 
-			.catch((error) => {console.error("Error fetching data:", error);});
-	}, [difficulty]);
+	// 		.catch((error) => {console.error("Error fetching data:", error);});
+	// }, [difficulty]);
 
     useEffect(() => {
         gsap.fromTo('#curr-image', {borderColor: '#6ba9fa'}, {borderColor: '#ffffff', duration: 1})
@@ -89,7 +93,7 @@ function Multiplayer() {
 		<Container className='App-Container'>
 			<Text fontWeight='bold' fontSize='xl'> Multiplayer Mode </Text>
 			{/* <Text fontWeight='bold' fontSize='xl'> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Text> */}
-			<DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty} />
+			<h1> Current difficulty : {difficulty} </h1> 
 
 			<GuessForm
 				guesses={guesses}
