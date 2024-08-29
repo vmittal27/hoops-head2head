@@ -89,7 +89,7 @@ function Lobby() {
 	useEffect(() => {
 		socket.emit('settings_changed', {'room_id' : roomId, 'difficulty': difficulty, 'roundTime' : roundTime})
 		console.log(difficulty, roundTime);
-	}, [difficulty, roundTime]);
+	}, [difficulty, roundTime, players]);
 
 	const createRoom = async () => {
 		try {
@@ -193,11 +193,11 @@ function Lobby() {
 								<Container>
 									<Heading fontWeight='bold' size='lg' m='10px'>Round Length: {roundTime} seconds</Heading>
 									{currentPlayer === players[0] && (
-										<Slider min={30} max={120} onChangeEnd={(val) => setRoundTime(val)}>
-										<SliderTrack>
-										<SliderFilledTrack />
-										</SliderTrack>
-										<SliderThumb />
+										<Slider min={30} max={120} step={5} onChange={(val) => setRoundTime(val)}>
+										    <SliderTrack>
+										        <SliderFilledTrack bg='#c76f0a'/>
+										    </SliderTrack>
+										    <SliderThumb />
 										</Slider>
 									)}
 								</Container>
