@@ -42,6 +42,14 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m }) {
 
 	console.log('fucked shit');
 	console.log(data_m, pics_m, players_m, difficulty_m, path_m);
+
+	useEffect(() => {
+		setData(data_m);
+		setPics(pics_m);
+		setPlayers(players_m);
+		setDifficulty(difficulty_m);
+		setOptimalPath(path_m);
+	  }, [data_m, pics_m, players_m, difficulty_m, path_m]);
 	console.log(data, pics, score, players, difficulty, optimalPath);
 	// const API_BASE_URL = "http://localhost:5000/"
 	

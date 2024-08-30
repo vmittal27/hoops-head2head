@@ -37,61 +37,7 @@ function Lobby() {
 	const { colorMode, toggleColorMode } = useColorMode();
 	const [currentPlayer, setCurrentPlayer] = useState(null);
 	const [started, setStarted] = useState(false);
-
-	useEffect(() => {
-		setCurrentPlayer(socket.id); //current player socket id fweh
-		
-		socket.on('join_success', (data) => {
-			setRoomId(data.room_id);
-			setPlayerCount(data.player_count);
-			setError('');
-		});
-		
-		socket.on('player_joined', (data) => {
-			setPlayerCount(data.player_count);
-			console.log("players" + data.players);
-			setPlayers(data.players);
-			// console.log("players:" + [...players, data.player]);
-			// console.log("test" + data.player);  
-		});
-		
-		socket.on('player_left', (data) => {
-			setPlayerCount(data.player_count);
-			setPlayers(data.players);
-			
-		});
-		
-		socket.on('error', (data) => {
-			setError(data.message);
-		});
-		
-		socket.on('change_settings', (data) => {
-			setDifficulty(data.difficulty); 
-			setRoundTime(data.roundTime);
-			console.log(data.difficulty, data.roundTime);
-		});
-
-		socket.on('game_started', () => {
-			setStarted(true); 
-		});
-		
-		
-		return () => {
-			socket.off('join_success');
-			socket.off('player_joined');
-			socket.off('player_left');
-			socket.off('error');
-			socket.off('change_settings')
-			socket.off('game_started')
-		};
-	}, [players]);
-	useEffect(() => {
-		if(currentPlayer === players[0]){
-			socket.emit('settings_changed', {'room_id' : roomId, 'difficulty': difficulty, 'roundTime' : roundTime})
-			console.log(difficulty, roundTime);
-		}
-		
-	}, [difficulty, roundTime, players]);
+	const [timeLeft, setTimeLeft] = useState(roundTime); // Time left for the countdown
 	const [data, setData] = useState([{currPlayer: "", lastPlayer: "", currPlayerID: "", lastPlayerID: ""}])
 
 	const [pics, setPics] = useState([{currPlayerURL: "", lastPlayerURL: ""}])
@@ -101,6 +47,18 @@ function Lobby() {
 
 	const [optimalPath, setOptimalPath] = useState([]);
 	const API_BASE_URL = "http://localhost:5000/"
+
+	useEffect(() => {
+		let timer;
+		if (started && timeLeft > 0) {
+		  timer = setInterval(() => {
+			setTimeLeft((prevTime) => prevTime - 1);
+		  }, 1000);
+		} else if (timeLeft === 0) {
+		  window.location.reload(); // Reload page when timer hits 0
+		}
+		return () => clearInterval(timer);
+	  }, [started, timeLeft]);
 	
 	useEffect(() => {
 		// Using fetch to fetch the api from flask server it will be redirected to proxy
@@ -140,6 +98,75 @@ function Lobby() {
 			.catch((error) => {console.error("Error fetching data:", error);});
 		}
 	}, [started]);
+
+	useEffect(() => {
+		setCurrentPlayer(socket.id); //current player socket id fweh
+		
+		socket.on('join_success', (data) => {
+			setRoomId(data.room_id);
+			setPlayerCount(data.player_count);
+			setError('');
+		});
+		
+		socket.on('player_joined', (data) => {
+			setPlayerCount(data.player_count);
+			console.log("players" + data.players);
+			setPlayers(data.players);
+			// console.log("players:" + [...players, data.player]);
+			// console.log("test" + data.player);  
+		});
+		
+		socket.on('player_left', (data) => {
+			setPlayerCount(data.player_count);
+			setPlayers(data.players);
+			
+		});
+		
+		socket.on('error', (data) => {
+			setError(data.message);
+		});
+		
+		socket.on('change_settings', (data) => {
+			setDifficulty(data.difficulty); 
+			setRoundTime(data.roundTime);
+			console.log(data.difficulty, data.roundTime);
+		});
+
+		socket.on('game_started', () => {
+			setStarted(true); 
+		});
+
+		socket.on('load_data', (data) => {
+			setData(data.data);
+			setPics(data.pictures);
+			setBBallPlayers(data.players);
+			setOptimalPath(data.path);
+		})
+		
+		
+		return () => {
+			socket.off('join_success');
+			socket.off('player_joined');
+			socket.off('player_left');
+			socket.off('error');
+			socket.off('change_settings');
+			socket.off('game_started');
+			socket.off('load_data')
+		};
+	}, [players]);
+	useEffect(() => {
+		if(currentPlayer === players[0]){
+			socket.emit('settings_changed', {'room_id' : roomId, 'difficulty': difficulty, 'roundTime' : roundTime})
+			console.log(difficulty, roundTime);
+		}
+		
+	}, [difficulty, roundTime, players]);
+	useEffect(() => {
+		if(started){
+			socket.emit('data_load', {'room_id' : roomId, 'player_data' : data, 'pictures' : pics, 'players' : bballPlayers, 'path' : optimalPath })
+		}
+	}, [optimalPath])
+	
 
 
 

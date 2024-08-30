@@ -286,6 +286,13 @@ def start_game(data):
     if room_id in rooms:
         socketio.emit("game_started", room=room_id)
 
+@socketio.on("data_load")
+def load_data(data):
+    room_id = int(data['room_id'])
+
+    if room_id in rooms:
+        socketio.emit('load_data', {'data' : data['player_data'], 'pictures' : data['pictures'], 'players' : data['players'], 'path' : data['path']})
+
 
 def close_driver():
     driver.close()
