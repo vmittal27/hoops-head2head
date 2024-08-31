@@ -4,6 +4,7 @@ import { io } from "socket.io-client";
 import { useEffect, useState } from "react";
 import "../css/Lobby.css"
 import Multiplayer from "./Multiplayer";
+import Test from "./Test";
 import {Link, Image, Text, Container, NumberInput, NumberInputField, Button, Box, IconButton, useColorMode} from "@chakra-ui/react";
 import DifficultyButton from '../components/Difficulty'
 import { Heading, UnorderedList, ListItem, Flex } from "@chakra-ui/react";
@@ -48,17 +49,6 @@ function Lobby() {
 	const [optimalPath, setOptimalPath] = useState([]);
 	const API_BASE_URL = "http://localhost:5000/"
 
-	useEffect(() => {
-		let timer;
-		if (started && timeLeft > 0) {
-		  timer = setInterval(() => {
-			setTimeLeft((prevTime) => prevTime - 1);
-		  }, 1000);
-		} else if (timeLeft === 0) {
-		  window.location.reload(); // Reload page when timer hits 0
-		}
-		return () => clearInterval(timer);
-	  }, [started, timeLeft]);
 	
 	useEffect(() => {
 		// Using fetch to fetch the api from flask server it will be redirected to proxy
@@ -161,12 +151,34 @@ function Lobby() {
 		}
 		
 	}, [difficulty, roundTime, players]);
+
 	useEffect(() => {
-		if(started){
-			socket.emit('data_load', {'room_id' : roomId, 'player_data' : data, 'pictures' : pics, 'players' : bballPlayers, 'path' : optimalPath })
+		console.log("Effect running:", {
+			currentPlayer,
+			players,
+			started,
+			data,
+			pics,
+			bballPlayers,
+			optimalPath
+		});
+		if (
+			currentPlayer === players[0] &&
+			started === true &&
+			data.currPlayer &&
+			pics.currPlayerURL &&
+			bballPlayers.length > 0 &&
+			optimalPath.length > 0
+		) {
+			socket.emit('data_load', {
+				room_id: roomId,
+				player_data: data,
+				pictures: pics,
+				players: bballPlayers,
+				path: optimalPath,
+			});
 		}
-	}, [optimalPath])
-	
+	}, [started, roomId, data, pics, bballPlayers, optimalPath]);
 
 
 
@@ -204,6 +216,7 @@ function Lobby() {
 
 	const startGame = () => {
 		socket.emit('start_game', { room_id: roomId });
+		console.log('tester')
 		setStarted(true);
 	};
 
@@ -215,6 +228,7 @@ function Lobby() {
 			console.error('Unable to copy to clipboard:', error);
 		}
 	};
+
 
 	return (
 		<Container className="App-Container">
@@ -282,13 +296,14 @@ function Lobby() {
 									)}
 								</Container>
 							</Container>
-							<Button top='480px' width='100%' colorScheme="green" size='lg' onClick={startGame} isDisabled={playerCount < 2 || currentPlayer != players[0]}>
+							<Button top='480px' width='100%' colorScheme="green" size='lg' onClick={startGame} isDisabled={playerCount < 1 || currentPlayer != players[0]}>
 								Start Game
 							</Button>
 						</>
 					) :
 					(
 						<>
+							{/* <Test /> */}
 							<Multiplayer data_m = {data} pics_m = {pics} players_m = {bballPlayers}
 							path_m = {optimalPath} difficulty_m = {difficulty} />
 						</>
