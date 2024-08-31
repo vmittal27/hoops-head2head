@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 
+
 function Scoreboard() {
     console.log('ajskdjf');
     return (

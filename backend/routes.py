@@ -253,6 +253,12 @@ def on_join(data):
     else:
         socketio.emit('error', {"message": "Room not found"}, room=request.sid)
 
+@socketio.on('player_finished')
+def player_finished(data):
+    room_id = int(data['room_id'])
+    if room_id in rooms:
+        socketio.emit('player_finished_endpoint', data, room=room_id)
+
 @socketio.on('start_game')
 def on_start_game(data):
     room_id = int(data['room_id'])

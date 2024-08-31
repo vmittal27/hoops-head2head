@@ -28,7 +28,7 @@ import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
 import defaultImage from '../components/default-pic.png'	
 import DifficultyButton from '../components/Difficulty'
 
-function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m }) {
+function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, setIsFinished }) {
 	const [data, setData] = useState(data_m)
 	const [pics, setPics] = useState(pics_m)
 	const [score, setScore] = useState(0);
@@ -99,6 +99,13 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m }
 	const { isOpen: isRulesOpen , onOpen: onRulesOpen, onClose: onRulesClose } = useDisclosure()
     const { isOpen: isWinOpen , onOpen: onWinOpen, onClose: onWinClose } = useDisclosure()
     const { isOpen: isLoseOpen , onOpen: onLoseOpen, onClose: onLoseClose } = useDisclosure()
+
+    // Checking if game end
+    useEffect(() => {
+        if (isWinOpen || guesses === 0) {
+            setIsFinished(true);
+        }
+    }, [guesses, players])
 
 	return (
 		<Container className='App-Container'>
@@ -171,7 +178,7 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m }
 				</div>
 			</div>
 
-			<Modal blockScrollOnMount={false} isOpen={isWinOpen} onClose={onWinClose}>
+			{/* <Modal blockScrollOnMount={false} isOpen={isWinOpen} onClose={onWinClose}>
 				<ModalOverlay/>
 				<ModalContent backgroundColor="green.300">
 					<ModalHeader>YOU DID ITTTTTT!</ModalHeader>
@@ -206,7 +213,7 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m }
 						<Button colorScheme='blue' onClick={() => window.location.reload()}>Restart</Button>
 					</ModalFooter>
 				</ModalContent>
-			</Modal>
+			</Modal> */}
 
             <Modal blockScrollOnMount={false} size ={'lg'} isOpen={isRulesOpen} onClose={onRulesClose}>
 				<ModalOverlay/>
@@ -257,7 +264,7 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m }
 				</ModalContent>
 			</Modal>
 
-			<Modal closeOnOverlayClick={false} isOpen={guesses===0} onClose={onLoseClose}>
+			{/* <Modal closeOnOverlayClick={false} isOpen={guesses===0} onClose={onLoseClose}>
 				<ModalOverlay/>
 				<ModalContent>
 					<ModalHeader>Game Over!</ModalHeader>
@@ -280,7 +287,7 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m }
 					</ModalFooter>
 
 				</ModalContent>
-			</Modal>
+			</Modal> */}
 		</Container>		
 			
 	)

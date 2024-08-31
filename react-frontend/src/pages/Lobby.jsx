@@ -6,6 +6,7 @@ import Multiplayer from "./Multiplayer";
 import Scoreboard from "./Scoreboard";
 import {Link, Image, Text, Container, NumberInput, NumberInputField, Button, Box, IconButton, useColorMode} from "@chakra-ui/react";
 import DifficultyButton from '../components/Difficulty'
+import Waiting from '../components/Waiting'
 import { Heading, UnorderedList, ListItem, Flex } from "@chakra-ui/react";
 import {
 	Slider,
@@ -39,6 +40,8 @@ function Lobby() {
 	const [started, setStarted] = useState(false);
 	const [timeLeft, setTimeLeft] = useState(75); // Time left for the countdown
 	const [data, setData] = useState([{currPlayer: "", lastPlayer: "", currPlayerID: "", lastPlayerID: ""}])
+    const [isFinished, setIsFinished] = useState(false);
+    const [numFinished, setNumFinished] = useState(0);
 
 	const [pics, setPics] = useState([{currPlayerURL: "", lastPlayerURL: ""}])
 
@@ -153,6 +156,10 @@ function Lobby() {
 		socket.on('change_time', (data) => {
 			setTimeLeft(data.newTime);
 		})
+
+        socket.on('player_finished_endpoint', (data) => {
+            setNumFinished((num) => num + 1);
+        })
 		
 		
 		return () => {
@@ -163,6 +170,8 @@ function Lobby() {
 			socket.off('change_settings');
 			socket.off('game_started');
 			socket.off('load_data')
+            socket.off('change_time')
+            socket.off('player_finished_endpoint')
 		};
 	}, [players]);
 	useEffect(() => {
@@ -172,7 +181,13 @@ function Lobby() {
 		}
 		
 	}, [difficulty, roundTime, players]);
-
+    
+    useEffect(() => {
+        console.log('isFinished changed')
+        if (isFinished) {
+            socket.emit('player_finished', {'id' : currentPlayer, 'room_id' : roomId});
+        }
+    }, [isFinished])
 
 
 
@@ -218,7 +233,7 @@ function Lobby() {
 		const [time, setTime] = useState(startTime);
 	  
 		useEffect(() => {
-		  if (time > 0) {
+		  if (time >= 0) {
 			const timerId = setInterval(() => {
 			  setTime((prevTime) => prevTime - 1);
 			}, 1000);
@@ -229,8 +244,7 @@ function Lobby() {
 
 		return (
 		  <div>
-			<h1>Time left: {time}</h1>
-			{time === 0 && <p>Time's up!</p>}
+            {time <= 0 ? <Text size='md'>Time's up!</Text> : <Text size='md'>Time left: {time}</Text>}
 		  </div>
 		);
 	  };
@@ -317,15 +331,22 @@ function Lobby() {
 						</>
 					) :
 					(
-						timeLeft > 1 ? (
-						<>
+						(timeLeft > 0 && numFinished < playerCount)? (
+                        isFinished ? (
+                        <>
+                            <CountdownTimer startTime={timeLeft} />
+                            <Waiting numFinished = {numFinished} totalNumber = {playerCount} />
+                        </>
+                        ) : (
+                        <>
 							<CountdownTimer startTime={timeLeft} />
 							<Multiplayer data_m = {data} pics_m = {pics} players_m = {bballPlayers}
-							path_m = {optimalPath} difficulty_m = {difficulty} time_m = {roundTime} />
+							path_m = {optimalPath} difficulty_m = {difficulty} time_m = {roundTime} setIsFinished={setIsFinished}/>
 						</>
+                        )
 						) : (
-							<> 
-							<Scoreboard />
+							<>
+                            <Scoreboard />
 							</>
 						)
 					)
