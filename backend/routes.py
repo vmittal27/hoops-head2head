@@ -293,6 +293,11 @@ def load_data(data):
     if room_id in rooms:
         socketio.emit('load_data', {'data' : data['player_data'], 'pictures' : data['pictures'], 'players' : data['players'], 'path' : data['path']}, room=room_id)
 
+@socketio.on("time_change")
+def time_change(data):
+    room_id = int(data['room_id'])
+    if room_id in rooms:
+        socketio.emit('change_time', {'newTime' : data['time']}, room=room_id)
 
 def close_driver():
     driver.close()

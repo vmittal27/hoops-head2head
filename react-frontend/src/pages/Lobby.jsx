@@ -1,10 +1,9 @@
-import HttpCall from "../components/HttpCall";
 import Chat from "../components/Chat";
 import { io } from "socket.io-client";
 import { useEffect, useState } from "react";
 import "../css/Lobby.css"
 import Multiplayer from "./Multiplayer";
-import Test from "./Test";
+import Scoreboard from "./Scoreboard";
 import {Link, Image, Text, Container, NumberInput, NumberInputField, Button, Box, IconButton, useColorMode} from "@chakra-ui/react";
 import DifficultyButton from '../components/Difficulty'
 import { Heading, UnorderedList, ListItem, Flex } from "@chakra-ui/react";
@@ -18,7 +17,7 @@ import {
 import { MoonIcon, CopyIcon } from '@chakra-ui/icons'
 
 import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
-import { Form } from "react-router-dom";
+import { Form, json } from "react-router-dom";
 
 const socket = io("localhost:5000/", {
 	transports: ["websocket"],
@@ -38,7 +37,7 @@ function Lobby() {
 	const { colorMode, toggleColorMode } = useColorMode();
 	const [currentPlayer, setCurrentPlayer] = useState(null);
 	const [started, setStarted] = useState(false);
-	const [timeLeft, setTimeLeft] = useState(roundTime); // Time left for the countdown
+	const [timeLeft, setTimeLeft] = useState(75); // Time left for the countdown
 	const [data, setData] = useState([{currPlayer: "", lastPlayer: "", currPlayerID: "", lastPlayerID: ""}])
 
 	const [pics, setPics] = useState([{currPlayerURL: "", lastPlayerURL: ""}])
@@ -49,6 +48,11 @@ function Lobby() {
 	const [optimalPath, setOptimalPath] = useState([]);
 	const API_BASE_URL = "http://localhost:5000/"
 
+	// const [jsonData, setJsonData] = useState({'room_id': '', 
+	// 	'player_data': [{'currPlayer': '', 'lastPlayer': '', 'currPlayerID': '', 'lastPlayerID': ''}], 
+	// 	'pictures': [{'currPlayerURL': '', 'lastPlayerURL': ''}], 
+	// 	'players': [], 
+	// 	'path': []})
 	
 	useEffect(() => {
 		// Using fetch to fetch the api from flask server it will be redirected to proxy
@@ -82,11 +86,24 @@ function Lobby() {
 					console.log(bballPlayers);
 					console.log(data);
 
+					const jsonData = {'room_id': roomId,
+						'player_data': {currPlayer: data["Player 1"]["name"], lastPlayer: data["Player 2"]["name"],
+							currPlayerID : data["Player 1"]["id"], lastPlayerID: data["Player 2"]["id"]
+						},
+						'pictures': {currPlayerURL: data["Player 1"]["picture_url"], lastPlayerURL: data["Player 2"]["picture_url"]},
+						'players': [data["Player 1"]["name"]],
+						'path': data['Path']}
+				
+					console.log("first then", jsonData);
+					socket.emit('data_load', jsonData);
+
 				}
 			)
 
 			.catch((error) => {console.error("Error fetching data:", error);});
 		}
+		console.log(data);
+
 	}, [started]);
 
 	useEffect(() => {
@@ -132,6 +149,10 @@ function Lobby() {
 			setBBallPlayers(data.players);
 			setOptimalPath(data.path);
 		})
+
+		socket.on('change_time', (data) => {
+			setTimeLeft(data.newTime);
+		})
 		
 		
 		return () => {
@@ -152,33 +173,6 @@ function Lobby() {
 		
 	}, [difficulty, roundTime, players]);
 
-	useEffect(() => {
-		console.log("Effect running:", {
-			currentPlayer,
-			players,
-			started,
-			data,
-			pics,
-			bballPlayers,
-			optimalPath
-		});
-		if (
-			currentPlayer === players[0] &&
-			started === true &&
-			data.currPlayer &&
-			pics.currPlayerURL &&
-			bballPlayers.length > 0 &&
-			optimalPath.length > 0
-		) {
-			socket.emit('data_load', {
-				room_id: roomId,
-				player_data: data,
-				pictures: pics,
-				players: bballPlayers,
-				path: optimalPath,
-			});
-		}
-	}, [started, roomId, data, pics, bballPlayers, optimalPath]);
 
 
 
@@ -218,7 +212,28 @@ function Lobby() {
 		socket.emit('start_game', { room_id: roomId });
 		console.log('tester')
 		setStarted(true);
+		setTimeLeft(roundTime);
 	};
+	const CountdownTimer = ({ startTime }) => {
+		const [time, setTime] = useState(startTime);
+	  
+		useEffect(() => {
+		  if (time > 0) {
+			const timerId = setInterval(() => {
+			  setTime((prevTime) => prevTime - 1);
+			}, 1000);
+			socket.emit('time_change', {'room_id' : roomId, 'time' : time})
+			return () => clearInterval(timerId); // Cleanup interval on unmount
+		  }
+		}, [time]);
+
+		return (
+		  <div>
+			<h1>Time left: {time}</h1>
+			{time === 0 && <p>Time's up!</p>}
+		  </div>
+		);
+	  };
 
 	const copyRoom = async () => {
 		try {
@@ -302,11 +317,17 @@ function Lobby() {
 						</>
 					) :
 					(
+						timeLeft > 1 ? (
 						<>
-							{/* <Test /> */}
+							<CountdownTimer startTime={timeLeft} />
 							<Multiplayer data_m = {data} pics_m = {pics} players_m = {bballPlayers}
-							path_m = {optimalPath} difficulty_m = {difficulty} />
+							path_m = {optimalPath} difficulty_m = {difficulty} time_m = {roundTime} />
 						</>
+						) : (
+							<> 
+							<Scoreboard />
+							</>
+						)
 					)
 				)
 			}

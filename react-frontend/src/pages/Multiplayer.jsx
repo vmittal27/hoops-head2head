@@ -28,19 +28,20 @@ import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
 import defaultImage from '../components/default-pic.png'	
 import DifficultyButton from '../components/Difficulty'
 
-function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m }) {
+function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m }) {
 	const [data, setData] = useState(data_m)
 	const [pics, setPics] = useState(pics_m)
 	const [score, setScore] = useState(0);
-	
+
 	const [players, setPlayers] = useState(players_m)
 	const [difficulty, setDifficulty] = useState(difficulty_m)
+	const [timeLeft, setTimeLeft] = useState(time_m);
 
 	const[guesses, setGuesses] = useState(5)
 
 	const [optimalPath, setOptimalPath] = useState(path_m);
 
-	console.log('fucked shit');
+	// console.log('fucked shit');
 	// console.log(data_m, pics_m, players_m, difficulty_m, path_m);
 
 	useEffect(() => {
@@ -49,8 +50,9 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m }) {
 		setPlayers(players_m);
 		setDifficulty(difficulty_m);
 		setOptimalPath(path_m);
-	  }, [data_m, pics_m, players_m, difficulty_m, path_m]);
-	console.log(data, pics, score, players, difficulty, optimalPath);
+		setTimeLeft(time_m);
+	  }, [data_m, pics_m, players_m, difficulty_m, path_m, time_m]);
+	// console.log(data, pics, score, players, difficulty, optimalPath);
 	// const API_BASE_URL = "http://localhost:5000/"
 	
 	// useEffect(() => {
@@ -91,6 +93,7 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m }) {
     useEffect(() => {
         gsap.fromTo('#curr-image', {borderColor: '#6ba9fa'}, {borderColor: '#ffffff', duration: 1})
     },[data])
+
 
 
 	const { isOpen: isRulesOpen , onOpen: onRulesOpen, onClose: onRulesClose } = useDisclosure()
@@ -136,6 +139,7 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m }) {
 					<Text fontSize='xl' align= 'center'> Current Player </Text>
 					<Image id='curr-image'
 						src = {pics.currPlayerURL}
+						bg = 'white'
 						fallbackSrc = {defaultImage} 
 						borderRadius='full'
 						border='5px solid #ffffff'
@@ -149,6 +153,7 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m }) {
 					<Text fontSize='xl' align= 'center'> Target Player </Text>
 					<Image 
 						src = {pics.lastPlayerURL}
+						bg = 'white'
 						borderRadius='full'
 						fallbackSrc = {defaultImage} 
 						border='5px solid #ffffff'
