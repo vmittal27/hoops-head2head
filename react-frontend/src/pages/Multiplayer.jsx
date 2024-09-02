@@ -28,10 +28,9 @@ import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
 import defaultImage from '../components/default-pic.png'	
 import DifficultyButton from '../components/Difficulty'
 
-function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, setIsFinished }) {
+function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, setIsFinished, score, setScore}) {
 	const [data, setData] = useState(data_m)
 	const [pics, setPics] = useState(pics_m)
-	const [score, setScore] = useState(0);
 
 	const [players, setPlayers] = useState(players_m)
 	const [difficulty, setDifficulty] = useState(difficulty_m)

@@ -42,6 +42,9 @@ function Lobby() {
 	const [data, setData] = useState([{currPlayer: "", lastPlayer: "", currPlayerID: "", lastPlayerID: ""}])
     const [isFinished, setIsFinished] = useState(false);
     const [numFinished, setNumFinished] = useState(0);
+    const [roundFinished, setRoundFinished] = useState(false);
+    const [score, setScore] = useState(0);
+    const [scoreboard, setScoreboard] = useState(null);
 
 	const [pics, setPics] = useState([{currPlayerURL: "", lastPlayerURL: ""}])
 
@@ -59,6 +62,7 @@ function Lobby() {
 	
 	useEffect(() => {
 		// Using fetch to fetch the api from flask server it will be redirected to proxy
+        if (started) {
 		console.log('test');
 		if(currentPlayer === players[0] && started === true){
 			fetch(API_BASE_URL + "players/" + difficulty)
@@ -106,6 +110,9 @@ function Lobby() {
 			.catch((error) => {console.error("Error fetching data:", error);});
 		}
 		console.log(data);
+        } else {
+            socket.emit('round_ended')
+        }
 
 	}, [started]);
 
@@ -139,6 +146,7 @@ function Lobby() {
 		socket.on('change_settings', (data) => {
 			setDifficulty(data.difficulty); 
 			setRoundTime(data.roundTime);
+            setTimeLeft(data.roundTime);
 			console.log(data.difficulty, data.roundTime);
 		});
 
@@ -159,6 +167,11 @@ function Lobby() {
 
         socket.on('player_finished_endpoint', (data) => {
             setNumFinished((num) => num + 1);
+        })
+
+        socket.on('score_added', (data) => {
+            setScoreboard(data.scoreboard);
+            console.log(scoreboard);
         })
 		
 		
@@ -188,8 +201,6 @@ function Lobby() {
             socket.emit('player_finished', {'id' : currentPlayer, 'room_id' : roomId});
         }
     }, [isFinished])
-
-
 
 
 	const createRoom = async () => {
@@ -229,7 +240,7 @@ function Lobby() {
 		setStarted(true);
 		setTimeLeft(roundTime);
 	};
-	const CountdownTimer = ({ startTime }) => {
+	const CountdownTimer = ( { startTime } ) => {
 		const [time, setTime] = useState(startTime);
 	  
 		useEffect(() => {
@@ -257,6 +268,12 @@ function Lobby() {
 			console.error('Unable to copy to clipboard:', error);
 		}
 	};
+
+    useEffect (() => {
+        if (roundFinished) {
+            socket.emit('sending_score', {'score' : score, 'player_id' : currentPlayer, 'room_id' : roomId})
+        }
+    }, [roundFinished])
 
 
 	return (
@@ -341,7 +358,8 @@ function Lobby() {
                         <>
 							<CountdownTimer startTime={timeLeft} />
 							<Multiplayer data_m = {data} pics_m = {pics} players_m = {bballPlayers}
-							path_m = {optimalPath} difficulty_m = {difficulty} time_m = {roundTime} setIsFinished={setIsFinished}/>
+							path_m = {optimalPath} difficulty_m = {difficulty} time_m = {roundTime} setIsFinished={setIsFinished}
+                            score = {score} setScore = {setScore} setRoundFinished = {setRoundFinished} />
 						</>
                         )
 						) : (

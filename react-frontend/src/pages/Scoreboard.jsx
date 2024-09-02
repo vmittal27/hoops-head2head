@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 
 
-function Scoreboard() {
-    console.log('ajskdjf');
+function Scoreboard({setRoundFinished}) {
+    useEffect (() => {
+        setRoundFinished(true);
+    },[]);
     return (
         <div>
             <p> Time's Up!
