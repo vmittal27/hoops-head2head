@@ -42,10 +42,9 @@ function Lobby() {
 	const [data, setData] = useState([{currPlayer: "", lastPlayer: "", currPlayerID: "", lastPlayerID: ""}])
     const [isFinished, setIsFinished] = useState(false);
     const [numFinished, setNumFinished] = useState(0);
-    const [roundFinished, setRoundFinished] = useState(false);
+	const [scoreBoard, setScoreBoard] = useState({})
+    // const [roundFinished, setRoundFinished] = useState(false);
     const [score, setScore] = useState(0);
-    const [scoreboard, setScoreboard] = useState(null);
-
 	const [pics, setPics] = useState([{currPlayerURL: "", lastPlayerURL: ""}])
 
 	const [bballPlayers, setBBallPlayers] = useState([])
@@ -129,6 +128,10 @@ function Lobby() {
 			setPlayerCount(data.player_count);
 			console.log("players" + data.players);
 			setPlayers(data.players);
+			const newScoreBoard = Object.fromEntries(
+				data.players.map(id => [id, 0])
+			  );
+			setScoreBoard(newScoreBoard);
 			// console.log("players:" + [...players, data.player]);
 			// console.log("test" + data.player);  
 		});
@@ -136,6 +139,10 @@ function Lobby() {
 		socket.on('player_left', (data) => {
 			setPlayerCount(data.player_count);
 			setPlayers(data.players);
+			const newScoreBoard = Object.fromEntries(
+				data.players.map(id => [id, 0])
+			  );
+			setScoreBoard(newScoreBoard);
 			
 		});
 		
@@ -170,9 +177,14 @@ function Lobby() {
         })
 
         socket.on('score_added', (data) => {
-            setScoreboard(data.scoreboard);
-            console.log(scoreboard);
+            setScoreBoard(prevScoreBoard => ({
+				...prevScoreBoard, 
+				[data.player_id]: (prevScoreBoard[data.player_id] || 0) + data.score
+			}));
+			console.log(data.score);
+            console.log(scoreBoard);
         })
+
 		
 		
 		return () => {
@@ -185,6 +197,7 @@ function Lobby() {
 			socket.off('load_data')
             socket.off('change_time')
             socket.off('player_finished_endpoint')
+			socket.off('score_added')
 		};
 	}, [players]);
 	useEffect(() => {
@@ -250,7 +263,7 @@ function Lobby() {
 			}, 1000);
 			socket.emit('time_change', {'room_id' : roomId, 'time' : time})
 			return () => clearInterval(timerId); // Cleanup interval on unmount
-		  }
+		  } 
 		}, [time]);
 
 		return (
@@ -270,10 +283,11 @@ function Lobby() {
 	};
 
     useEffect (() => {
-        if (roundFinished) {
+        if (isFinished) {
             socket.emit('sending_score', {'score' : score, 'player_id' : currentPlayer, 'room_id' : roomId})
         }
-    }, [roundFinished])
+		console.log('eat my ass');
+    }, [isFinished])
 
 
 	return (
@@ -349,8 +363,10 @@ function Lobby() {
 					) :
 					(
 						(timeLeft > 0 && numFinished < playerCount)? (
-                        isFinished ? (
+                        isFinished ? ( 
                         <>
+							<Heading>Guest {socket.id.substring(0,5)} </Heading>
+							<Heading>Previous Round Score: {score} </Heading>
                             <CountdownTimer startTime={timeLeft} />
                             <Waiting numFinished = {numFinished} totalNumber = {playerCount} />
                         </>
@@ -359,12 +375,14 @@ function Lobby() {
 							<CountdownTimer startTime={timeLeft} />
 							<Multiplayer data_m = {data} pics_m = {pics} players_m = {bballPlayers}
 							path_m = {optimalPath} difficulty_m = {difficulty} time_m = {roundTime} setIsFinished={setIsFinished}
-                            score = {score} setScore = {setScore} setRoundFinished = {setRoundFinished} />
+                            score = {score} setScore = {setScore}  />
 						</>
                         )
 						) : (
 							<>
-                            <Scoreboard />
+							<Heading>Guest {socket.id.substring(0,5)} </Heading>
+							<Heading>Previous Round Score: {score} </Heading>
+                            <Scoreboard scores = {scoreBoard}/>
 							</>
 						)
 					)

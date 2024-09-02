@@ -224,7 +224,7 @@ def handle_message(data):
 all room functionality below
 '''
 
-rooms = {}
+rooms = {} 
 game_states = {}
 
 def generate_room_id(n):
@@ -304,6 +304,12 @@ def time_change(data):
     room_id = int(data['room_id'])
     if room_id in rooms:
         socketio.emit('change_time', {'newTime' : data['time']}, room=room_id)
+
+@socketio.on("sending_score")
+def score_send(data):
+    room_id = int(data['room_id'])
+    if room_id in rooms:
+        socketio.emit('score_added', {'player_id' : data['player_id'], 'score' : data['score']}, room=room_id)
 
 def close_driver():
     driver.close()
