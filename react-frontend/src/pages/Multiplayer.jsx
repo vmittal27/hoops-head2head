@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import '../components/Difficulty'
 
-import '../css/SinglePlayer.css'
+import '../css/Multiplayer.css'
 import GuessForm from '../components/GuessForm'
 import { QuestionOutlineIcon } from '@chakra-ui/icons'
 import { IoHome } from "react-icons/io5";
@@ -109,7 +109,7 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, 
 	return (
 		<Container className='App-Container'>
 			{/* <Text fontWeight='bold' fontSize='xl'> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Text> */}
-			<Heading size='md'> Current difficulty : {difficulty} </Heading> 
+			{/* <Heading size='md'> Current difficulty : {difficulty} </Heading>  */}
 
 			<GuessForm
 				guesses={guesses}
