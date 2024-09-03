@@ -240,7 +240,7 @@ function Lobby() {
 
 	const createRoom = async () => {
 		try {
-			const response = await fetch('http://localhost:5000/create_room', { method: 'POST' });
+			const response = await fetch(`${API_BASE_URL}/create_room`, { method: 'POST' });
 			const data = await response.json();
 			console.log("room id" + data.room_id);
 			joinRoom(data.room_id);
@@ -290,7 +290,7 @@ function Lobby() {
 
 		return (
 		  <div>
-            {time <= 0 ? <Text size='md'>Time's up!</Text> : <Text size='md'>Time left: {new Date(timeLeft * 1000).toISOString().substring(14, 19)}</Text>}
+            {time <= 0 ? <Text size='lg'>Time's up!</Text> : <Stat><StatNumber>{new Date(timeLeft * 1000).toISOString().substring(14, 19)}</StatNumber></Stat>}
 		  </div>
 		);
 	  };
