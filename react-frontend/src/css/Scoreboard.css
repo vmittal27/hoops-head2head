@@ -1,17 +1,17 @@
 .Scoreboard-Container {
     display: flex;
-    border-radius: 10px;
+    border-radius: 0.63rem;
     background-color: var(--chakra-colors-chakra-subtle-bg);
-    width: 250px;
+    width: 15.6rem;
     border-color: #ff7f26;
-    border-width: 3px; 
+    border-width: 0.2rem; 
     position: relative;
-    padding: 20px 20px;
+    padding: 1.3rem 1.3rem;
 }
 
 .score {
     position: absolute;
-    right: 30px;
+    right: 1.9rem;
 }
 
 .score-head {
@@ -19,5 +19,5 @@
     vertical-align: middle;
     font-size: x-large;
     font-weight: bold;
-    left: 194px;
+    left: 12.2rem;
 }
