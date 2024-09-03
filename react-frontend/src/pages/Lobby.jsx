@@ -37,7 +37,7 @@ import {
 	StatArrow,
 	StatGroup,
   } from '@chakra-ui/react'
-const socket = io("localhost:5000/", {
+const socket = io("localhost:3000/", {
 	transports: ["websocket"],
 	cors: {
 		origin: "http://localhost:5173/",
@@ -64,12 +64,14 @@ function Lobby() {
     // const [roundFinished, setRoundFinished] = useState(false);
     const [score, setScore] = useState(0);
 	const [pics, setPics] = useState([{currPlayerURL: "", lastPlayerURL: ""}])
+	const [curRound, setCurRound] = useState(1); 
+	const [transitionTime, setTransitionTime] = useState(10);
 
 	const [bballPlayers, setBBallPlayers] = useState([])
 
 
 	const [optimalPath, setOptimalPath] = useState([]);
-	const API_BASE_URL = "http://localhost:5000/"
+	const API_BASE_URL = "http://localhost:3000/"
 
 	// const [jsonData, setJsonData] = useState({'room_id': '', 
 	// 	'player_data': [{'currPlayer': '', 'lastPlayer': '', 'currPlayerID': '', 'lastPlayerID': ''}], 
@@ -81,7 +83,7 @@ function Lobby() {
 		// Using fetch to fetch the api from flask server it will be redirected to proxy
         if (started) {
 		console.log('test');
-		if(currentPlayer === players[0] && started === true){
+		if(currentPlayer === players[0]){
 			fetch(API_BASE_URL + "players/" + difficulty)
 			
 			.then(
@@ -131,7 +133,7 @@ function Lobby() {
             socket.emit('round_ended')
         }
 
-	}, [started]);
+	}, [started, curRound]);
 
 	useEffect(() => {
 		setCurrentPlayer(socket.id); //current player socket id fweh
@@ -148,10 +150,8 @@ function Lobby() {
 			setPlayers(data.players);
 			const newScoreBoard = Object.fromEntries(
 				data.players.map(id => [id, 0])
-			  );
-			setScoreBoard(newScoreBoard);
-			// console.log("players:" + [...players, data.player]);
-			// console.log("test" + data.player);  
+			);
+			setScoreBoard(newScoreBoard); 
 		});
 		
 		socket.on('player_left', (data) => {
@@ -159,7 +159,7 @@ function Lobby() {
 			setPlayers(data.players);
 			const newScoreBoard = Object.fromEntries(
 				data.players.map(id => [id, 0])
-			  );
+			);
 			setScoreBoard(newScoreBoard);
 			
 		});
@@ -172,7 +172,8 @@ function Lobby() {
 			setDifficulty(data.difficulty); 
 			setRoundTime(data.roundTime);
             setTimeLeft(data.roundTime);
-			console.log(data.difficulty, data.roundTime);
+			setRoundNum(data.roundNum)
+			console.log(data.difficulty, data.roundNum);
 		});
 
 		socket.on('game_started', () => {
@@ -202,8 +203,11 @@ function Lobby() {
 			console.log(data.score);
             console.log(scoreBoard);
         })
-
 		
+		
+		socket.on('transition_time_changed', (data) => {
+			setTransitionTime(data.newTime);
+		})
 		
 		return () => {
 			socket.off('join_success');
@@ -220,11 +224,11 @@ function Lobby() {
 	}, [players]);
 	useEffect(() => {
 		if(currentPlayer === players[0]){
-			socket.emit('settings_changed', {'room_id' : roomId, 'difficulty': difficulty, 'roundTime' : roundTime})
+			socket.emit('settings_changed', {'room_id' : roomId, 'difficulty': difficulty, 'roundTime' : roundTime, 'roundNum': roundNum})
 			console.log(difficulty, roundTime);
 		}
 		
-	}, [difficulty, roundTime, players]);
+	}, [difficulty, roundTime, players, roundNum]);
     
     useEffect(() => {
         console.log('isFinished changed')
@@ -296,6 +300,33 @@ function Lobby() {
 		);
 	  };
 
+	  const TransitionTimer = ( { startTime } ) => {
+		const [time, setTime] = useState(startTime);
+	  
+		useEffect(() => {
+		  if (time >= 0) {
+			const timerId = setInterval(() => {
+			  setTime((prevTime) => prevTime - 1);
+			}, 1000);
+			socket.emit('transition_time', {'room_id' : roomId, 'time' : time})
+			return () => clearInterval(timerId); // Cleanup interval on unmount
+		  } 
+		  else {
+			setCurRound((round) => round + 1);
+			setIsFinished(false);
+			setNumFinished(0);
+			setTimeLeft(roundTime); 
+			setTransitionTime(10); 
+		  }
+		}, [time]);
+
+		return (
+		  <div>
+			{time >= 0 ? <Stat><StatNumber>{new Date(time * 1000).toISOString().substring(14, 19)}</StatNumber></Stat> : <Heading size='md'>Waiting for next round...</Heading>}
+		  </div>
+		);
+	  };
+
 	const copyRoom = async () => {
 		try {
 			await navigator.clipboard.writeText(roomId);
@@ -309,7 +340,6 @@ function Lobby() {
         if (isFinished) {
             socket.emit('sending_score', {'score' : score, 'player_id' : currentPlayer, 'room_id' : roomId})
         }
-		console.log('eat my ass');
     }, [isFinished])
 
 
@@ -328,7 +358,7 @@ function Lobby() {
 			{!roomId ? 
 				(
 					<>
-                        <Heading fontWeight='bold' size='lg'> Multiplayer </Heading>
+						<Heading fontWeight='bold' size='lg'> Multiplayer </Heading>
 						<Box className="Menu-Box">
 							<Button className="Menu-Element" colorScheme="teal" size='lg' onClick={createRoom}>Create a Room</Button>
 							<Form className='Form' onSubmit={handleJoinSubmit}>
@@ -345,7 +375,7 @@ function Lobby() {
 					!started ? 
 					(
 						<>
-                            <Heading fontWeight='bold' size='lg'> Multiplayer </Heading>
+							<Heading fontWeight='bold' size='lg'> Multiplayer </Heading>
 							<Container class="lobbycontain">
 								<Heading size='lg' m='10px'>Lobby Info</Heading>
 								<Flex>
@@ -371,7 +401,7 @@ function Lobby() {
 								<Container>
 									<Heading fontWeight='bold' size='md' m='10px'>Round Length: {roundTime} seconds</Heading>
 									{currentPlayer === players[0] && (
-										<Slider min={30} max={120} step={5} onChangeEnd={(val) => setRoundTime(val)}>
+										<Slider defaultValue={roundTime} min={30} max={120} step={5} onChangeEnd={(val) => setRoundTime(val)}>
 										    <SliderTrack>
 										        <SliderFilledTrack bg='#c76f0a'/>
 										    </SliderTrack>
@@ -380,7 +410,7 @@ function Lobby() {
 									)}
                                     <Heading fontWeight='bold' size='md' m='10px'>Number of Rounds: {roundNum}</Heading>
 									{currentPlayer === players[0] && (
-										<Slider min={1} max={10} step={1} onChangeEnd={(val) => setRoundNum(val)}>
+										<Slider defaultValue={roundNum} min={1} max={10} step={1} onChangeEnd={(val) => setRoundNum(val)}>
 										    <SliderTrack>
 										        <SliderFilledTrack bg='#c76f0a'/>
 										    </SliderTrack>
@@ -396,8 +426,9 @@ function Lobby() {
 					) :
 					(
 						(timeLeft > 0 && numFinished < playerCount)? (
-                        <>
+						<>
 							<CountdownTimer startTime={timeLeft} />
+							<Text>Round: {curRound}</Text>
 							<Multiplayer data_m = {data} pics_m = {pics} players_m = {bballPlayers}
 							path_m = {optimalPath} difficulty_m = {difficulty} time_m = {roundTime} setIsFinished={setIsFinished}
                             score = {score} setScore = {setScore}  />
@@ -417,16 +448,28 @@ function Lobby() {
 							</Modal>
 						</>
 						) : (
-							<>
-                            <Heading size="lg">Round Over!</Heading>
-							<Heading size="md">Guest {socket.id.substring(0,5)} </Heading>
-							<Heading size="sm">Round Score: {score} </Heading>
-                            <Scoreboard scores = {scoreBoard}/>
-							</>
+							curRound < roundNum ? (
+								<>
+									<Heading size="lg">Round {curRound} Results</Heading>
+									<Heading size="md">Guest {socket.id.substring(0,5)} </Heading>
+									<Heading size="sm">Round Score: {score} </Heading>
+									<TransitionTimer startTime={transitionTime}/>
+									<Scoreboard scores = {scoreBoard}/>
+								</>
+							) : (
+								<>
+									<Heading size="lg">Final Results</Heading>
+									<Heading size="md">Guest {socket.id.substring(0,5)} </Heading>
+									<Heading size="sm">Round Score: {score} </Heading>
+									<Scoreboard scores = {scoreBoard}/>
+									<Button onClick={() => setStarted(false)}>Return to Lobby</Button> 
+								</>
+							)
 						)
 					)
 				)
 			}
+			
 		</Container>
 	);
 };

@@ -281,9 +281,9 @@ def on_leave(data):
 
 @socketio.on('settings_changed')
 def handle_difficulty_change(data):
-    room_id, difficulty, roundTime = data['room_id'], data['difficulty'], data['roundTime']
+    room_id, difficulty, roundTime, roundNum = data['room_id'], data['difficulty'], data['roundTime'], data['roundNum']
     if room_id in rooms:
-        socketio.emit('change_settings', {'difficulty' : difficulty, 'roundTime' : roundTime}, room=room_id)
+        socketio.emit('change_settings', {'difficulty' : difficulty, 'roundTime' : roundTime, 'roundNum': roundNum}, room=room_id)
     # Broadcast the difficulty change to all players in the room
 
 @socketio.on("start_game")
@@ -310,6 +310,13 @@ def score_send(data):
     room_id = int(data['room_id'])
     if room_id in rooms:
         socketio.emit('score_added', {'player_id' : data['player_id'], 'score' : data['score']}, room=room_id)
+
+@socketio.on("transition_time")
+def transition_time(data):
+    room_id = int(data['room_id'])
+    if room_id in rooms:
+        socketio.emit('transition_time_changed', {'newTime' : data['time']}, room=room_id)
+
 
 def close_driver():
     driver.close()
