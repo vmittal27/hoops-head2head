@@ -52,6 +52,7 @@ function Lobby() {
 	const [error, setError] = useState('');
 	const [difficulty, setDifficulty] = useState('easy');
 	const [roundTime, setRoundTime] = useState(75)
+    const [roundNum, setRoundNum] = useState(5); // Number of rounds
 	const { colorMode, toggleColorMode } = useColorMode();
 	const [currentPlayer, setCurrentPlayer] = useState(null);
 	const [started, setStarted] = useState(false);
@@ -368,9 +369,18 @@ function Lobby() {
 									)}
 								</Container>
 								<Container>
-									<Heading fontWeight='bold' size='lg' m='10px'>Round Length: {roundTime} seconds</Heading>
+									<Heading fontWeight='bold' size='md' m='10px'>Round Length: {roundTime} seconds</Heading>
 									{currentPlayer === players[0] && (
 										<Slider min={30} max={120} step={5} onChangeEnd={(val) => setRoundTime(val)}>
+										    <SliderTrack>
+										        <SliderFilledTrack bg='#c76f0a'/>
+										    </SliderTrack>
+										    <SliderThumb />
+										</Slider>
+									)}
+                                    <Heading fontWeight='bold' size='md' m='10px'>Number of Rounds: {roundNum}</Heading>
+									{currentPlayer === players[0] && (
+										<Slider min={1} max={10} step={1} onChangeEnd={(val) => setRoundNum(val)}>
 										    <SliderTrack>
 										        <SliderFilledTrack bg='#c76f0a'/>
 										    </SliderTrack>
