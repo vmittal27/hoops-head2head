@@ -6,7 +6,6 @@ import Multiplayer from "./Multiplayer";
 import Scoreboard from "./Scoreboard";
 import {Link, Image, Text, Container, NumberInput, NumberInputField, Button, Box, IconButton, useColorMode} from "@chakra-ui/react";
 import DifficultyButton from '../components/Difficulty'
-import Waiting from '../components/Waiting'
 import { Heading, UnorderedList, ListItem, Flex } from "@chakra-ui/react";
 import {
 	Slider,
@@ -20,6 +19,24 @@ import { MoonIcon, CopyIcon } from '@chakra-ui/icons'
 import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
 import { Form, json } from "react-router-dom";
 
+import {
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    AbsoluteCenter,
+	CircularProgress
+  } from '@chakra-ui/react'
+import {
+	Stat,
+	StatLabel,
+	StatNumber,
+	StatHelpText,
+	StatArrow,
+	StatGroup,
+  } from '@chakra-ui/react'
 const socket = io("localhost:5000/", {
 	transports: ["websocket"],
 	cors: {
@@ -212,6 +229,11 @@ function Lobby() {
         console.log('isFinished changed')
         if (isFinished) {
             socket.emit('player_finished', {'id' : currentPlayer, 'room_id' : roomId});
+			window.scrollTo({
+				top: 0,
+				left: 0,
+				behavior: 'smooth'
+			});
         }
     }, [isFinished])
 
@@ -268,7 +290,7 @@ function Lobby() {
 
 		return (
 		  <div>
-            {time <= 0 ? <Text size='md'>Time's up!</Text> : <Text size='md'>Time left: {time}</Text>}
+            {time <= 0 ? <Text size='md'>Time's up!</Text> : <Text size='md'>Time left: {new Date(timeLeft * 1000).toISOString().substring(14, 19)}</Text>}
 		  </div>
 		);
 	  };
@@ -364,21 +386,26 @@ function Lobby() {
 					) :
 					(
 						(timeLeft > 0 && numFinished < playerCount)? (
-                        isFinished ? ( 
-                        <>
-							<Heading>Guest {socket.id.substring(0,5)} </Heading>
-							<Heading>Previous Round Score: {score} </Heading>
-                            <CountdownTimer startTime={timeLeft} />
-                            <Waiting numFinished = {numFinished} totalNumber = {playerCount} />
-                        </>
-                        ) : (
                         <>
 							<CountdownTimer startTime={timeLeft} />
 							<Multiplayer data_m = {data} pics_m = {pics} players_m = {bballPlayers}
 							path_m = {optimalPath} difficulty_m = {difficulty} time_m = {roundTime} setIsFinished={setIsFinished}
                             score = {score} setScore = {setScore}  />
+							<Modal isOpen={isFinished} closeOnOverlayClick={false} isCentered={true} size='lg'>
+								<ModalOverlay />
+								<ModalContent>
+									<ModalHeader>Waiting for other players . . .</ModalHeader>
+									<ModalBody display='flex' flexDirection='row' alignItems='center' gap='1em'>
+										<CircularProgress value={(numFinished / playerCount) * 100}/>
+										<Text fontSize='xl'>Players Finished: {numFinished}</Text>
+									</ModalBody>
+									<ModalFooter margin='auto'>
+										<Stat><StatNumber>{new Date(timeLeft * 1000).toISOString().substring(14, 19)}</StatNumber></Stat>
+									</ModalFooter>
+
+								</ModalContent>
+							</Modal>
 						</>
-                        )
 						) : (
 							<>
                             <Heading size="lg">Round Over!</Heading>
