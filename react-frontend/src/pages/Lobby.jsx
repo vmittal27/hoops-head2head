@@ -14,7 +14,7 @@ import {
 	SliderThumb,
 	SliderMark,
 } from '@chakra-ui/react'
-import { MoonIcon, CopyIcon } from '@chakra-ui/icons'
+import { MoonIcon, CopyIcon, SunIcon } from '@chakra-ui/icons'
 
 import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
 import { Form, json } from "react-router-dom";
@@ -319,7 +319,7 @@ function Lobby() {
 					<Image src={logoImage} boxSize = '150' objectFit='cover' position='relative'/>
 				</Link>
 				<Text fontWeight='bold' fontSize='3xl'> Hoops Head 2 Head </Text>
-				<IconButton onClick={toggleColorMode} icon={<MoonIcon/>} position='absolute' right='50px'>
+				<IconButton onClick={toggleColorMode} icon={colorMode === 'light' ? <MoonIcon/> : <SunIcon/>} position='absolute' right='50px'>
 					Toggle {colorMode === 'light' ? 'Dark' : 'Light'}
 				</IconButton>
 			</div>
