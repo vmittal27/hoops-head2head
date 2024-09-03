@@ -37,7 +37,7 @@ import {
 	StatArrow,
 	StatGroup,
   } from '@chakra-ui/react'
-const socket = io("localhost:3000/", {
+const socket = io("localhost:5000/", {
 	transports: ["websocket"],
 	cors: {
 		origin: "http://localhost:5173/",
@@ -71,7 +71,7 @@ function Lobby() {
 
 
 	const [optimalPath, setOptimalPath] = useState([]);
-	const API_BASE_URL = "http://localhost:3000/"
+	const API_BASE_URL = "http://localhost:5000/"
 
 	// const [jsonData, setJsonData] = useState({'room_id': '', 
 	// 	'player_data': [{'currPlayer': '', 'lastPlayer': '', 'currPlayerID': '', 'lastPlayerID': ''}], 
@@ -280,6 +280,13 @@ function Lobby() {
 		console.log('tester')
 		setStarted(true);
 		setTimeLeft(roundTime);
+		console.log('big ass');
+		const newScoreBoard = Object.fromEntries(
+			Object.keys(players).map(id => [id, 0])
+		);
+		setScoreBoard(newScoreBoard);
+		
+		console.log("info aksfhkajsjdfkjashdflkjhjalksdjfhkljh", scoreBoard, curRound);
 	};
 	const CountdownTimer = ( { startTime } ) => {
 		const [time, setTime] = useState(startTime);
@@ -346,12 +353,9 @@ function Lobby() {
 	const resetGame = () => {
 		setStarted(false); 
 		setIsFinished(false);
-		setCurRound(0);
+		setCurRound(1);
 		setScore(0);
-		const newScoreBoard = Object.fromEntries(
-			data.players.map(id => [id, 0])
-		);
-		setScoreBoard(newScoreBoard);
+		// console.log(scoreBoard);
 		setTimeLeft(roundTime);
 		setNumFinished(0); 
 	}
