@@ -13,3 +13,11 @@
     position: absolute;
     right: 30px;
 }
+
+.score-head {
+    position: relative;
+    vertical-align: middle;
+    font-size: x-large;
+    font-weight: bold;
+    left: 194px;
+}
