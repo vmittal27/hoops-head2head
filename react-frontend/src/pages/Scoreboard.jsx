@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { Heading, List, ListItem, Flex } from "@chakra-ui/react";
+import { Heading, List, ListItem, Flex, Container } from "@chakra-ui/react";
+import "../css/Scoreboard.css"
+
 
 
 function Scoreboard({scores}) { 
@@ -10,15 +12,18 @@ function Scoreboard({scores}) {
         Object.entries(scores).sort(([,a],[,b]) => b-a)
     );
     return (
-        <div>
-            <p> Time's Up! </p>
-            <p> Scoreboard: </p>
-                <List styleType="''" textAlign='left' fontSize='lg' mx='10px'>
-                    {Object.keys(sortedDict).map((player_id) => {
-                        return <ListItem >Guest {player_id.substring(0,5)} : {scores[player_id]} </ListItem>;
-                    })}
-				</List>
-        </div>
+        <Container className='Scoreboard-Container'>
+            <List fontWeight="bold" styleType="none" fontSize="xl" mx="10px">
+                {Object.keys(sortedDict).map((player_id) => (
+                <ListItem>
+                    <Flex alignItems='center'>
+                        <span fontSize='xl'>Guest {player_id.substring(0, 5)}</span>
+                        <Heading fontWeight='bold'fontSize='xl' className='score'>{scores[player_id]}</Heading>
+                    </Flex>
+                </ListItem>
+                ))}
+            </List>
+            </Container>
     )
 }
 

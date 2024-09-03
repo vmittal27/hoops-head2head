@@ -301,11 +301,11 @@ function Lobby() {
 					Toggle {colorMode === 'light' ? 'Dark' : 'Light'}
 				</IconButton>
 			</div>
-			<Heading fontWeight='bold' size='lg'> Multiplayer </Heading>
 			{error && <Text style={{color: 'red'}}>{error}</Text>}
 			{!roomId ? 
 				(
 					<>
+                        <Heading fontWeight='bold' size='lg'> Multiplayer </Heading>
 						<Box className="Menu-Box">
 							<Button className="Menu-Element" colorScheme="teal" size='lg' onClick={createRoom}>Create a Room</Button>
 							<Form className='Form' onSubmit={handleJoinSubmit}>
@@ -322,6 +322,7 @@ function Lobby() {
 					!started ? 
 					(
 						<>
+                            <Heading fontWeight='bold' size='lg'> Multiplayer </Heading>
 							<Container class="lobbycontain">
 								<Heading size='lg' m='10px'>Lobby Info</Heading>
 								<Flex>
@@ -380,8 +381,9 @@ function Lobby() {
                         )
 						) : (
 							<>
-							<Heading>Guest {socket.id.substring(0,5)} </Heading>
-							<Heading>Previous Round Score: {score} </Heading>
+                            <Heading size="lg">Round Over!</Heading>
+							<Heading size="md">Guest {socket.id.substring(0,5)} </Heading>
+							<Heading size="sm">Round Score: {score} </Heading>
                             <Scoreboard scores = {scoreBoard}/>
 							</>
 						)

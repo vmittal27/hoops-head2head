@@ -108,9 +108,8 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, 
 
 	return (
 		<Container className='App-Container'>
-			<Text fontWeight='bold' fontSize='xl'> Multiplayer Mode </Text>
 			{/* <Text fontWeight='bold' fontSize='xl'> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Text> */}
-			<h1> Current difficulty : {difficulty} </h1> 
+			<Heading size='md'> Current difficulty : {difficulty} </Heading> 
 
 			<GuessForm
 				guesses={guesses}

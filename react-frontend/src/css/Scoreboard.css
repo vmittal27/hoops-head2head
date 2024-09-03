@@ -1,0 +1,15 @@
+.Scoreboard-Container {
+    display: flex;
+    border-radius: 10px;
+    background-color: var(--chakra-colors-chakra-subtle-bg);
+    width: 250px;
+    border-color: #ff7f26;
+    border-width: 3px; 
+    position: relative;
+    padding: 20px 20px;
+}
+
+.score {
+    position: absolute;
+    right: 30px;
+}
