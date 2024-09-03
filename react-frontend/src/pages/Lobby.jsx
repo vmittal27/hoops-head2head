@@ -82,7 +82,7 @@ function Lobby() {
 	useEffect(() => {
 		// Using fetch to fetch the api from flask server it will be redirected to proxy
         if (started) {
-		console.log('test');
+		console.log('running this useEffect');
 		if(currentPlayer === players[0]){
 			fetch(API_BASE_URL + "players/" + difficulty)
 			
@@ -220,6 +220,7 @@ function Lobby() {
             socket.off('change_time')
             socket.off('player_finished_endpoint')
 			socket.off('score_added')
+			socket.off('transition_time_changed')
 		};
 	}, [players]);
 	useEffect(() => {
@@ -342,6 +343,19 @@ function Lobby() {
         }
     }, [isFinished])
 
+	const resetGame = () => {
+		setStarted(false); 
+		setIsFinished(false);
+		setCurRound(0);
+		setScore(0);
+		const newScoreBoard = Object.fromEntries(
+			data.players.map(id => [id, 0])
+		);
+		setScoreBoard(newScoreBoard);
+		setTimeLeft(roundTime);
+		setNumFinished(0); 
+	}
+
 
 	return (
 		<Container className="App-Container">
@@ -462,7 +476,7 @@ function Lobby() {
 									<Heading size="md">Guest {socket.id.substring(0,5)} </Heading>
 									<Heading size="sm">Round Score: {score} </Heading>
 									<Scoreboard scores = {scoreBoard}/>
-									<Button onClick={() => setStarted(false)}>Return to Lobby</Button> 
+									<Button onClick={resetGame}>Return to Lobby</Button> 
 								</>
 							)
 						)

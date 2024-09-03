@@ -6,7 +6,7 @@ import '../css/SinglePlayer.css'
 
 const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, modalOpen, score, setScore, pics, setPics}) => {
 
-    const API_BASE_URL = "http://localhost:3000"
+    const API_BASE_URL = "http://localhost:5000"
 
     const [wrongStreak, setWrongStreak] = useState(0); // for scoring
 
