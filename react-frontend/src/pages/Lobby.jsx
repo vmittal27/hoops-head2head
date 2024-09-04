@@ -184,6 +184,7 @@ function Lobby() {
 		});
 
 		socket.on('game_started', (data) => {
+			console.log("help me");
 			setRoundData(data.players);
 			setLobby(0); //nobody in lobby
 			setStarted(true); 
@@ -469,7 +470,7 @@ function Lobby() {
 						</>
 					) :
 					(
-						(timeLeft > 0 && numFinished < playerCount)? (
+						(timeLeft > 0 && numFinished < playerCount && roundData.length != 0)? (
 						<>
 							<CountdownTimer startTime={timeLeft} />
 							<Text>Round: {curRound}</Text>
