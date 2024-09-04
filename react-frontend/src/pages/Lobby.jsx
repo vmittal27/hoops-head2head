@@ -72,70 +72,72 @@ function Lobby() {
 	// const [loaded, setLoaded] = useState(false); 
 
 	const [optimalPath, setOptimalPath] = useState([]);
+	const [roundData, setRoundData] = useState([]);
+
 	const API_BASE_URL = "http://localhost:5000/"
 	
-	useEffect(() => {
-		if (!started) {
-		  socket.emit('round_ended');
-		  return;
-		}
+	// useEffect(() => {
+	// 	if (!started) {
+	// 	  socket.emit('round_ended');
+	// 	  return;
+	// 	}
 	  
-		const fetchData = async () => {
-		  const newData = [];
-		  const newPics = [];
-		  const newPaths = [];
-		  const newPlayers = [];	
+	// 	const fetchData = async () => {
+	// 	  const newData = [];
+	// 	  const newPics = [];
+	// 	  const newPaths = [];
+	// 	  const newPlayers = [];	
 	  
-		  for (let i = 0; i < roundNum; i++) {
-			if (currentPlayer === players[0]) {
-			  try {
-				const res = await fetch(`${API_BASE_URL}players/${difficulty}`);
-				if (!res.ok) {
-				  throw new Error(`HTTP error! status: ${res.status}`);
-				}
-				const data = await res.json();
+	// 	  for (let i = 0; i < roundNum; i++) {
+	// 		if (currentPlayer === players[0]) {
+	// 		  try {
+	// 			const res = await fetch(`${API_BASE_URL}players/${difficulty}`);
+	// 			if (!res.ok) {
+	// 			  throw new Error(`HTTP error! status: ${res.status}`);
+	// 			}
+	// 			const data = await res.json();
 	  
-				newData.push({
-				  currPlayer: data["Player 1"]["name"],
-				  lastPlayer: data["Player 2"]["name"],
-				  currPlayerID: data["Player 1"]["id"],
-				  lastPlayerID: data["Player 2"]["id"]
-				});
+	// 			newData.push({
+	// 			  currPlayer: data["Player 1"]["name"],
+	// 			  lastPlayer: data["Player 2"]["name"],
+	// 			  currPlayerID: data["Player 1"]["id"],
+	// 			  lastPlayerID: data["Player 2"]["id"]
+	// 			});
 	  
-				newPics.push({
-				  currPlayerURL: data["Player 1"]["picture_url"],
-				  lastPlayerURL: data["Player 2"]["picture_url"]
-				});
+	// 			newPics.push({
+	// 			  currPlayerURL: data["Player 1"]["picture_url"],
+	// 			  lastPlayerURL: data["Player 2"]["picture_url"]
+	// 			});
 	  
-				newPaths.push(data['Path']);
-				newPlayers.push([data["Player 1"]["name"]]);
+	// 			newPaths.push(data['Path']);
+	// 			newPlayers.push([data["Player 1"]["name"]]);
 	  
-				const jsonData = {
-				  room_id: roomId,
-				  player_data: newData[newData.length - 1],
-				  pictures: newPics[newPics.length - 1],
-				  players: newPlayers[newPlayers.length - 1],
-				  path: newPaths[newPaths.length - 1]
-				};
+	// 			const jsonData = {
+	// 			  room_id: roomId,
+	// 			  player_data: newData[newData.length - 1],
+	// 			  pictures: newPics[newPics.length - 1],
+	// 			  players: newPlayers[newPlayers.length - 1],
+	// 			  path: newPaths[newPaths.length - 1]
+	// 			};
 	  
-				socket.emit('data_load', jsonData);
-			  } catch (error) {
-				console.error("Error fetching data:", error);
-			  }
-			}
-		  }
+	// 			socket.emit('data_load', jsonData);
+	// 		  } catch (error) {
+	// 			console.error("Error fetching data:", error);
+	// 		  }
+	// 		}
+	// 	  }
 	  
-		  setData(prevData => Array.isArray(prevData) ? [...prevData, ...newData] : newData);
-		  setPics(prevPics => Array.isArray(prevPics) ? [...prevPics, ...newPics] : newPics);
-		  setOptimalPath(prevPath => Array.isArray(prevPath) ? [...prevPath, ...newPaths] : newPaths);
-		  setBBallPlayers(prevPlayers => Array.isArray(prevPlayers) ? [...prevPlayers, ...newPlayers] : newPlayers);
-		//   setLoaded(true);
-		};
+	// 	  setData(prevData => Array.isArray(prevData) ? [...prevData, ...newData] : newData);
+	// 	  setPics(prevPics => Array.isArray(prevPics) ? [...prevPics, ...newPics] : newPics);
+	// 	  setOptimalPath(prevPath => Array.isArray(prevPath) ? [...prevPath, ...newPaths] : newPaths);
+	// 	  setBBallPlayers(prevPlayers => Array.isArray(prevPlayers) ? [...prevPlayers, ...newPlayers] : newPlayers);
+	// 	//   setLoaded(true);
+	// 	};
 
-		console.log("loop test", data, pics, optimalPath, bballPlayers);
+	// 	console.log("loop test", data, pics, optimalPath, bballPlayers);
 	  
-		fetchData();
-	  }, [started, roundNum, currentPlayer, players, difficulty, roomId]);
+	// 	fetchData();
+	//   }, [started, roundNum, currentPlayer, players, difficulty, roomId]);
 
 	useEffect(() => {
 		setCurrentPlayer(socket.id); //current player socket id fweh
@@ -181,11 +183,14 @@ function Lobby() {
 			console.log(data.difficulty, data.roundNum);
 		});
 
-		socket.on('game_started', () => {
+		socket.on('game_started', (data) => {
+			setRoundData(data.players);
 			setLobby(0); //nobody in lobby
 			setStarted(true); 
+			console.log("game start test", data.players);
 		});
 
+	
 		socket.on('load_data', (data) => {
 			setData(data.data);
 			setPics(data.pictures);
@@ -295,13 +300,9 @@ function Lobby() {
 	};
 
 	const startGame = () => {
-		socket.emit('start_game', { room_id: roomId });
-		console.log('tester')
 		setStarted(true);
-		setTimeLeft(roundTime);
-		console.log('big ass');
-		
-		console.log("info aksfhkajsjdfkjashdflkjhjalksdjfhkljh", scoreBoard, curRound);
+		setTimeLeft(roundTime);	
+		socket.emit('start_game', { room_id: roomId, rounds : roundNum, difficulty : difficulty});
 	};
 	const CountdownTimer = ( { startTime } ) => {
 		const [time, setTime] = useState(startTime);
@@ -472,9 +473,10 @@ function Lobby() {
 						<>
 							<CountdownTimer startTime={timeLeft} />
 							<Text>Round: {curRound}</Text>
-							{/* <Multiplayer data_m = {data[curRound-1]} pics_m = {pics[curRound-1]} players_m = {bballPlayers[curRound-1]} //just need to make this data[curRound-1], etc.
-							path_m = {optimalPath[curRound-1]} difficulty_m = {difficulty} time_m = {roundTime} setIsFinished={setIsFinished}
-                            score = {score} setScore = {setScore}  /> */}
+							<Multiplayer data_m = {roundData[curRound-1].player_data} pics_m = {roundData[curRound-1].pictures} 
+							players_m = {roundData[curRound-1].players} //just need to make this data[curRound-1], etc.
+							path_m = {roundData[curRound-1].path} difficulty_m = {difficulty} time_m = {roundTime} setIsFinished={setIsFinished}
+                            score = {score} setScore = {setScore}  />
 							<Modal isOpen={isFinished} closeOnOverlayClick={false} isCentered={true} size='lg'>
 								<ModalOverlay />
 								<ModalContent>

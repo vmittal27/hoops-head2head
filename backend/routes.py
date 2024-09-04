@@ -253,6 +253,8 @@ def on_join(data):
     else:
         socketio.emit('error', {"message": "Room not found"}, room=request.sid)
 
+room_players = {} #room_id : [list of round info]
+
 @socketio.on('player_finished')
 def player_finished(data):
     room_id = int(data['room_id'])
@@ -263,7 +265,7 @@ def player_finished(data):
 def new_round_start(data):
     room_id = int(data['room_id'])
     if room_id in rooms:
-        socketio.emit('start_new_round', data, room=room_id)
+        socketio.emit('start_new_round', data, room=room_id )
 
 @socketio.on('lobby_rejoin')
 def lobby_rejoin(data):
@@ -271,15 +273,15 @@ def lobby_rejoin(data):
     if room_id in rooms:
         socketio.emit('rejoin_lobby', data, room=room_id)
     
-@socketio.on('start_game')
-def on_start_game(data):
-    room_id = int(data['room_id'])
-    if room_id in rooms:
-        #data should have keys room_id, player1_json, player2_json
-        player1 = data['player1_json'] #dict, with 'name', 'id', 'url'
-        player2 = data['player2_json'] #same thing
-        game_states[room_id] = [player1, player2] 
-        socketio.emit('game_started', {'room_id': room_id, 'game_data': game_states[room_id]}, room=room_id)
+# @socketio.on('start_game')
+# def on_start_game(data):
+#     room_id = int(data['room_id'])
+#     if room_id in rooms:
+#         #data should have keys room_id, player1_json, player2_json
+#         player1 = data['player1_json'] #dict, with 'name', 'id', 'url'
+#         player2 = data['player2_json'] #same thing
+#         game_states[room_id] = [player1, player2] 
+#         socketio.emit('game_started', {'room_id': room_id, 'game_data': game_states[room_id]}, room=room_id)
 
 @socketio.on('leave')
 def on_leave(data):
@@ -300,9 +302,20 @@ def handle_difficulty_change(data):
 
 @socketio.on("start_game")
 def start_game(data):
+    num_rounds = int(data['rounds'])
     room_id = int(data['room_id'])
+    difficulty = data['difficulty']
     if room_id in rooms:
-        socketio.emit("game_started", room=room_id)
+        ppr = []
+        for i in range(num_rounds):
+            p = get_players(difficulty)
+            new_round = {'player_data': {'currPlayer': p["Player 1"]["name"], 'lastPlayer': p["Player 2"]["name"], 'currPlayerID': p["Player 1"]["id"], 'lastPlayerID': p["Player 2"]["id"]}, 
+                         'pictures': {'currPlayerURL': p["Player 1"]["picture_url"], 'lastPlayerURL': p["Player 2"]["picture_url"]},
+                         'players': [p["Player 1"]["name"]], 'path': p['Path']}
+            ppr.append(new_round)
+        room_players[room_id] = ppr
+    print("BIG TEST", room_players[room_id])
+    socketio.emit('game_started', {"players" : room_players[room_id]}, room=room_id)
 
 @socketio.on("data_load")
 def load_data(data):
