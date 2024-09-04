@@ -41,7 +41,7 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, 
 	const [optimalPath, setOptimalPath] = useState(path_m);
 
 	// console.log('fucked shit');
-	// console.log(data_m, pics_m, players_m, difficulty_m, path_m);
+	console.log(data_m, pics_m, players_m, difficulty_m, path_m);
 
 	useEffect(() => {
 		setData(data_m);

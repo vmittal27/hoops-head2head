@@ -259,6 +259,18 @@ def player_finished(data):
     if room_id in rooms:
         socketio.emit('player_finished_endpoint', data, room=room_id)
 
+@socketio.on('new_round_start')
+def new_round_start(data):
+    room_id = int(data['room_id'])
+    if room_id in rooms:
+        socketio.emit('start_new_round', data, room=room_id)
+
+@socketio.on('lobby_rejoin')
+def lobby_rejoin(data):
+    room_id = int(data['room_id'])
+    if room_id in rooms:
+        socketio.emit('rejoin_lobby', data, room=room_id)
+    
 @socketio.on('start_game')
 def on_start_game(data):
     room_id = int(data['room_id'])

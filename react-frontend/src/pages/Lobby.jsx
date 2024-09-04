@@ -57,83 +57,85 @@ function Lobby() {
 	const [currentPlayer, setCurrentPlayer] = useState(null);
 	const [started, setStarted] = useState(false);
 	const [timeLeft, setTimeLeft] = useState(75); // Time left for the countdown
-	const [data, setData] = useState([{currPlayer: "", lastPlayer: "", currPlayerID: "", lastPlayerID: ""}])
+	const [data, setData] = useState([])
     const [isFinished, setIsFinished] = useState(false);
     const [numFinished, setNumFinished] = useState(0);
 	const [scoreBoard, setScoreBoard] = useState({})
     // const [roundFinished, setRoundFinished] = useState(false);
+	const [lobby, setLobby] = useState(0);
     const [score, setScore] = useState(0);
-	const [pics, setPics] = useState([{currPlayerURL: "", lastPlayerURL: ""}])
+	const [pics, setPics] = useState([])
 	const [curRound, setCurRound] = useState(1); 
 	const [transitionTime, setTransitionTime] = useState(10);
 
 	const [bballPlayers, setBBallPlayers] = useState([])
-
+	// const [loaded, setLoaded] = useState(false); 
 
 	const [optimalPath, setOptimalPath] = useState([]);
 	const API_BASE_URL = "http://localhost:5000/"
-
-	// const [jsonData, setJsonData] = useState({'room_id': '', 
-	// 	'player_data': [{'currPlayer': '', 'lastPlayer': '', 'currPlayerID': '', 'lastPlayerID': ''}], 
-	// 	'pictures': [{'currPlayerURL': '', 'lastPlayerURL': ''}], 
-	// 	'players': [], 
-	// 	'path': []})
 	
 	useEffect(() => {
-		// Using fetch to fetch the api from flask server it will be redirected to proxy
-        if (started) {
-		console.log('running this useEffect');
-		if(currentPlayer === players[0]){
-			fetch(API_BASE_URL + "players/" + difficulty)
-			
-			.then(
-				(res) => {
-
-					if (!res.ok)
-						throw new Error(`HTTP error! status: ${res.status}`);
-
-					console.log("Raw response:", res);
-					return res.json();
-				}
-			)
-	
-			.then(
-				(data) => {
-					setData({currPlayer: data["Player 1"]["name"], lastPlayer: data["Player 2"]["name"],
-						currPlayerID : data["Player 1"]["id"], lastPlayerID: data["Player 2"]["id"]
-					});
-					setPics({currPlayerURL: data["Player 1"]["picture_url"], lastPlayerURL: data["Player 2"]["picture_url"]})
-				
-					setOptimalPath(data['Path']);
-
-					//adding initial player to player list
-					console.log('adding first player');
-					setBBallPlayers([data["Player 1"]["name"]]);
-					console.log(bballPlayers);
-					console.log(data);
-
-					const jsonData = {'room_id': roomId,
-						'player_data': {currPlayer: data["Player 1"]["name"], lastPlayer: data["Player 2"]["name"],
-							currPlayerID : data["Player 1"]["id"], lastPlayerID: data["Player 2"]["id"]
-						},
-						'pictures': {currPlayerURL: data["Player 1"]["picture_url"], lastPlayerURL: data["Player 2"]["picture_url"]},
-						'players': [data["Player 1"]["name"]],
-						'path': data['Path']}
-				
-					console.log("first then", jsonData);
-					socket.emit('data_load', jsonData);
-
-				}
-			)
-
-			.catch((error) => {console.error("Error fetching data:", error);});
+		if (!started) {
+		  socket.emit('round_ended');
+		  return;
 		}
-		console.log(data);
-        } else {
-            socket.emit('round_ended')
-        }
+	  
+		const fetchData = async () => {
+		  const newData = [];
+		  const newPics = [];
+		  const newPaths = [];
+		  const newPlayers = [];	
+	  
+		  for (let i = 0; i < roundNum; i++) {
+			if (currentPlayer === players[0]) {
+			  try {
+				const res = await fetch(`${API_BASE_URL}players/${difficulty}`);
+				if (!res.ok) {
+				  throw new Error(`HTTP error! status: ${res.status}`);
+				}
+				const data = await res.json();
+	  
+				newData.push({
+				  currPlayer: data["Player 1"]["name"],
+				  lastPlayer: data["Player 2"]["name"],
+				  currPlayerID: data["Player 1"]["id"],
+				  lastPlayerID: data["Player 2"]["id"]
+				});
+	  
+				newPics.push({
+				  currPlayerURL: data["Player 1"]["picture_url"],
+				  lastPlayerURL: data["Player 2"]["picture_url"]
+				});
+	  
+				newPaths.push(data['Path']);
+				newPlayers.push([data["Player 1"]["name"]]);
+	  
+				const jsonData = {
+				  room_id: roomId,
+				  player_data: newData[newData.length - 1],
+				  pictures: newPics[newPics.length - 1],
+				  players: newPlayers[newPlayers.length - 1],
+				  path: newPaths[newPaths.length - 1]
+				};
+	  
+				socket.emit('data_load', jsonData);
+			  } catch (error) {
+				console.error("Error fetching data:", error);
+			  }
+			}
+		  }
+	  
+		  setData(prevData => Array.isArray(prevData) ? [...prevData, ...newData] : newData);
+		  setPics(prevPics => Array.isArray(prevPics) ? [...prevPics, ...newPics] : newPics);
+		  setOptimalPath(prevPath => Array.isArray(prevPath) ? [...prevPath, ...newPaths] : newPaths);
+		  setBBallPlayers(prevPlayers => Array.isArray(prevPlayers) ? [...prevPlayers, ...newPlayers] : newPlayers);
+		//   setLoaded(true);
+		};
 
-	}, [started, curRound]);
+		console.log("loop test", data, pics, optimalPath, bballPlayers);
+	  
+		fetchData();
+	  }, [started, roundNum, currentPlayer, players, difficulty, roomId]);
 
 	useEffect(() => {
 		setCurrentPlayer(socket.id); //current player socket id fweh
@@ -141,11 +143,13 @@ function Lobby() {
 		socket.on('join_success', (data) => {
 			setRoomId(data.room_id);
 			setPlayerCount(data.player_count);
+			setLobby(data.player_count);
 			setError('');
 		});
 		
 		socket.on('player_joined', (data) => {
 			setPlayerCount(data.player_count);
+			setLobby(data.player_count);
 			console.log("players" + data.players);
 			setPlayers(data.players);
 			const newScoreBoard = Object.fromEntries(
@@ -156,6 +160,7 @@ function Lobby() {
 		
 		socket.on('player_left', (data) => {
 			setPlayerCount(data.player_count);
+			setLobby(data.player_count);
 			setPlayers(data.players);
 			const newScoreBoard = Object.fromEntries(
 				data.players.map(id => [id, 0])
@@ -177,6 +182,7 @@ function Lobby() {
 		});
 
 		socket.on('game_started', () => {
+			setLobby(0); //nobody in lobby
 			setStarted(true); 
 		});
 
@@ -208,6 +214,17 @@ function Lobby() {
 		socket.on('transition_time_changed', (data) => {
 			setTransitionTime(data.newTime);
 		})
+
+		socket.on('rejoin_lobby', (data) => {
+			setLobby((prevLobby) => prevLobby + 1);
+		})
+
+		socket.on('start_new_round', (data) => {
+			setCurRound((round) => round + 1);
+			setIsFinished(false);
+			setNumFinished(0);
+			setTransitionTime(10); 
+		})
 		
 		return () => {
 			socket.off('join_success');
@@ -221,6 +238,8 @@ function Lobby() {
             socket.off('player_finished_endpoint')
 			socket.off('score_added')
 			socket.off('transition_time_changed')
+			socket.off('rejoin_lobby')
+			socket.off('start_new_round')
 		};
 	}, [players]);
 	useEffect(() => {
@@ -281,10 +300,6 @@ function Lobby() {
 		setStarted(true);
 		setTimeLeft(roundTime);
 		console.log('big ass');
-		const newScoreBoard = Object.fromEntries(
-			Object.keys(players).map(id => [id, 0])
-		);
-		setScoreBoard(newScoreBoard);
 		
 		console.log("info aksfhkajsjdfkjashdflkjhjalksdjfhkljh", scoreBoard, curRound);
 	};
@@ -320,11 +335,15 @@ function Lobby() {
 			return () => clearInterval(timerId); // Cleanup interval on unmount
 		  } 
 		  else {
-			setCurRound((round) => round + 1);
-			setIsFinished(false);
-			setNumFinished(0);
 			setTimeLeft(roundTime); 
-			setTransitionTime(10); 
+			if(currentPlayer === players[0]){
+				socket.emit('new_round_start', {'room_id' : roomId});
+			}	
+			// setCurRound((round) => round + 1);
+			// setIsFinished(false);
+			// setNumFinished(0);
+			// setTimeLeft(roundTime); 
+			// setTransitionTime(10); 
 		  }
 		}, [time]);
 
@@ -355,6 +374,12 @@ function Lobby() {
 		setIsFinished(false);
 		setCurRound(1);
 		setScore(0);
+		setTransitionTime(10);
+		const newScoreBoard = Object.fromEntries(
+			players.map(id => [id, 0])
+		);
+		setScoreBoard(newScoreBoard);
+		socket.emit('lobby_rejoin', {'room_id' : roomId})
 		// console.log(scoreBoard);
 		setTimeLeft(roundTime);
 		setNumFinished(0); 
@@ -437,7 +462,7 @@ function Lobby() {
 									)}
 								</Container>
 							</Container>
-							<Button top='480px' width='100%' colorScheme="green" size='lg' onClick={startGame} isDisabled={playerCount < 1 || currentPlayer != players[0]}>
+							<Button top='480px' width='100%' colorScheme="green" size='lg' onClick={startGame} isDisabled={playerCount < 1 || currentPlayer != players[0] || lobby != playerCount}>
 								Start Game
 							</Button>
 						</>
@@ -447,9 +472,9 @@ function Lobby() {
 						<>
 							<CountdownTimer startTime={timeLeft} />
 							<Text>Round: {curRound}</Text>
-							<Multiplayer data_m = {data} pics_m = {pics} players_m = {bballPlayers}
-							path_m = {optimalPath} difficulty_m = {difficulty} time_m = {roundTime} setIsFinished={setIsFinished}
-                            score = {score} setScore = {setScore}  />
+							{/* <Multiplayer data_m = {data[curRound-1]} pics_m = {pics[curRound-1]} players_m = {bballPlayers[curRound-1]} //just need to make this data[curRound-1], etc.
+							path_m = {optimalPath[curRound-1]} difficulty_m = {difficulty} time_m = {roundTime} setIsFinished={setIsFinished}
+                            score = {score} setScore = {setScore}  /> */}
 							<Modal isOpen={isFinished} closeOnOverlayClick={false} isCentered={true} size='lg'>
 								<ModalOverlay />
 								<ModalContent>
