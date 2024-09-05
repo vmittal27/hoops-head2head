@@ -1,6 +1,6 @@
 import {Heading, Box, Button, Text, NumberInput, NumberInputField} from '@chakra-ui/react'
 import { Form } from "react-router-dom";
-import "../css/MultiPlayer.css"
+import "../css/Multiplayer.css"
 function MultiplayerEntryPoint({handleClick, handleSubmit, roomId, setRoomId}) {
     return (
         <>

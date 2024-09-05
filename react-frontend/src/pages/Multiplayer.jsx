@@ -1,7 +1,8 @@
 import Chat from "../components/Chat";
 import { io } from "socket.io-client";
 import { useEffect, useState } from "react";
-import "../css/MultiPlayer.css"
+import "../css/Multiplayer.css"
+import Loading from '../components/Loading'
 import MultiplayerScreen from "../components/MultiplayerPlayScreen";
 import MultiplayerEntryPoint from "../components/MultiplayerEntryPoint";
 import Lobby from '../components/Lobby.jsx'
@@ -349,7 +350,8 @@ function MultiPlayer() {
 						</>
 					) :
 					(
-						(timeLeft > 0 && numFinished < userCount && roundData.length != 0)? (
+						(timeLeft > 0 && numFinished < userCount)? (
+                        (roundData.length != 0)? (
 						<>
 							<CountdownTimer startTime={timeLeft} />
 							<Text>Round: {curRound}</Text>
@@ -372,6 +374,11 @@ function MultiPlayer() {
 								</ModalContent>
 							</Modal>
 						</>
+                        ) : (
+                            <>
+                            <Loading />
+                            </>
+                        )
 						) : (
 							curRound < roundNum ? (
 								<>

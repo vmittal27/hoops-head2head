@@ -3,7 +3,7 @@ import {Slider, SliderTrack, SliderFilledTrack, SliderThumb} from '@chakra-ui/re
 import { CopyIcon } from '@chakra-ui/icons'
 import Chat from './Chat.jsx'
 import DifficultyButton from './Difficulty.jsx'
-import '../css/MultiPlayer.css'
+import '../css/Multiplayer.css'
 
 function Lobby({
     roomId, leaveRoom, // room information
