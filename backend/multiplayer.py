@@ -90,7 +90,7 @@ def on_leave(data):
         leave_room(room_id)
         rooms[room_id].remove(request.sid)
 
-        socketio.emit('leave', {"player_count": len(rooms[room_id]), "players" : rooms[room_id]}, room=room_id)
+        socketio.emit('leave', {"user_count": len(rooms[room_id]), "users" : rooms[room_id]}, room=room_id)
 
         if len(rooms[room_id]) == 0:
             del rooms[room_id]

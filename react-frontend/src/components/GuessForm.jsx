@@ -59,7 +59,6 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
         )
             .then((response) => response.json())
             .then((response) => {
-                console.log(`${p1} and ${p2} are teammates: ${response.areTeammates}`);
                 return response.areTeammates; 
             })
             .catch(error => console.log('Error checking teammates:', error))
@@ -76,7 +75,6 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
         )
         .then((response) => response.json())
             .then((response) => {
-                console.log(`${p1}'s JSON data:  ${response.name}`);
                 return {
                     'name' : response.name,
                     'id' : response.id,
@@ -100,12 +98,9 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                             setPlayers(p => [...p, jsonData.name ]);
                             setData({...data, currPlayer : jsonData.name, currPlayerID: jsonData.id});
                             setPics({...pics, currPlayerURL : jsonData.url});
-                            console.log(jsonData.name, jsonData.id, jsonData.url);
-                            console.log(data.currPlayer, pics.currPlayerURL);
                             checkTeammates(data.lastPlayerID, guess)
                                 .then((gameOver) => {
                                     if (gameOver) {
-                                        console.log('Game Complete! Well done!');
                                         setPlayers(p => [...p, data.lastPlayer])
                                         modalOpen();
                                     }
@@ -155,12 +150,8 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
 
         if (action.action === 'select-option') {
             const data_len = players.length; 
-            
-            console.log(`Guessed ${option.value}`);
 
             handleSubmit(option.value);
-
-            console.log(`Score: ${score}`);
 
             if (players.length != data_len)
                 setValue('');

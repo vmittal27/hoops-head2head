@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { Heading, List, ListItem, Flex, Container, Text, VStack } from "@chakra-ui/react";
 import "../css/Scoreboard.css"
 
 
 
 function Scoreboard({scores}) { 
-    // useEffect (() => {
-    //     setRoundFinished(true);
-    // },[]);
+
     const sortedDict = Object.fromEntries(
         Object.entries(scores).sort(([,a],[,b]) => b-a)
     );
+
     return (
         <Container className='Scoreboard-Container'>
             <VStack>
@@ -30,4 +29,4 @@ function Scoreboard({scores}) {
     )
 }
 
-export default Scoreboard
+export default Scoreboard;

@@ -1,0 +1,97 @@
+.App-Container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1em;
+    text-align: center;
+    gap: 1em
+}
+
+.header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100vw;
+}
+
+.difficulty-buttons-group {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.difficulty-button {
+    padding: 10px 20px;
+    margin-top: 10px;
+    font-size: 1em;
+    background-color: #ffffff;
+    color: black;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.difficulty-button:hover {
+    border: 2px solid #8196e0;
+}
+
+.selected-difficulty-button {
+    padding: 10px 20px;
+    margin-top: 10px;
+    font-size: 1em;
+    background-color: #ffffff;
+    color: black;
+    border: 2px solid #8196e0;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.right-container {
+    display: flex;
+    align-items: center;
+    position: absolute; 
+    top: 0; 
+    right: 0; 
+    padding: 1vw;
+    gap: 1vw;
+}
+
+.score-box {
+    border-radius: 20px;
+    text-align: center;
+    padding: 0.5em;
+    box-sizing: border-box;
+    margin: 1.5px;
+    border: 1.5px solid; 
+    border-color: white;
+}
+
+.rules {
+    position: relative;
+}
+
+.rules:hover {
+    color: #8196e0;
+    cursor: pointer;
+}
+
+.player-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    width: 80vw; 
+    height: 100vh;
+}
+
+.player {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.search-bar {
+    width: 30vw;
+    text-align: left;
+}

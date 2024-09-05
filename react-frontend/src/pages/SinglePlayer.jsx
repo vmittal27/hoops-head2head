@@ -38,7 +38,7 @@ function SinglePlayer() {
 	const[guesses, setGuesses] = useState(5);
 
 	const [optimalPath, setOptimalPath] = useState([]);
-	const API_BASE_URL = "http://localhost:3000/";
+	const API_BASE_URL = "http://localhost:5000/";
 	
 	useEffect(() => {
 		// Using fetch to fetch the api from flask server it will be redirected to proxy
@@ -65,6 +65,7 @@ function SinglePlayer() {
 					setPics({currPlayerURL: data["Player 1"]["picture_url"], lastPlayerURL: data["Player 2"]["picture_url"]});
 				
 					setOptimalPath(data['Path']);
+					console.log(data['Path']);
 
 					//adding initial player to player list
 					setPlayers([data["Player 1"]["name"]]);

@@ -8,7 +8,7 @@ function Homepage() {
 
     return (
         <Container className='Homepage-Container'>
-            <div class='header'>
+            <div className='header'>
                 <Link to='..'>
                 <Image src={logoImage} boxSize = '150' objectFit='cover' position='relative'/>
                 </Link>
@@ -20,7 +20,7 @@ function Homepage() {
                 <Heading pos='relative' as='h3' size='lg'>Please select a game mode below</Heading>
                 <br/>
                 <Link to='/singleplayer' ><Button className='Gamemode-Button'>Single Player</Button></Link>
-                <Link to='/lobby'><Button className='Gamemode-Button'>Multiplayer</Button></Link>
+                <Link to='/multiplayer'><Button className='Gamemode-Button'>Multiplayer</Button></Link>
             </Box>
             <Container>
             </Container>

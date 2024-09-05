@@ -1,294 +1,402 @@
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { gsap } from 'gsap'
-import '../components/Difficulty'
-
-import '../css/Multiplayer.css'
-import GuessForm from '../components/GuessForm'
-import { QuestionOutlineIcon } from '@chakra-ui/icons'
-import { IoHome } from "react-icons/io5";
-import { VStack,Container, Heading, Text, UnorderedList, ListItem } from '@chakra-ui/react'
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
+import Chat from "../components/Chat";
+import { io } from "socket.io-client";
+import { useEffect, useState } from "react";
+import "../css/MultiPlayer.css"
+import MultiplayerScreen from "../components/MultiplayerPlayScreen";
+import MultiplayerEntryPoint from "../components/MultiplayerEntryPoint";
+import Lobby from '../components/Lobby.jsx'
+import Scoreboard from "../components/Scoreboard";
+import {Link, Image, Text, Container, NumberInput, NumberInputField, Button, Box, IconButton, useColorMode} from "@chakra-ui/react";
+import DifficultyButton from '../components/Difficulty'
+import { Heading, UnorderedList, ListItem, Flex } from "@chakra-ui/react";
 import {
-	Modal,
-	ModalOverlay,
-	ModalContent,
-	ModalHeader,
-	ModalFooter,
-	ModalBody,
-	ModalCloseButton,
-	useDisclosure,
-	Button,
-	Image,
-    Icon
+	Slider,
+	SliderTrack,
+	SliderFilledTrack,
+	SliderThumb,
+} from '@chakra-ui/react'
+import { MoonIcon, CopyIcon, SunIcon } from '@chakra-ui/icons'
+
+import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
+import { Form } from "react-router-dom";
+
+import {
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+	CircularProgress
+} from '@chakra-ui/react'
+import {
+	Stat,
+	StatNumber,
 } from '@chakra-ui/react'
 
-import myImage from '../components/wedidit.jpeg'
-import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
-import defaultImage from '../components/default-pic.png'	
-import DifficultyButton from '../components/Difficulty'
+const socket = io("localhost:5000/", {
+	transports: ["websocket"],
+	cors: {
+		origin: "http://localhost:5173/",
+	},
+});
 
-function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, setIsFinished, score, setScore}) {
-	const [data, setData] = useState(data_m)
-	const [pics, setPics] = useState(pics_m)
+function MultiPlayer() {
+	const [roomId, setRoomId] = useState('');
+	const [joinRoomId, setJoinRoomId] = useState('');
+	const [userCount, setUserCount] = useState(0);
+	const [users, setUsers] = useState([]);
+	const [error, setError] = useState('');
+	const [difficulty, setDifficulty] = useState('easy');
+	const [roundTime, setRoundTime] = useState(75)
+    const [roundNum, setRoundNum] = useState(5);
+	const [currentUser, setCurrentUser] = useState(null);
+	const [started, setStarted] = useState(false);
+	const [timeLeft, setTimeLeft] = useState(75); // Time left for the countdown
+    const [isFinished, setIsFinished] = useState(false);
+    const [numFinished, setNumFinished] = useState(0);
+	const [scoreBoard, setScoreBoard] = useState({})
+	const [lobby, setLobby] = useState(0);
+    const [score, setScore] = useState(0);
+	const [curRound, setCurRound] = useState(1); 
+	const [transitionTime, setTransitionTime] = useState(10);
+	const [roundData, setRoundData] = useState([]);
 
-	const [players, setPlayers] = useState(players_m)
-	const [difficulty, setDifficulty] = useState(difficulty_m)
-	const [timeLeft, setTimeLeft] = useState(time_m);
+	const { colorMode, toggleColorMode } = useColorMode();
 
-	const[guesses, setGuesses] = useState(5)
-
-	const [optimalPath, setOptimalPath] = useState(path_m);
-
-	// console.log('fucked shit');
-	// console.log(data_m, pics_m, players_m, difficulty_m, path_m);
+	const API_BASE_URL = "http://localhost:5000/"
 
 	useEffect(() => {
-		setData(data_m);
-		setPics(pics_m);
-		setPlayers(players_m);
-		setDifficulty(difficulty_m);
-		setOptimalPath(path_m);
-		setTimeLeft(time_m);
-	  }, [data_m, pics_m, players_m, difficulty_m, path_m, time_m]);
-	// console.log(data, pics, score, players, difficulty, optimalPath);
-	// const API_BASE_URL = "http://localhost:5000/"
-	
-	// useEffect(() => {
-	// 	// Using fetch to fetch the api from flask server it will be redirected to proxy
-	// 	fetch(API_BASE_URL + "players/" + difficulty)
+		setCurrentUser(socket.id);
+		
+		socket.on('join_success', (data) => {
+			setRoomId(data.room_id);
+			setUserCount(data.user_count);
+			setLobby(data.user_count);
+			setError('');
+		});
+		
+		socket.on('user_joined', (data) => {
+			setUserCount(data.user_count);
+			setLobby(data.user_count);
+			console.log("users" + data.users);
+			setUsers(data.users);
+			const newScoreBoard = Object.fromEntries(
+				data.users.map(id => [id, 0])
+			);
+			setScoreBoard(newScoreBoard); 
+		});
+		
+		socket.on('leave', (data) => {
+			setUserCount(data.user_count);
+			setLobby(data.user_count);
+			setUsers(data.users);
+			const newScoreBoard = Object.fromEntries(
+				data.users.map(id => [id, 0])
+			);
+			setScoreBoard(newScoreBoard);
 			
-	// 		.then(
-	// 			(res) => {
+		});
+		
+		socket.on('error', (data) => {
+			setError(data.message);
+		});
+		
+		socket.on('settings_changed', (data) => {
+			setDifficulty(data.difficulty); 
+			setRoundTime(data.roundTime);
+            setTimeLeft(data.roundTime);
+			setRoundNum(data.roundNum)
+			console.log(data.difficulty, data.roundNum);
+		});
 
-	// 				if (!res.ok)
-	// 					throw new Error(`HTTP error! status: ${res.status}`);
+		socket.on('start_game', (data) => {
+			setRoundData(data.players);
+			setLobby(0); //nobody in lobby
+			setStarted(true); 
+			console.log("game start test", data.players);
+		});
 
-	// 				console.log("Raw response:", res);
-	// 				return res.json();
-	// 			}
-	// 		)
-	
-	// 		.then(
-	// 			(data) => {
-	// 				setData({currPlayer: data["Player 1"]["name"], lastPlayer: data["Player 2"]["name"],
-	// 					currPlayerID : data["Player 1"]["id"], lastPlayerID: data["Player 2"]["id"]
-	// 				});
-	// 				setPics({currPlayerURL: data["Player 1"]["picture_url"], lastPlayerURL: data["Player 2"]["picture_url"]})
-				
-	// 				setOptimalPath(data['Path']);
+		socket.on('time_changed', (data) => {
+			setTimeLeft(data.newTime);
+		})
 
-	// 				//adding initial player to player list
-	// 				console.log('adding first player');
-	// 				setPlayers([data["Player 1"]["name"]]);
-	// 				console.log(players);
+        socket.on('user_finished', (data) => {
+            setNumFinished((num) => num + 1);
+        })
 
-	// 			}
-	// 		)
+        socket.on('score_added', (data) => {
+            setScoreBoard(prevScoreBoard => ({
+				...prevScoreBoard, 
+				[data.player_id]: (prevScoreBoard[data.player_id] || 0) + data.score
+			}));
+			console.log(data.score);
+            console.log(scoreBoard);
+        })
+		
+		
+		socket.on('transition_time_changed', (data) => {
+			setTransitionTime(data.newTime);
+		})
 
-	// 		.catch((error) => {console.error("Error fetching data:", error);});
-	// }, [difficulty]);
+		socket.on('lobby_rejoined', (data) => {
+			setLobby((prevLobby) => prevLobby + 1);
+		})
 
+		socket.on('start_new_round', (data) => {
+			setCurRound((round) => round + 1);
+			setIsFinished(false);
+			setNumFinished(0);
+			setTransitionTime(10); 
+			console.log("Set new transition time");
+		})
+		
+		return () => {
+			socket.off('join_success');
+			socket.off('user_joined');
+			socket.off('leave');
+			socket.off('error');
+			socket.off('settings_changed');
+			socket.off('start_game');
+            socket.off('time_changed');
+            socket.off('user_finished');
+			socket.off('score_added');
+			socket.off('transition_time_changed');
+			socket.off('lobby_rejoined');
+			socket.off('start_new_round');
+		};
+	}, [users]);
+
+	useEffect(() => {
+		if (currentUser === users[0]) {
+			socket.emit('settings_changed', {'room_id' : roomId, 'difficulty': difficulty, 'roundTime' : roundTime, 'roundNum': roundNum})
+			console.log(difficulty, roundTime);
+		}
+		
+	}, [difficulty, roundTime, users, roundNum]);
+    
     useEffect(() => {
-        gsap.fromTo('#curr-image', {borderColor: '#6ba9fa'}, {borderColor: '#ffffff', duration: 1})
-    },[data])
-
-
-
-	const { isOpen: isRulesOpen , onOpen: onRulesOpen, onClose: onRulesClose } = useDisclosure()
-    const { isOpen: isWinOpen , onOpen: onWinOpen, onClose: onWinClose } = useDisclosure()
-    const { isOpen: isLoseOpen , onOpen: onLoseOpen, onClose: onLoseClose } = useDisclosure()
-
-    // Checking if game end
-    useEffect(() => {
-        if (isWinOpen || guesses === 0) {
-            setIsFinished(true);
+        console.log('isFinished changed')
+        if (isFinished) {
+            socket.emit('user_finished', {'id' : currentUser, 'room_id' : roomId});
+			window.scrollTo({
+				top: 0,
+				left: 0,
+				behavior: 'smooth'
+			});
+			socket.emit('score_added', {'score' : score, 'player_id' : currentUser, 'room_id' : roomId})
         }
-    }, [guesses, players])
+    }, [isFinished])
+
+	const createRoom = async () => {
+		try {
+			const response = await fetch(`${API_BASE_URL}/create_room`, { method: 'POST' });
+			const data = await response.json();
+			console.log("room id" + data.room_id);
+			joinRoom(data.room_id);
+		} catch (err) {
+			setError('Failed to create room');
+		}
+	};
+
+	const joinRoom = (id) => {
+		socket.emit('user_joined', { room_id: id });
+		console.log("test" + users);
+	};
+
+	const leaveRoom = () => {
+		socket.emit('leave', { room_id: roomId });
+		setRoomId('');
+		setUserCount(0);
+	};
+
+	const handleJoinSubmit = (e) => {
+		e.preventDefault();
+		if (joinRoomId) {
+			joinRoom(joinRoomId);
+			console.log("test" + joinRoomId);
+			setJoinRoomId('');
+		}
+	};
+
+	const startGame = () => {
+		setStarted(true);
+		setTimeLeft(roundTime);	
+		socket.emit('start_game', { room_id: roomId, rounds : roundNum, difficulty : difficulty});
+	};
+
+	const resetGame = () => {
+		setStarted(false); 
+		setIsFinished(false);
+		setCurRound(1);
+		setScore(0);
+		setTransitionTime(10);
+		const newScoreBoard = Object.fromEntries(
+			users.map(id => [id, 0])
+		);
+		setScoreBoard(newScoreBoard);
+		socket.emit('lobby_rejoined', {'room_id' : roomId})
+		setTimeLeft(roundTime);
+		setNumFinished(0); 
+	}
+
+	const CountdownTimer = ( { startTime } ) => {
+
+		const [time, setTime] = useState(startTime);
+	  
+		useEffect(
+			() => {
+				if (time >= 0) {
+					const timerId = setInterval(
+						() => {setTime((prevTime) => prevTime - 1);},
+						1000
+					);
+					socket.emit('time_changed', {'room_id' : roomId, 'time' : time});
+					return () => clearInterval(timerId); // Cleanup interval on unmount
+		  		} 
+			}, 
+			[time]
+		);
+
+		return (
+			<div>
+            	{
+					time <= 0 ? 
+					<Text size='lg'>Time's up!</Text> : 
+					<Stat><StatNumber>{new Date(timeLeft * 1000).toISOString().substring(14, 19)}</StatNumber></Stat>
+				}
+		  	</div>
+		);
+	};
+
+	const TransitionTimer = ( { startTime } ) => {
+		const [time, setTime] = useState(startTime);
+	  
+		useEffect(
+			() => {
+		  		if (time >= 0) {
+					const timerId = setInterval(
+						() => {setTime((prevTime) => prevTime - 1);}, 
+						1000
+					);
+					socket.emit('transition_time_changed', {'room_id' : roomId, 'time' : time})
+					console.log("Current transition time", time);
+					return () => clearInterval(timerId); // Cleanup interval on unmount
+		 		} 
+				else {
+					setTimeLeft(roundTime); 
+					if (currentUser === users[0]) {
+						socket.emit('start_new_round', {'room_id' : roomId});
+					}
+					setTransitionTime(10); 
+				}
+			}, 
+			[time]
+		);
+
+		return (
+			<div>
+				{
+					time >= 0 ? 
+					<Stat><StatNumber>{new Date(time * 1000).toISOString().substring(14, 19)}</StatNumber></Stat> :
+					<Heading size='md'>Waiting for next round...</Heading>
+				}
+		  	</div>
+		);
+	};
+
 
 	return (
-		<Container className='App-Container'>
-			{/* <Text fontWeight='bold' fontSize='xl'> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Text> */}
-			{/* <Heading size='md'> Current difficulty : {difficulty} </Heading>  */}
-
-			<GuessForm
-				guesses={guesses}
-				setGuesses={setGuesses}
-				players={players}
-				setPlayers={setPlayers}
-				data={data}
-				setData={setData}
-				modalOpen={onWinOpen}
-				score={score}
-				setScore={setScore}
-				pics={pics}
-				setPics={setPics}
-			/>
-	
-			<Text align= 'center'>Remaining Guesses: {guesses}</Text>
-
-			<div className='path'>
-                <VStack spacing={4} align="stretch">
-				<Text fontSize='xl' fontWeight='bold'>Current Path</Text>
-                <Text fontWeight='bold'>{players.map((player, index) => (
-									<React.Fragment key={index}>
-										{player}
-										{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
-									</React.Fragment>
-								))}
-							</Text>
-                </VStack>
-            </div>
-			<div className='player-container'>
-				<div className='player'> 
-					<Text fontSize='xl' align= 'center'> Current Player </Text>
-					<Image id='curr-image'
-						src = {pics.currPlayerURL}
-						bg = 'white'
-						fallbackSrc = {defaultImage} 
-						borderRadius='full'
-						border='5px solid #ffffff'
-						objectFit='contain' 
-						boxSize='180'
-					/>
-					<Text fontSize='xl' align= 'center'>{data.currPlayer} </Text>
-				</div>
-
-				<div className='player'> 
-					<Text fontSize='xl' align= 'center'> Target Player </Text>
-					<Image 
-						src = {pics.lastPlayerURL}
-						bg = 'white'
-						borderRadius='full'
-						fallbackSrc = {defaultImage} 
-						border='5px solid #ffffff'
-						objectFit='contain' 
-						boxSize='180'
-					/>
-					<Text fontSize='xl' align= 'center'> {data.lastPlayer} </Text>
-				</div>
+		<Container className="App-Container">
+			<div className='header'>
+				<a href="/"><Image src={logoImage} boxSize = '150' objectFit='cover' position='relative'/></a>
+				<Text fontWeight='bold' fontSize='3xl'> Hoops Head 2 Head </Text>
+				<IconButton onClick={toggleColorMode} icon={colorMode === 'light' ? <MoonIcon/> : <SunIcon/>} position='absolute' right='50px'>
+					Toggle {colorMode === 'light' ? 'Dark' : 'Light'}
+				</IconButton>
 			</div>
-			<div className='right-container'>
-				<QuestionOutlineIcon onClick={onRulesOpen} className = "rules" boxSize={8}/>
+			{error && <Text style={{color: 'red'}}>{error}</Text>}
+			{!roomId ? 
+				(
+					<>
+						<MultiplayerEntryPoint
+							handleClick={createRoom}
+							handleSubmit={handleJoinSubmit}
+							roomId={joinRoomId}
+							setRoomId={setJoinRoomId}
+						/>
+					</>
+				) : 
+				( 
+					!started ? 
+					(	<>
+							<Lobby
+								roomId={roomId}
+								leaveRoom={leaveRoom}
+								userCount={userCount}
+								users={users}
+								currentUser={currentUser}
+								difficulty={difficulty}
+								setDifficulty={setDifficulty}
+								roundTime={roundTime}
+								setRoundTime={setRoundTime}
+								roundNum={roundNum}
+								setRoundNum={setRoundNum}
+								socket={socket}
+								lobby={lobby}
+								startGame={startGame}
+							/>
+						</>
+					) :
+					(
+						(timeLeft > 0 && numFinished < userCount && roundData.length != 0)? (
+						<>
+							<CountdownTimer startTime={timeLeft} />
+							<Text>Round: {curRound}</Text>
+							<MultiplayerScreen data_m = {roundData[curRound-1].player_data} pics_m = {roundData[curRound-1].pictures} 
+							players_m = {roundData[curRound-1].players} //just need to make this data[curRound-1], etc.
+							path_m = {roundData[curRound-1].path} difficulty_m = {difficulty} time_m = {roundTime} setIsFinished={setIsFinished}
+                            score = {score} setScore = {setScore}  />
+							<Modal isOpen={isFinished} closeOnOverlayClick={false} isCentered={true} size='lg'>
+								<ModalOverlay />
+								<ModalContent>
+									<ModalHeader>Waiting for other players . . .</ModalHeader>
+									<ModalBody display='flex' flexDirection='row' alignItems='center' gap='1em'>
+										<CircularProgress value={(numFinished / userCount) * 100}/>
+										<Text fontSize='xl'>Players Finished: {numFinished}</Text>
+									</ModalBody>
+									<ModalFooter margin='auto'>
+										<Stat><StatNumber>{new Date(timeLeft * 1000).toISOString().substring(14, 19)}</StatNumber></Stat>
+									</ModalFooter>
 
-				<div className = "score-box">
-					<Heading size='md'>Score: {score}</Heading>
-				</div>
-			</div>
-
-			{/* <Modal blockScrollOnMount={false} isOpen={isWinOpen} onClose={onWinClose}>
-				<ModalOverlay/>
-				<ModalContent backgroundColor="green.300">
-					<ModalHeader>YOU DID ITTTTTT!</ModalHeader>
-					<ModalCloseButton/>
-					<ModalBody>
-						<Image src={myImage} alt="Description of Image" />
-						<Text mb='1rem'>
-							Your path was:
-							<Text fontWeight='bold'>{players.map((player, index) => (
-									<React.Fragment key={index}>
-										{player}
-										{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
-									</React.Fragment>
-								))}
-							</Text>
-							The shortest path was:
-							<Text fontWeight='bold'>{optimalPath.map((player, index) => (
-									<React.Fragment key={index}>
-										{player}
-										{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
-									</React.Fragment>
-								))}
-							</Text>
-						</Text>
-						<Text mb='1rem'>
-							Score:<Text as="span" fontWeight='bold'>{score}</Text>
-						</Text>
-					</ModalBody>
-
-					<ModalFooter>
-						<Button variant='ghost' mr={3} onClick={onWinClose}>Close</Button>
-						<Button colorScheme='blue' onClick={() => window.location.reload()}>Restart</Button>
-					</ModalFooter>
-				</ModalContent>
-			</Modal> */}
-
-            <Modal blockScrollOnMount={false} size ={'lg'} isOpen={isRulesOpen} onClose={onRulesClose}>
-				<ModalOverlay/>
-				<ModalContent>
-					<ModalHeader>Rules</ModalHeader>
-					<ModalCloseButton color="black"/>
-					<ModalBody>
-                    <Tabs variant='enclosed'>
-                        <TabList>
-                            <Tab>How to Play</Tab>
-                            <Tab>Scoring</Tab>
-                        </TabList>
-                        <TabPanels>
-                            <TabPanel>
-                            <UnorderedList>
-                                <ListItem>
-                                    Connect two NBA players based on mutual teammates
-                                </ListItem>
-                                <ListItem>
-                                    Complete the connection in as few guesses as possible
-                                </ListItem>
-                                <ListItem>
-                                    The game ends when the connection is complete or you have exhausted all your guesses
-                                </ListItem>
-				            </UnorderedList>
-                            </TabPanel>
-                            <TabPanel>
-                            <UnorderedList>
-                                <ListItem>
-                                    Lowest score wins
-                                </ListItem>
-                                <ListItem>
-                                    For correct guesses, obvious teammates add more points than guessing less well-known teammates do
-                                </ListItem>
-                                <ListItem>
-                                    Incorrect guesses add the most points, with more points being added for a streak of wrong guesses
-                                </ListItem>
-                                </UnorderedList>
-                            </TabPanel>
-                        </TabPanels>
-                        </Tabs>
-
-					</ModalBody>
-
-					<ModalFooter>
-
-					</ModalFooter>
-				</ModalContent>
-			</Modal>
-
-			{/* <Modal closeOnOverlayClick={false} isOpen={guesses===0} onClose={onLoseClose}>
-				<ModalOverlay/>
-				<ModalContent>
-					<ModalHeader>Game Over!</ModalHeader>
-
-					<ModalCloseButton />
-
-					<ModalBody>
-						<Text mb='1rem'>
-							You ran out of guesses!
-							<br/><br/>The shortest path was:<br/>
-							<Text fontWeight='bold'>
-								{optimalPath.join(' ➡️ ')}
-							</Text>
-						</Text>
-					</ModalBody>
-
-					<ModalFooter>
-						<Button variant='ghost' mr={3} onClick={onLoseClose}>Close</Button>
-						<Button colorScheme='blue' onClick={() => window.location.reload()}>Restart</Button>
-					</ModalFooter>
-
-				</ModalContent>
-			</Modal> */}
-		</Container>		
+								</ModalContent>
+							</Modal>
+						</>
+						) : (
+							curRound < roundNum ? (
+								<>
+									<Heading size="lg">Round {curRound} Results</Heading>
+									<Heading size="md">Guest {socket.id.substring(0,5)} </Heading>
+									<Heading size="sm">Round Score: {score} </Heading>
+									<TransitionTimer startTime={transitionTime}/>
+									<Scoreboard scores = {scoreBoard}/>
+								</>
+							) : (
+								<>
+									<Heading size="lg">Final Results</Heading>
+									<Heading size="md">Guest {socket.id.substring(0,5)} </Heading>
+									<Heading size="sm">Round Score: {score} </Heading>
+									<Scoreboard scores = {scoreBoard}/>
+									<Button onClick={resetGame}>Return to Lobby</Button> 
+								</>
+							)
+						)
+					)
+				)
+			}
 			
-	)
-}
+		</Container>
+	);
+};
 
-export default Multiplayer; 
+export default MultiPlayer;

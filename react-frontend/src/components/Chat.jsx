@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Heading, UnorderedList, ListItem, Input, InputGroup, InputRightElement, Container, Button, DarkMode } from "@chakra-ui/react";
 
-export default function Chat({ socket }) {
+export default function Chat({ socket, roomId }) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
 
@@ -11,7 +11,7 @@ export default function Chat({ socket }) {
 
   const handleSubmit = () => {
     if (!message) return;
-    socket.emit("data", message);
+    socket.emit("message", {'room_id': roomId, 'message': message});
     setMessage("");
   };
 
@@ -27,19 +27,16 @@ export default function Chat({ socket }) {
       setMessages((prevMessages) => [...prevMessages, [data.data, data.id]]);
     };
 
-    socket.on("data", handleIncomingData);
+    socket.on("message", handleIncomingData);
 
     // Cleanup function to remove the listener
     return () => {
-      socket.off("data", handleIncomingData);
+      socket.off("message", handleIncomingData);
     };
   }, [socket]);
 
   return (
-    <div>
-  
-    <Container bg='var(--chakra-colors-chakra-subtle-bg)' h='300px' minW='650px' position='absolute' top='130%' bottom='3%' right= '2%'  borderRadius='20px' borderWidth='3px' borderColor= 
-    '#ff7f26' >
+    <Container bg='var(--chakra-colors-chakra-subtle-bg)' h='20rem' w='100%' float='right' overflow-x= 'hidden' maxWidth='45rem' position='relative'borderRadius='20px' borderWidth='3px' borderColor='#ff7f26' >
       <Heading size='lg' mt='10px'>Chat</Heading>
       <UnorderedList styleType="''" mt='10px' overflowY='auto' maxHeight='120px'>
         {messages.map((message, ind) => (
@@ -48,7 +45,7 @@ export default function Chat({ socket }) {
           </ListItem>
         ))}
       </UnorderedList>
-      <InputGroup position='absolute' bottom='23%' right='1.6%' maxW='625px'>
+      <InputGroup width='95%' position='absolute' top='14rem'>
         <Input 
             position='absolute'
             placeholder='Enter Message'
@@ -68,7 +65,5 @@ export default function Chat({ socket }) {
         </InputRightElement>
       </InputGroup>
     </Container>
-    
-    </div>
   );
 }

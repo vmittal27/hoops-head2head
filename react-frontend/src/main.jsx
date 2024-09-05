@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import SinglePlayer from './pages/SinglePlayer.jsx'
 import Homepage from './pages/Homepage.jsx'
-import Lobby from './pages/Lobby.jsx'
+import MultiPlayer from './pages/MultiPlayer.jsx'
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import './css/index.css'
 import { extendTheme } from '@chakra-ui/react'
@@ -18,8 +18,8 @@ const router = createBrowserRouter([
         element: <SinglePlayer />
     },
     {
-        path: '/lobby',
-        element: <Lobby />
+        path: '/multiplayer',
+        element: <MultiPlayer />
     }
 ])
 
