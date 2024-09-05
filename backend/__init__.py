@@ -14,3 +14,4 @@ socketio = SocketIO(app,cors_allowed_origins="http://localhost:5173")
 if __name__ == '__main__':
     socketio.run(app, debug=True,port=5000)
 from backend import routes
+from backend import websocket
