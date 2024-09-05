@@ -6,7 +6,6 @@ import '../components/Difficulty'
 import '../css/SinglePlayer.css'
 import GuessForm from '../components/GuessForm'
 import { QuestionOutlineIcon } from '@chakra-ui/icons'
-import { IoHome } from "react-icons/io5";
 import { VStack,Container, Heading, Text, UnorderedList, ListItem } from '@chakra-ui/react'
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 import {
@@ -29,17 +28,17 @@ import defaultImage from '../components/default-pic.png'
 import DifficultyButton from '../components/Difficulty'
 
 function SinglePlayer() {
-	const [data, setData] = useState([{currPlayer: "", lastPlayer: "", currPlayerID: "", lastPlayerID: ""}])
-	const [pics, setPics] = useState([{currPlayerURL: "", lastPlayerURL: ""}])
+	const [data, setData] = useState([{currPlayer: "", lastPlayer: "", currPlayerID: "", lastPlayerID: ""}]);
+	const [pics, setPics] = useState([{currPlayerURL: "", lastPlayerURL: ""}]);
 	const [score, setScore] = useState(0);
 
-	const [players, setPlayers] = useState([])
-	const [difficulty, setDifficulty] = useState('easy')
+	const [players, setPlayers] = useState([]);
+	const [difficulty, setDifficulty] = useState('easy');
 
-	const[guesses, setGuesses] = useState(5)
+	const[guesses, setGuesses] = useState(5);
 
 	const [optimalPath, setOptimalPath] = useState([]);
-	const API_BASE_URL = "http://localhost:5000/"
+	const API_BASE_URL = "http://localhost:3000/";
 	
 	useEffect(() => {
 		// Using fetch to fetch the api from flask server it will be redirected to proxy
@@ -51,24 +50,24 @@ function SinglePlayer() {
 					if (!res.ok)
 						throw new Error(`HTTP error! status: ${res.status}`);
 
-					console.log("Raw response:", res);
 					return res.json();
 				}
 			)
 	
 			.then(
 				(data) => {
-					setData({currPlayer: data["Player 1"]["name"], lastPlayer: data["Player 2"]["name"],
-						currPlayerID : data["Player 1"]["id"], lastPlayerID: data["Player 2"]["id"]
-					});
-					setPics({currPlayerURL: data["Player 1"]["picture_url"], lastPlayerURL: data["Player 2"]["picture_url"]})
+					setData(
+						{
+							currPlayer: data["Player 1"]["name"], lastPlayer: data["Player 2"]["name"],
+							currPlayerID : data["Player 1"]["id"], lastPlayerID: data["Player 2"]["id"]
+						}
+					);
+					setPics({currPlayerURL: data["Player 1"]["picture_url"], lastPlayerURL: data["Player 2"]["picture_url"]});
 				
 					setOptimalPath(data['Path']);
 
 					//adding initial player to player list
-					console.log('adding first player');
 					setPlayers([data["Player 1"]["name"]]);
-					console.log(players);
 
 				}
 			)
@@ -79,7 +78,6 @@ function SinglePlayer() {
     useEffect(() => {
         gsap.fromTo('#curr-image', {borderColor: '#6ba9fa'}, {borderColor: '#ffffff', duration: 1})
     },[data])
-
 
 	const { isOpen: isRulesOpen , onOpen: onRulesOpen, onClose: onRulesClose } = useDisclosure()
     const { isOpen: isWinOpen , onOpen: onWinOpen, onClose: onWinClose } = useDisclosure()
@@ -93,8 +91,8 @@ function SinglePlayer() {
                 </Link>
                 <Text fontWeight='bold' fontSize='3xl'> Hoops Head 2 Head </Text>
             </div>
+
 			<Text fontWeight='bold' fontSize='xl'> Single Player Mode </Text>
-			{/* <Text fontWeight='bold' fontSize='xl'> Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Text> */}
 			<DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty} />
 
 			<GuessForm
@@ -116,15 +114,19 @@ function SinglePlayer() {
 			<div className='path'>
                 <VStack spacing={4} align="stretch">
 				<Text fontSize='xl' fontWeight='bold'>Current Path</Text>
-                <Text fontWeight='bold'>{players.map((player, index) => (
-									<React.Fragment key={index}>
-										{player}
-										{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
-									</React.Fragment>
-								))}
-							</Text>
+                <Text fontWeight='bold'>{
+					players.map(
+						(player, index) => (
+							<React.Fragment key={index}>
+								{player}
+								{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
+							</React.Fragment>
+						)
+					)
+				}</Text>
                 </VStack>
             </div>
+	
 			<div className='player-container'>
 				<div className='player'> 
 					<Text fontSize='xl' align= 'center'> Current Player </Text>
@@ -157,9 +159,7 @@ function SinglePlayer() {
 			<div className='right-container'>
 				<QuestionOutlineIcon onClick={onRulesOpen} className = "rules" boxSize={8}/>
 
-				<div className = "score-box">
-					<Heading size='md'>Score: {score}</Heading>
-				</div>
+				<div className = "score-box"><Heading size='md'>Score: {score}</Heading></div>
 			</div>
 
 			<Modal blockScrollOnMount={false} isOpen={isWinOpen} onClose={onWinClose}>
@@ -172,21 +172,20 @@ function SinglePlayer() {
 						<Text mb='1rem'>
 							Your path was:
 							<Text fontWeight='bold'>{players.map((player, index) => (
-									<React.Fragment key={index}>
-										{player}
-										{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
-									</React.Fragment>
-								))}
-							</Text>
+								<React.Fragment key={index}>
+									{player}
+									{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
+								</React.Fragment>
+							))}</Text>
 							The shortest path was:
 							<Text fontWeight='bold'>{optimalPath.map((player, index) => (
-									<React.Fragment key={index}>
-										{player}
-										{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
-									</React.Fragment>
-								))}
-							</Text>
+								<React.Fragment key={index}>
+									{player}
+									{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
+								</React.Fragment>
+							))}</Text>
 						</Text>
+
 						<Text mb='1rem'>
 							Score:<Text as="span" fontWeight='bold'>{score}</Text>
 						</Text>
@@ -205,46 +204,43 @@ function SinglePlayer() {
 					<ModalHeader>Rules</ModalHeader>
 					<ModalCloseButton color="black"/>
 					<ModalBody>
-                    <Tabs variant='enclosed'>
-                        <TabList>
-                            <Tab>How to Play</Tab>
-                            <Tab>Scoring</Tab>
-                        </TabList>
-                        <TabPanels>
-                            <TabPanel>
-                            <UnorderedList>
-                                <ListItem>
-                                    Connect two NBA players based on mutual teammates
-                                </ListItem>
-                                <ListItem>
-                                    Complete the connection in as few guesses as possible
-                                </ListItem>
-                                <ListItem>
-                                    The game ends when the connection is complete or you have exhausted all your guesses
-                                </ListItem>
-				            </UnorderedList>
-                            </TabPanel>
-                            <TabPanel>
-                            <UnorderedList>
-                                <ListItem>
-                                    Lowest score wins
-                                </ListItem>
-                                <ListItem>
-                                    For correct guesses, obvious teammates add more points than guessing less well-known teammates do
-                                </ListItem>
-                                <ListItem>
-                                    Incorrect guesses add the most points, with more points being added for a streak of wrong guesses
-                                </ListItem>
-                                </UnorderedList>
-                            </TabPanel>
-                        </TabPanels>
-                        </Tabs>
+						<Tabs variant='enclosed'>
+							<TabList>
+								<Tab>How to Play</Tab>
+								<Tab>Scoring</Tab>
+							</TabList>
 
+							<TabPanels>
+								<TabPanel>
+									<UnorderedList>
+										<ListItem>
+											Connect two NBA players based on mutual teammates
+										</ListItem>
+										<ListItem>
+											Complete the connection in as few guesses as possible
+										</ListItem>
+										<ListItem>
+											The game ends when the connection is complete or you have exhausted all your guesses
+										</ListItem>
+									</UnorderedList>
+								</TabPanel>
+								<TabPanel>
+									<UnorderedList>
+										<ListItem>
+											Lowest score wins
+										</ListItem>
+										<ListItem>
+											For correct guesses, obvious teammates add more points than guessing less well-known teammates do
+										</ListItem>
+										<ListItem>
+											Incorrect guesses add the most points, with more points being added for a streak of wrong guesses
+										</ListItem>
+									</UnorderedList>
+								</TabPanel>
+							</TabPanels>
+						</Tabs>
 					</ModalBody>
-
-					<ModalFooter>
-
-					</ModalFooter>
+					<ModalFooter/>
 				</ModalContent>
 			</Modal>
 
