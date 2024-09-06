@@ -58,8 +58,8 @@ function Lobby({
                     <Flex>
                         <Text as='b' fontSize='lg' m='10px'>Room ID: {roomId}</Text>
                         <IconButton icon={<CopyIcon />} onClick={copyRoom}></IconButton>
+                        <Button onClick={leaveRoom} marginRight='0' right='2rem' marginLeft='auto' position='relative'>Leave Room</Button>
                     </Flex>
-                    <Button onClick={leaveRoom} position='absolute' top='5%' right='5%'>Leave Room</Button>
                     <Text fontSize='lg' textAlign='left' mx='10px' my='5px'>Players: {userCount}</Text>
                     <UnorderedList styleType="''" textAlign='left' fontSize='lg' mx='10px'>
                         {users.map((user) => {
@@ -67,7 +67,7 @@ function Lobby({
                         })}
                     </UnorderedList>
                 </Container>    
-                <Chat socket = {socket} roomId={roomId} />
+                <Chat class='chatclass' socket = {socket} roomId={roomId} />
             </Container>
             <Button width='100%' colorScheme="green" size='lg' onClick={startGame} isDisabled={userCount < 1 || currentUser != users[0] || lobby != userCount}>
                 Start Game

@@ -36,7 +36,7 @@ export default function Chat({ socket, roomId }) {
   }, [socket]);
 
   return (
-    <Container bg='var(--chakra-colors-chakra-subtle-bg)' h='20rem' w='100%' float='right' overflow-x= 'hidden' maxWidth='45rem' position='relative'borderRadius='20px' borderWidth='3px' borderColor='#ff7f26' >
+    <Container bg='var(--chakra-colors-chakra-subtle-bg)' flex='1' minHeight='20rem' float='right' overflow-x= 'hidden' maxWidth='100%'position='relative'borderRadius='20px' borderWidth='3px' borderColor='#ff7f26' >
       <Heading size='lg' mt='10px'>Chat</Heading>
       <UnorderedList styleType="''" mt='10px' overflowY='auto' maxHeight='120px'>
         {messages.map((message, ind) => (
