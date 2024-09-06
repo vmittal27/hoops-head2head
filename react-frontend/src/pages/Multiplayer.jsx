@@ -17,7 +17,7 @@ import {
 	SliderThumb,
 } from '@chakra-ui/react'
 import { MoonIcon, CopyIcon, SunIcon } from '@chakra-ui/icons'
-
+import { useParams, useNavigate } from 'react-router-dom'
 import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
 import { Form } from "react-router-dom";
 
@@ -62,10 +62,21 @@ function MultiPlayer() {
 	const [curRound, setCurRound] = useState(1); 
 	const [transitionTime, setTransitionTime] = useState(10);
 	const [roundData, setRoundData] = useState([]);
+    const [username, setUsername] = useState('');
 
 	const { colorMode, toggleColorMode } = useColorMode();
 
 	const API_BASE_URL = "http://localhost:5000/"
+
+    const { roomIdUrl } = useParams();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (roomIdUrl) {
+            setRoomId(roomIdUrl);
+            joinRoom(roomIdUrl);
+        }
+    }, [])
 
 	useEffect(() => {
 		setCurrentUser(socket.id);
@@ -195,6 +206,8 @@ function MultiPlayer() {
 			const data = await response.json();
 			console.log("room id" + data.room_id);
 			joinRoom(data.room_id);
+            localStorage.setItem('roomId', data.room_id);
+            navigate(`/multiplayer/${data.room_id}`)
 		} catch (err) {
 			setError('Failed to create room');
 		}
@@ -217,6 +230,7 @@ function MultiPlayer() {
 			joinRoom(joinRoomId);
 			console.log("test" + joinRoomId);
 			setJoinRoomId('');
+            navigate(`/multiplayer/${joinRoomId}`)
 		}
 	};
 
@@ -325,6 +339,8 @@ function MultiPlayer() {
 							handleSubmit={handleJoinSubmit}
 							roomId={joinRoomId}
 							setRoomId={setJoinRoomId}
+                            username={username}
+                            setUsername={setUsername}
 						/>
 					</>
 				) : 

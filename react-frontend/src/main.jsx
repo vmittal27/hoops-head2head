@@ -18,7 +18,11 @@ const router = createBrowserRouter([
         element: <SinglePlayer />
     },
     {
-        path: '/multiplayer',
+        path:'/multiplayer',
+        element: <MultiPlayer />
+    },
+    {
+        path: '/multiplayer/:roomIdUrl',
         element: <MultiPlayer />
     }
 ])
