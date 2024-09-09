@@ -63,7 +63,7 @@ def on_join(data):
         rooms[room_id].append(request.sid)
         socket_to_user[request.sid] = data['username']
         socketio.emit('join_success', {"room_id": room_id, "user_count": len(rooms[room_id])}, room=request.sid)
-        socketio.emit('user_joined', {"user_count": len(rooms[room_id]), "users" : rooms[room_id], "user_map" : {socket_to_user[socket_id] for socket_id in rooms[room_id]}}, room=room_id)
+        socketio.emit('user_joined', {"user_count": len(rooms[room_id]), "users" : rooms[room_id], "user_map" : {socket_id: socket_to_user[socket_id] for socket_id in rooms[room_id]}}, room=room_id)
         print(socket_to_user)
         print(rooms)
     else:
@@ -155,3 +155,39 @@ def transition_time(data):
     room_id = int(data['room_id'])
     if room_id in rooms:
         socketio.emit('transition_time_changed', {'newTime' : data['time']}, room=room_id)
+
+@socketio.on('reconnect')
+def handle_reconnect(data):
+    old_socket_id = data['oldSocketId']
+    room_id = int(data['roomId'])
+    new_socket_id = request.sid
+
+    if room_id in rooms and old_socket_id in rooms[room_id]:
+        # Remove the old socket ID and add the new one
+        rooms[room_id].remove(old_socket_id)
+        rooms[room_id].append(new_socket_id)
+
+        # Update the socket_to_user mapping
+        if old_socket_id in socket_to_user:
+            socket_to_user[new_socket_id] = socket_to_user[old_socket_id]
+            del socket_to_user[old_socket_id]
+
+        # Join the room with the new socket
+        join_room(room_id)
+
+        # Emit success event
+        socketio.emit('reconnect_success', {
+            "room_id": room_id,
+            "user_count": len(rooms[room_id]),
+            "users": rooms[room_id],
+            "user_map": {socket_id: socket_to_user[socket_id] for socket_id in rooms[room_id]}
+        }, room=new_socket_id)
+
+        # Notify other users in the room
+        socketio.emit('user_joined', {
+            "user_count": len(rooms[room_id]),
+            "users": rooms[room_id],
+            "user_map": {socket_id: socket_to_user[socket_id] for socket_id in rooms[room_id]}
+        }, room=room_id)
+    else:
+        socketio.emit('error', {"message": "Reconnection failed"}, room=new_socket_id)
