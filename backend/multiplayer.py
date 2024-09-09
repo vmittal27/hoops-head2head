@@ -7,6 +7,7 @@ from .neo4j_routes import get_players
 
 rooms = {} # contains data about the users in each room
 room_players = {} # contains data about the basketball players assigned to each room
+socket_to_user = {} #maps socket id to username
 
 @app.route('/create_room', methods=['POST'])
 def create_room():
@@ -52,15 +53,18 @@ def generate_room_id(n):
     #n digit code, usually use n=6
     return random.randint(10**(n-1)+1, 10**(n))
 
-@socketio.on('user_joined')
+
+@socketio.on('user_joined') #when a user joins, emit username from the backend
 def on_join(data):
     room_id = int(data['room_id'])
 
     if room_id in rooms:
         join_room(room_id)
         rooms[room_id].append(request.sid)
+        socket_to_user[request.sid] = data['username']
         socketio.emit('join_success', {"room_id": room_id, "user_count": len(rooms[room_id])}, room=request.sid)
-        socketio.emit('user_joined', {"user_count": len(rooms[room_id]), "users" : rooms[room_id]}, room=room_id)
+        socketio.emit('user_joined', {"user_count": len(rooms[room_id]), "users" : rooms[room_id], "user_map" : {socket_to_user[socket_id] for socket_id in rooms[room_id]}}, room=room_id)
+        print(socket_to_user)
         print(rooms)
     else:
         socketio.emit('error', {"message": "Room not found"}, room=request.sid)
@@ -90,8 +94,9 @@ def on_leave(data):
         leave_room(room_id)
         rooms[room_id].remove(request.sid)
 
-        socketio.emit('leave', {"user_count": len(rooms[room_id]), "users" : rooms[room_id]}, room=room_id)
-
+        socketio.emit('leave', {"user_count": len(rooms[room_id]), "users" : rooms[room_id], "user_map" : {socket_to_user[socket_id] for socket_id in rooms[room_id]}}, room=room_id)
+        del socket_to_user[request.sid]
+        
         if len(rooms[room_id]) == 0:
             del rooms[room_id]
 

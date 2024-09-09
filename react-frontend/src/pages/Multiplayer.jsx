@@ -63,6 +63,7 @@ function MultiPlayer() {
 	const [transitionTime, setTransitionTime] = useState(10);
 	const [roundData, setRoundData] = useState([]);
     const [username, setUsername] = useState('');
+	const [idToUser, setIdToUser] = useState({});
 
 	const { colorMode, toggleColorMode } = useColorMode();
 
@@ -93,6 +94,8 @@ function MultiPlayer() {
 			setLobby(data.user_count);
 			console.log("users" + data.users);
 			setUsers(data.users);
+			setIdToUser(data.user_map);
+			console.log("idToUser:", data.user_map);
 			const newScoreBoard = Object.fromEntries(
 				data.users.map(id => [id, 0])
 			);
@@ -103,6 +106,7 @@ function MultiPlayer() {
 			setUserCount(data.user_count);
 			setLobby(data.user_count);
 			setUsers(data.users);
+			setIdToUser(data.user_map);
 			const newScoreBoard = Object.fromEntries(
 				data.users.map(id => [id, 0])
 			);
@@ -214,7 +218,7 @@ function MultiPlayer() {
 	};
 
 	const joinRoom = (id) => {
-		socket.emit('user_joined', { room_id: id });
+		socket.emit('user_joined', { room_id: id, username : username});
 		console.log("test" + users);
 	};
 
@@ -359,6 +363,8 @@ function MultiPlayer() {
 								setRoundTime={setRoundTime}
 								roundNum={roundNum}
 								setRoundNum={setRoundNum}
+								username={username}
+								idToUser={idToUser}
 								socket={socket}
 								lobby={lobby}
 								startGame={startGame}

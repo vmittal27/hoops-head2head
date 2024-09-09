@@ -7,7 +7,7 @@ import '../css/Multiplayer.css'
 
 function Lobby({
     roomId, leaveRoom, // room information
-    userCount, users, currentUser, // users information
+    userCount, users, currentUser, idToUser, // users information
     difficulty, setDifficulty, roundTime, setRoundTime, roundNum, setRoundNum, // game settings
     socket, lobby, startGame
 }) {
@@ -20,6 +20,7 @@ function Lobby({
 			console.error('Unable to copy to clipboard:', error);
 		}
 	};
+    console.log(idToUser);
 
     return (
         <>
@@ -63,7 +64,7 @@ function Lobby({
                     <Text fontSize='lg' textAlign='left' mx='10px' my='5px'>Players: {userCount}</Text>
                     <UnorderedList styleType="''" textAlign='left' fontSize='lg' mx='10px'>
                         {users.map((user) => {
-                            return <ListItem >Guest {user.substring(0,5)}</ListItem>;
+                            return <ListItem >{idToUser[user]}</ListItem>;
                         })}
                     </UnorderedList>
                 </Container>    
