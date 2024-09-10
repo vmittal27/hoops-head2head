@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Heading, UnorderedList, ListItem, Input, InputGroup, InputRightElement, Container, Button, DarkMode } from "@chakra-ui/react";
 
-export default function Chat({ socket, roomId }) {
+export default function Chat({ idToUser, socket, roomId }) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
 
@@ -35,16 +35,20 @@ export default function Chat({ socket, roomId }) {
     };
   }, [socket]);
 
+
+
   return (
     <Container bg='var(--chakra-colors-chakra-subtle-bg)' flex='1' minHeight='20rem' float='right' overflow-x= 'hidden' maxWidth='100%'position='relative'borderRadius='20px' borderWidth='3px' borderColor='#ff7f26' >
       <Heading size='lg' mt='10px'>Chat</Heading>
       <UnorderedList styleType="''" mt='10px' overflowY='auto' maxHeight='120px'>
-        {messages.map((message, ind) => (
-          <ListItem key={ind}>
-            Guest {message[1].substring(0, 5)}: {message[0]}
-          </ListItem>
-        ))}
       </UnorderedList>
+      <UnorderedList styleType="''" mt='10px' overflowY='auto' maxHeight='120px'>
+        {messages.map((message, ind) => (
+            <ListItem key={ind}>
+                {idToUser[message[1]]}: {message[0]}
+            </ListItem>
+        ))}
+    </UnorderedList>
       <InputGroup width='95%' position='absolute' top='14rem'>
         <Input 
             position='absolute'

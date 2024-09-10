@@ -68,7 +68,7 @@ function Lobby({
                         })}
                     </UnorderedList>
                 </Container>    
-                <Chat class='chatclass' socket = {socket} roomId={roomId} />
+                <Chat idToUser={idToUser} socket = {socket} roomId={roomId} />
             </Container>
             <Button width='100%' colorScheme="green" size='lg' onClick={startGame} isDisabled={userCount < 1 || currentUser != users[0] || lobby != userCount}>
                 Start Game

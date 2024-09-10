@@ -1,10 +1,11 @@
-import {Heading, Box, Button, Text, NumberInput, NumberInputField, Input, InputGroup} from '@chakra-ui/react'
+import {Heading, Box, Button, Text, NumberInput, NumberInputField, Input, InputGroup, InputRightElement, FormControl, FormLabel, FormErrorMessage, FormHelperText} from '@chakra-ui/react'
 import {
     Modal,
     ModalOverlay,
     ModalContent,
     ModalHeader,
     ModalBody,
+    ModalFooter,
 } from '@chakra-ui/react'
 import { Form } from "react-router-dom";
 import { useState } from 'react';
@@ -23,23 +24,50 @@ function MultiplayerEntryPoint({handleClick, handleSubmit, roomId, setRoomId, us
         setSubmitted(true);
     };
 
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter" && !isError) {
+          userSubmit();
+        }
+      };
+
+    const isError = currName === ''
+
     return (
         <>
             <Modal isOpen={!(submitted)} closeOnOverlayClick={false} isCentered={true} size='lg'>
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>Enter Username</ModalHeader>
+                    <ModalHeader textAlign='center'>
+                        Enter Username
+                    </ModalHeader>
                     <ModalBody display='flex' flexDirection='row' alignItems='center' gap='1em'>
+                    <FormControl isInvalid={isError}>
                         <InputGroup>
-                            <Input
+                            <Input 
+                                value={currName}
+                                type='text' 
                                 placeholder='Enter Username'
-                                onChange={handleText}
-                            ></Input>
-                            <Button onClick={userSubmit}>
-                                Enter
-                            </Button>
+                                onChange={handleText} 
+                                onKeyDown={handleKeyDown}/>
+                            <InputRightElement width='4.5rem'>
+                                <Button 
+                                    onClick={userSubmit}
+                                    isDisabled={isError}>
+                                    Enter
+                                </Button>
+                            </InputRightElement>
                         </InputGroup>
+                        {!isError ? (
+                            <FormHelperText>
+                             
+                            </FormHelperText>
+                        ) : (
+                            <FormErrorMessage>Username is required.</FormErrorMessage>
+                        )}
+                    </FormControl>
                     </ModalBody>
+                    <ModalFooter>
+                    </ModalFooter>
                 </ModalContent>
             </Modal>
             <Heading fontWeight='bold' size='lg'> Multiplayer </Heading>
