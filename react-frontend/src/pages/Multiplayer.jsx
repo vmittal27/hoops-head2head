@@ -62,9 +62,9 @@ function MultiPlayer() {
 	const [curRound, setCurRound] = useState(1); 
 	const [transitionTime, setTransitionTime] = useState(10);
 	const [roundData, setRoundData] = useState([]);
-    const [username, setUsername] = useState('');
+    const [username, setUsername] = useState(localStorage.getItem('username') || '');
 	const [idToUser, setIdToUser] = useState({});
-	const [reconnecting, setReconnecting] = useState(false);
+	// const [reconnecting, setReconnecting] = useState(false);
 
 	const { colorMode, toggleColorMode } = useColorMode();
 
@@ -75,6 +75,7 @@ function MultiPlayer() {
 
     useEffect(() => {
         if (roomIdUrl) {
+			console.log('this use effect was called');
             setRoomId(roomIdUrl);
             joinRoom(roomIdUrl);
         }
@@ -85,14 +86,6 @@ function MultiPlayer() {
 		
 		// Store the socket ID in local storage
 		localStorage.setItem('socketId', socket.id);
-
-		// Check if we're reconnecting
-		const oldSocketId = localStorage.getItem('oldSocketId');
-		if (oldSocketId && oldSocketId !== socket.id) {
-			setReconnecting(true);
-			socket.emit('reconnect', { oldSocketId, roomId });
-			localStorage.removeItem('oldSocketId');
-		}
 
 		socket.on('join_success', (data) => {
 			setRoomId(data.room_id);
@@ -179,16 +172,6 @@ function MultiPlayer() {
 			console.log("Set new transition time");
 		})
 
-		socket.on('reconnect_success', (data) => {
-			setReconnecting(false);
-			setRoomId(data.room_id);
-			setUserCount(data.user_count);
-			setLobby(data.user_count);
-			setUsers(data.users);
-			setIdToUser(data.user_map);
-			setError('');
-		});
-
 		return () => {
 			socket.off('join_success');
 			socket.off('user_joined');
@@ -202,8 +185,6 @@ function MultiPlayer() {
 			socket.off('transition_time_changed');
 			socket.off('lobby_rejoined');
 			socket.off('start_new_round');
-			socket.off('reconnect_success');
-			// Store the current socket ID before unmounting
 			localStorage.setItem('oldSocketId', socket.id);
 		};
 	}, [users]);
@@ -244,12 +225,15 @@ function MultiPlayer() {
 
 	const joinRoom = (id) => {
 		socket.emit('user_joined', { room_id: id, username : username});
-		console.log("test" + users);
+		localStorage.setItem('roomId', id);
+		// console.log("test" + users);
+		console.log('joinRoom was called');
 	};
 
 	const leaveRoom = () => {
 		socket.emit('leave', { room_id: roomId });
 		setRoomId('');
+		localStorage.removeItem('roomId');
 		setUserCount(0);
 	};
 

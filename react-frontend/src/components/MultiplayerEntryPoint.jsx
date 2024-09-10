@@ -11,14 +11,15 @@ import { useState } from 'react';
 import "../css/Multiplayer.css"
 function MultiplayerEntryPoint({handleClick, handleSubmit, roomId, setRoomId, username, setUsername}) {
     const [currName, setCurrName] = useState('');
-    const [submitted, setSubmitted] = useState(false);
+    const [submitted, setSubmitted] = useState(!!localStorage.getItem('username'));
 
     const handleText = (e) => {
         setCurrName(e.target.value);
     };
 
     const userSubmit = () => {
-        setUsername(currName)
+        setUsername(currName);
+        localStorage.setItem('username', currName); 
         setSubmitted(true);
     };
 
