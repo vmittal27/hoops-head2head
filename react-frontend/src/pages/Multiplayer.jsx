@@ -417,14 +417,14 @@ function MultiPlayer() {
 									<Heading size="md">Guest {socket.id.substring(0,5)} </Heading>
 									<Heading size="sm">Round Score: {score} </Heading>
 									<TransitionTimer startTime={transitionTime}/>
-									<Scoreboard scores = {scoreBoard}/>
+									<Scoreboard scores = {scoreBoard} idToUser={idToUser}/>
 								</>
 							) : (
 								<>
 									<Heading size="lg">Final Results</Heading>
 									<Heading size="md">Guest {socket.id.substring(0,5)} </Heading>
 									<Heading size="sm">Round Score: {score} </Heading>
-									<Scoreboard scores = {scoreBoard}/>
+									<Scoreboard scores = {scoreBoard} idToUser={idToUser}/>
 									<Button onClick={resetGame}>Return to Lobby</Button> 
 								</>
 							)
