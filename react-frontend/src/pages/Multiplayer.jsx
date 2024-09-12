@@ -69,7 +69,7 @@ function MultiPlayer() {
 
 	const { colorMode, toggleColorMode } = useColorMode();
 
-	const API_BASE_URL = "http://localhost:5000/"
+	const API_BASE_URL = "http://localhost:3000/"
 
     const { roomIdUrl } = useParams();
     const navigate = useNavigate();
@@ -136,6 +136,7 @@ function MultiPlayer() {
 			setRoundData(data.players);
 			setLobby(0); //nobody in lobby
 			setStarted(true); 
+			setTimeLeft(data.roundEnd);
 			// setRoundPath([data.players[curRound - 1].player_data.currPlayerID])
 			console.log("game start test", data.players);
 		});
@@ -171,7 +172,9 @@ function MultiPlayer() {
 			setIsFinished(false);
 			setNumFinished(0);
 			setTransitionTime(10); 
-			console.log("Set new transition time");
+			setRoundTime(data.roundEnd)
+			console.log(data.roundEnd);
+			// console.log("Set new transition time");
 		})
 
 		return () => {
@@ -271,22 +274,54 @@ function MultiPlayer() {
 		setNumFinished(0); 
 	}
 
-	const CountdownTimer = ( { startTime } ) => {
+	// const CountdownTimer = ( { startTime } ) => {
 
-		const [time, setTime] = useState(startTime);
+	// 	const [time, setTime] = useState(startTime);
 	  
+	// 	useEffect(
+	// 		() => {
+	// 			if (time >= 0) {
+	// 				const timerId = setInterval(
+	// 					() => {setTime((prevTime) => prevTime - 1);},
+	// 					1000
+	// 				);
+	// 				socket.emit('time_changed', {'room_id' : roomId, 'time' : time});
+	// 				return () => clearInterval(timerId); // Cleanup interval on unmount
+	// 	  		} 
+	// 		}, 
+	// 		[time]
+	// 	);
+
+	// 	return (
+	// 		<div>
+    //         	{
+	// 				time <= 0 ? 
+	// 				<Text size='lg'>Time's up!</Text> : 
+	// 				<Stat><StatNumber>{new Date(timeLeft * 1000).toISOString().substring(14, 19)}</StatNumber></Stat>
+	// 			}
+	// 	  	</div>
+	// 	);
+	// };
+
+	const CountdownTimer = ({endTime}) => {
+		const [time, setTime] = useState(0);
+
 		useEffect(
 			() => {
-				if (time >= 0) {
-					const timerId = setInterval(
-						() => {setTime((prevTime) => prevTime - 1);},
-						1000
-					);
-					socket.emit('time_changed', {'room_id' : roomId, 'time' : time});
-					return () => clearInterval(timerId); // Cleanup interval on unmount
-		  		} 
-			}, 
-			[time]
+				if (endTime) {
+			  		const interval = setInterval(() => {
+						const now = new Date().getTime() / 1000;
+						const timeDiff = Math.max(0, trunc(endTime - now));  // Calculate remaining time in ms
+						setTime(timeDiff);
+		
+						if (timeDiff === 0) {
+				  			clearInterval(interval);  // Clear interval when the timer ends
+						}
+			  		}, 1000);
+		
+			  		return () => clearInterval(interval);
+				}
+		  	}, [endTime]
 		);
 
 		return (
@@ -294,11 +329,12 @@ function MultiPlayer() {
             	{
 					time <= 0 ? 
 					<Text size='lg'>Time's up!</Text> : 
-					<Stat><StatNumber>{new Date(timeLeft * 1000).toISOString().substring(14, 19)}</StatNumber></Stat>
+					<Stat><StatNumber>{new Date(time * 1000).toISOString().substring(14, 19)}</StatNumber></Stat>
 				}
 		  	</div>
 		);
-	};
+		
+	}
 
 	const TransitionTimer = ( { startTime } ) => {
 		const [time, setTime] = useState(startTime);
@@ -390,7 +426,7 @@ function MultiPlayer() {
 						(timeLeft > 0 && numFinished < userCount)? (
                         (roundData.length != 0)? (
 						<>
-							<CountdownTimer startTime={timeLeft} />
+							<CountdownTimer endTime={timeLeft} />
 							<Text>Round: {curRound}</Text>
 							<MultiplayerScreen data_m = {roundData[curRound-1].player_data} pics_m = {roundData[curRound-1].pictures} 
 							players_m = {roundData[curRound-1].players} //just need to make this data[curRound-1], etc.

@@ -48,7 +48,8 @@ Database schema:
             'difficulty': str
         }, 
         'gameStatus': int # one of 0 (not started), -1 (game finished), or round number
-        'finishedUsers: list[str] 
+        'finishedUsers': list[str] 
+        'roundEnd': datetime
     }
 }
 '''
@@ -106,7 +107,8 @@ def create_room():
                 'difficulty': 'easy'
             }, 
             'gameStatus': 0, 
-            'finishedUsers': []
+            'finishedUsers': [], 
+            'roundEnd': None
         }
 
     update_room_usage(room=room_id)
@@ -196,7 +198,8 @@ def start_new_round(data):
         with thread_lock:
             room_db[room_id]['gameStatus'] += 1
             room_db[room_id]['finishedUsers'] = [] # reset
-        socketio.emit('start_new_round', data, room=room_id)
+            room_db[room_id]['roundEnd'] = datetime.now() + timedelta(seconds=room_db[room_id]['settings']['roundTime'])
+        socketio.emit('start_new_round', {'roundEnd': room_db[room_id]['roundEnd'].timestamp() / 1000}, room=room_id)
 
 
 @socketio.on('lobby_rejoined')
@@ -262,6 +265,7 @@ def start_game(data):
             room_db[room_id]['players'] = ppr
             room_db[room_id]['gameStatus'] = 1
             room_db[room_id]['finishedUsers'] = []
+            room_db[room_id]['roundEnd'] = datetime.now() + timedelta(seconds=room_db[room_id]['settings']['roundTime'])
     socketio.emit('start_game', {"players" : room_db[room_id]['players']}, room=room_id)
 
 @socketio.on("time_changed")

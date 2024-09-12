@@ -64,10 +64,12 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, 
 
     // Checking if game end
     useEffect(() => {
-        if (isWinOpen || guesses === 0) {
-            setIsFinished(true);
+		console.log(timeLeft)
+        if (isWinOpen || guesses === 0 || time_m <= 0) {
+            console.log("is finished")
+			setIsFinished(true);
         }
-    }, [guesses, players])
+    }, [guesses, players, timeLeft])
 
 	return (
 		<Container className='App-Container'>
