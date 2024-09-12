@@ -4,7 +4,7 @@ import { useTheme } from '@chakra-ui/system'
 import Select from "react-select"
 import '../css/SinglePlayer.css'
 
-const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, modalOpen, score, setScore, pics, setPics}) => {
+const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, modalOpen, score, setScore, pics, setPics, gameMode, setRoundPath, setRoundGuessesUsed}) => {
 
     const API_BASE_URL = "http://localhost:5000"
     // states for search bar
@@ -84,7 +84,8 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
     const handleSubmit = (guess) => {
 
         if (guess) {
-
+            if (gameMode == 'multi')
+                setRoundGuessesUsed(6 - guesses)
             setGuesses(guesses - 1)
 
             checkTeammates(data.currPlayerID, guess)
@@ -94,22 +95,23 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                         .then((jsonData) => {
                             setPlayers(p => [...p, jsonData.name ]);
                             setData({...data, currPlayer : jsonData.name, currPlayerID: jsonData.id});
+                            setRoundPath((prev) => [...prev, jsonData.id])
                             setPics({...pics, currPlayerURL : jsonData.url});
                             checkTeammates(data.lastPlayerID, guess)
                                 .then((gameOver) => {
                                     if (gameOver) {
                                         setPlayers(p => [...p, data.lastPlayer]);
+                                        setRoundPath((prev) => [...prev, data.lastPlayerID])
                                         modalOpen();
+                                        if (gameMode == 'single')
+                                            processScoring(teammates, guess, gameOver)
                                     }
-                                    processScoring(teammates, guess, gameOver);
                                 
                                 })
                         })
                         
                     }
                 
-                    
-                    // setScore(score + 100 * (guesses));
                 }); 
         }
         else {

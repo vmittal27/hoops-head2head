@@ -64,7 +64,8 @@ function MultiPlayer() {
 	const [roundData, setRoundData] = useState([]);
     const [username, setUsername] = useState(localStorage.getItem('username') || '');
 	const [idToUser, setIdToUser] = useState({});
-	// const [reconnecting, setReconnecting] = useState(false);
+	const [roundPath, setRoundPath] = useState([]);
+	const [roundGuessesUsed, setRoundGuessesUsed] = useState(0); 
 
 	const { colorMode, toggleColorMode } = useColorMode();
 
@@ -135,6 +136,7 @@ function MultiPlayer() {
 			setRoundData(data.players);
 			setLobby(0); //nobody in lobby
 			setStarted(true); 
+			// setRoundPath([data.players[curRound - 1].player_data.currPlayerID])
 			console.log("game start test", data.players);
 		});
 
@@ -146,14 +148,14 @@ function MultiPlayer() {
             setNumFinished((num) => num + 1);
         })
 
-        socket.on('score_added', (data) => {
-            setScoreBoard(prevScoreBoard => ({
-				...prevScoreBoard, 
-				[data.player_id]: data.score
-			}));
-			console.log(data.score);
-            console.log(scoreBoard);
+        socket.on('scores_added', (data) => {
+			setScoreBoard(data); 
+			console.log(data);
         })
+
+		socket.on('user_score', (data) => {
+			setScore(data.score);
+		})
 		
 		
 		socket.on('transition_time_changed', (data) => {
@@ -181,7 +183,8 @@ function MultiPlayer() {
 			socket.off('start_game');
             socket.off('time_changed');
             socket.off('user_finished');
-			socket.off('score_added');
+			socket.off('user_score')
+			socket.off('scores_added');
 			socket.off('transition_time_changed');
 			socket.off('lobby_rejoined');
 			socket.off('start_new_round');
@@ -206,7 +209,7 @@ function MultiPlayer() {
 				left: 0,
 				behavior: 'smooth'
 			});
-			socket.emit('score_added', {'score' : score, 'player_id' : currentUser, 'room_id' : roomId})
+			socket.emit('submit_score', {'room_id': roomId, 'guessesUsed': roundGuessesUsed, 'user': currentUser, 'path': roundPath})
         }
     }, [isFinished])
 
@@ -392,7 +395,7 @@ function MultiPlayer() {
 							<MultiplayerScreen data_m = {roundData[curRound-1].player_data} pics_m = {roundData[curRound-1].pictures} 
 							players_m = {roundData[curRound-1].players} //just need to make this data[curRound-1], etc.
 							path_m = {roundData[curRound-1].path} difficulty_m = {difficulty} time_m = {roundTime} setIsFinished={setIsFinished}
-                            score = {score} setScore = {setScore}  />
+                            score = {score} setScore = {setScore} setRoundPath={setRoundPath} setRoundGuessesUsed={setRoundGuessesUsed}/>
 							<Modal isOpen={isFinished} closeOnOverlayClick={false} isCentered={true} size='lg'>
 								<ModalOverlay />
 								<ModalContent>

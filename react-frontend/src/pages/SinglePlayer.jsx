@@ -108,6 +108,7 @@ function SinglePlayer() {
 				setScore={setScore}
 				pics={pics}
 				setPics={setPics}
+				gameMode={'single'}
 			/>
 	
 			<Text align= 'center'>Remaining Guesses: {guesses}</Text>

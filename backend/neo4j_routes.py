@@ -18,7 +18,7 @@ password = cred['NEO4J_PASSWORD']
 #Driver instance
 driver = GraphDatabase.driver(uri, auth=(username, password))
 
-def get_two_players(rel_min, rel_max, year_min, year_max):
+def _get_two_players(rel_min, rel_max, year_min, year_max):
     """
     Gets 2 random players based on relevancy and year criteria.
     """
@@ -47,16 +47,41 @@ def get_two_players(rel_min, rel_max, year_min, year_max):
         ]
         return all_info
     
-@app.route('/')
-def welcome():
-    """
-    Default screen for the standard URL
-    """
-    return "Welcome to Hoops H2H!"
+def _get_scoring_data(player1_id, player2_id):
 
+    if not player1_id or not player2_id:
+        return {'error': 'Missing player names'}
 
-@app.route('/players/<difficulty>')
-def get_players(difficulty):
+    query = f"""
+    MATCH (p1 {{`id`: "{player1_id}"}}), (p2 {{`id`: "{player2_id}"}})
+    MATCH (p1)-[r]-(p2)
+    RETURN r.weight AS weight, p2.Relevancy AS relevancy
+    """
+    
+    with driver.session() as session:
+        result = session.run(query)
+        record = result.single()
+        return {
+            'Weight': record["weight"],
+            'Relevancy' : record["relevancy"]
+        }
+
+def _check_teammates(player1_id, player2_id):
+
+    if not player1_id or not player2_id:
+        return jsonify({'error': 'Missing player names'}), 400
+
+    query = f"""
+    MATCH (a {{`id`: "{player1_id}"}})--(b {{`id`: "{player2_id}"}})
+    RETURN COUNT(*) > 0 AS areTeammates
+    """
+
+    with driver.session() as session:
+        result = session.run(query)
+        are_teammates = result.single()['areTeammates']
+        return {'areTeammates': are_teammates}
+
+def _get_players(difficulty):
     """
     Endpoint to get players based on difficulty level.
     """
@@ -79,6 +104,18 @@ def get_players(difficulty):
         neighbors = len(path) == 2 # true if direct neighbors, false otherwise
 
     return {"Player 1": p1, "Player 2": p2, "Path": path}
+    
+@app.route('/')
+def welcome():
+    """
+    Default screen for the standard URL
+    """
+    return "Welcome to Hoops H2H!"
+
+
+@app.route('/players/<difficulty>')
+def get_players(difficulty):
+    return _get_players(difficulty=difficulty)
 
 @app.route("/path/shortest")
 def get_shortest_path(src_id: str, dst_id: str):
@@ -105,19 +142,7 @@ def check_teammates():
     data = request.get_json()
     player1_id = data.get('player1_id')
     player2_id = data.get('player2_id')
-
-    if not player1_id or not player2_id:
-        return jsonify({'error': 'Missing player names'}), 400
-
-    query = f"""
-    MATCH (a {{`id`: "{player1_id}"}})--(b {{`id`: "{player2_id}"}})
-    RETURN COUNT(*) > 0 AS areTeammates
-    """
-
-    with driver.session() as session:
-        result = session.run(query)
-        are_teammates = result.single()['areTeammates']
-        return jsonify({'areTeammates': are_teammates})
+    return jsonify(_check_teammates(player1_id, player2_id))
     
 @app.route("/autocomplete")
 def autocomplete_players():
@@ -144,22 +169,7 @@ def get_scoring_data():
     player1_id = data.get('player1_id')
     player2_id = data.get('player2_id')
 
-    if not player1_id or not player2_id:
-        return jsonify({'error': 'Missing player names'}), 400
-
-    query = f"""
-    MATCH (p1 {{`id`: "{player1_id}"}}), (p2 {{`id`: "{player2_id}"}})
-    MATCH (p1)-[r]-(p2)
-    RETURN r.weight AS weight, p2.Relevancy AS relevancy
-    """
-    
-    with driver.session() as session:
-        result = session.run(query)
-        record = result.single()
-        return {
-            'Weight': record["weight"],
-            'Relevancy' : record["relevancy"]
-        }
+    return _get_scoring_data(player1_id, player2_id)
 
 @app.route("/player", methods = ['POST'])
 def get_player_json_data():

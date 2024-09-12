@@ -28,7 +28,7 @@ import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
 import defaultImage from '../components/default-pic.png'	
 import DifficultyButton from './Difficulty'
 
-function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, setIsFinished, score, setScore}) {
+function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, setIsFinished, score, setScore, setRoundPath, setRoundGuessesUsed}) {
 	const [data, setData] = useState(data_m)
 	const [pics, setPics] = useState(pics_m)
 
@@ -36,9 +36,13 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, 
 	const [difficulty, setDifficulty] = useState(difficulty_m)
 	const [timeLeft, setTimeLeft] = useState(time_m);
 
-	const[guesses, setGuesses] = useState(5)
+	const[guesses, setGuesses] = useState(5);
 
 	const [optimalPath, setOptimalPath] = useState(path_m);
+
+	useEffect(() => {
+		setRoundPath([data_m.currPlayerID])
+	}, [])
 
 	useEffect(() => {
 		setData(data_m);
@@ -53,8 +57,6 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, 
     useEffect(() => {
         gsap.fromTo('#curr-image', {borderColor: '#6ba9fa'}, {borderColor: '#ffffff', duration: 1})
     },[data])
-
-
 
 	const { isOpen: isRulesOpen , onOpen: onRulesOpen, onClose: onRulesClose } = useDisclosure()
     const { isOpen: isWinOpen , onOpen: onWinOpen, onClose: onWinClose } = useDisclosure()
@@ -82,6 +84,9 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, 
 				setScore={setScore}
 				pics={pics}
 				setPics={setPics}
+				gameMode={'multi'}
+				setRoundPath={setRoundPath}
+				setRoundGuessesUsed={setRoundGuessesUsed}
 			/>
 	
 			<Text align= 'center'>Remaining Guesses: {guesses}</Text>

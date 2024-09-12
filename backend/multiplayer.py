@@ -5,16 +5,58 @@ from datetime import datetime, timedelta
 from flask_socketio import emit,join_room, leave_room
 from backend import app, socketio
 from flask import jsonify, request
-from .neo4j_routes import get_players
+from .neo4j_routes import _get_players, _get_scoring_data, _check_teammates
 
 CLEANUP_INTERVAL = 600 # cleans rooms every 10 mins
 ROOM_TIMEOUT = 300 # closes rooms after 5 minutes of 0 players
 RUN_CLEANUP_THREAD = True
 
-rooms = {} # contains data about the users in each room
-room_players = {} # contains data about the basketball players assigned to each room
+# TODO
+# 1. Set settings to be in the database and accessible
+# 2. Set scores to be stored in the database
+# 3. Allow reconnections to get players too
+# 4. Time using backend not frontend
+
+room_db: dict[int, dict[str, list | datetime | dict | None]] = {} 
+'''
+Database schema:
+{
+    room_id: {
+        'users': list[str], 
+        'lastUsed': datetime,
+        'players': [{
+            'player_data': {
+                'currPlayer': str,
+                'lastPlayer': str,
+                'currPlayerID': str,
+                'lastPlayerID': str
+            }, 
+            'pictures': {
+                'currPlayerURL': str,
+                'lastPlayerURL': str
+            },
+            'players': list[str],
+            'path': list[str]
+        }, ...]
+        'scores': {
+            user: int, 
+            ...
+        }, 
+        'settings': {
+            'roundTime': int, 
+            'roundNum': int, 
+            'difficulty': str
+        }, 
+        'gameStatus': int # one of 0 (not started), -1 (game finished), or round number
+        'finishedUsers: list[str] 
+    }
+}
+'''
+
+# rooms = {} # contains data about the users in each room
+# room_players = {} # contains data about the basketball players assigned to each room
 socket_to_user = {} #maps socket id to username
-rooms_usage_tracker: dict[int, datetime] = {} # keeps track of room usage
+# rooms_usage_tracker: dict[int, datetime] = {} # keeps track of room usage
 
 thread_lock = threading.Lock()
 
@@ -26,17 +68,11 @@ def clean_rooms():
         with thread_lock:
 
             now = datetime.now()
-            room_ids = list(rooms_usage_tracker.keys())
+            room_ids = list(room_db.keys())
 
             for room_id in room_ids:
-
-                if now - rooms_usage_tracker[room_id] > timedelta(seconds=ROOM_TIMEOUT) and not rooms[room_id]:
-
-                    del rooms_usage_tracker[room_id]
-                    del rooms[room_id]
-
-                    if room_id in room_players:
-                        del room_players[room_id]
+                if now - room_db[room_id]['lastUsed'] > timedelta(seconds=ROOM_TIMEOUT) and not room_db[room_id]['users']:
+                    del room_db[room_id]
 
                     print(f"Deleted room {room_id} due to inactivity.")
 
@@ -49,18 +85,30 @@ def generate_room_id(n):
 
 def update_room_usage(room: int):
     with thread_lock:
-        rooms_usage_tracker[room] = datetime.now()
-    # print(rooms_usage_tracker)
+        room_db[room]['lastUsed'] = datetime.now()
 
 @app.route('/create_room', methods=['POST'])
 def create_room():
     room_id = generate_room_id(6)
 
-    while room_id in rooms:
+    while room_id in room_db:
         room_id = generate_room_id(6)
 
     with thread_lock:
-        rooms[room_id] = []
+        room_db[room_id] = {
+            'users': [], 
+            'lastUsed': datetime.now(),
+            'players': None, 
+            'scores': {}, 
+            'settings': {
+                'roundTime': 75,
+                'roundNum': 5, 
+                'difficulty': 'easy'
+            }, 
+            'gameStatus': 0, 
+            'finishedUsers': []
+        }
+
     update_room_usage(room=room_id)
  
     return jsonify({"room_id": room_id})
@@ -78,26 +126,34 @@ def connected():
 def disconnected():
     """event listener when client disconnects to the server"""
     user_id = request.sid
-    for room_id in rooms:
-        if user_id in rooms[room_id]:
+    for room_id in room_db:
+        if user_id in room_db[room_id]['users']:
             with thread_lock:
-                rooms[room_id].remove(user_id)
+                room_db[room_id]['users'].remove(user_id)
+
             if user_id in socket_to_user:
                 with thread_lock:
                     del socket_to_user[user_id]
+
             update_room_usage(room=room_id)
-            socketio.emit('player_left', {"player_count": len(rooms[room_id]), "players" : rooms[room_id]}, room=room_id)
+            socketio.emit(
+                'leave', 
+                {
+                    "user_count": len(room_db[room_id]['users']), 
+                    "users" : room_db[room_id]['users'], 
+                    "user_map" : {socket_id: socket_to_user[socket_id] for socket_id in room_db[room_id]['users']}
+                },
+                room=room_id
+            )
             break
     print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - user disconnected (ID: {request.sid})")
-    # print(f'\tRooms: {rooms}')
-    # print(f'\tSocket-User Mapping: {socket_to_user}')
 
 @socketio.on('message')
 def handle_message(data):
     """event listener when client types a message"""
     room_id = data['room_id']
 
-    if room_id in rooms:
+    if room_id in room_db:
         emit("message", {'data': data['message'], 'id': request.sid}, room=room_id)
 
 
@@ -105,52 +161,77 @@ def handle_message(data):
 def on_join(data):
     room_id = int(data['room_id'])
 
-    if room_id in rooms:
+    if room_id in room_db:
         join_room(room_id)
         with thread_lock:
-            rooms[room_id].append(request.sid)
+            room_db[room_id]['users'].append(request.sid)
         update_room_usage(room=room_id)
         socket_to_user[request.sid] = data['username']
-        socketio.emit('join_success', {"room_id": room_id, "user_count": len(rooms[room_id])}, room=request.sid)
-        socketio.emit('user_joined', {"user_count": len(rooms[room_id]), "users" : rooms[room_id], "user_map" : {socket_id: socket_to_user[socket_id] for socket_id in rooms[room_id]}}, room=room_id)
+        socketio.emit('join_success', {"room_id": room_id, "user_count": len(room_db[room_id]['users'])}, room=request.sid)
+        socketio.emit(
+            'user_joined', 
+            {
+                "user_count": len(room_db[room_id]['users']), 
+                "users" : room_db[room_id]['users'], 
+                "user_map" : {socket_id: socket_to_user[socket_id] for socket_id in room_db[room_id]['users']}
+            },
+            room=room_id
+        )
     else:
         socketio.emit('error', {"message": "Room not found"}, room=request.sid)
 
 @socketio.on('user_finished')
 def user_finished(data):
     room_id = int(data['room_id'])
-    if room_id in rooms:
+
+    if room_id in room_db:
         socketio.emit('user_finished', data, room=room_id)
+        with thread_lock:
+            room_db[room_id]['finishedUsers'].append(data['id'])
 
 @socketio.on('start_new_round')
 def start_new_round(data):
     room_id = int(data['room_id'])
-    if room_id in rooms:
-        socketio.emit('start_new_round', data, room=room_id )
+    if room_id in room_db:
+        with thread_lock:
+            room_db[room_id]['gameStatus'] += 1
+            room_db[room_id]['finishedUsers'] = [] # reset
+        socketio.emit('start_new_round', data, room=room_id)
+
 
 @socketio.on('lobby_rejoined')
 def lobby_rejoined(data):
     room_id = int(data['room_id'])
-    if room_id in rooms:
+    if room_id in room_db:
         socketio.emit('lobby_rejoined', data, room=room_id)
 
 @socketio.on('leave')
 def on_leave(data):
     room_id = int(data['room_id'])
-    if room_id in rooms and request.sid in rooms[room_id]:
+    if room_id in room_db and request.sid in room_db[room_id]['users']:
         leave_room(room_id)
         with thread_lock:
-            rooms[room_id].remove(request.sid)
+            room_db[room_id]['users'].remove(request.sid)
         update_room_usage(room=room_id)
 
-        socketio.emit('leave', {"user_count": len(rooms[room_id]), "users" : rooms[room_id], "user_map" : {socket_id: socket_to_user[socket_id] for socket_id in rooms[room_id]}}, room=room_id)
+        socketio.emit(
+            'leave', 
+            {
+                "user_count": len(room_db[room_id]['users']), 
+                "users" : room_db[room_id]['users'], 
+                "user_map" : {socket_id: socket_to_user[socket_id] for socket_id in room_db[room_id]['users']}
+            },
+            room=room_id
+        )
         del socket_to_user[request.sid]
 
 @socketio.on('settings_changed')
 def handle_difficulty_change(data):
     room_id, difficulty, roundTime, roundNum = data['room_id'], data['difficulty'], data['roundTime'], data['roundNum']
-    if room_id in rooms:
-        socketio.emit('settings_changed', {'difficulty' : difficulty, 'roundTime' : roundTime, 'roundNum': roundNum}, room=room_id)
+    if room_id in room_db:
+        with thread_lock:
+            room_db[room_id]['settings'] = {'difficulty' : difficulty, 'roundTime' : roundTime, 'roundNum': roundNum}
+        socketio.emit('settings_changed', room_db[room_id]['settings'], room=room_id)
 
 @socketio.on("start_game")
 def start_game(data):
@@ -158,10 +239,10 @@ def start_game(data):
     room_id = int(data['room_id'])
     difficulty = data['difficulty']
 
-    if room_id in rooms:
+    if room_id in room_db:
         ppr = []
         for _ in range(num_rounds):
-            p = get_players(difficulty)
+            p = _get_players(difficulty)
             new_round = {
                 'player_data': {
                     'currPlayer': p["Player 1"]["name"],
@@ -178,23 +259,45 @@ def start_game(data):
             }
             ppr.append(new_round)
         with thread_lock:
-            room_players[room_id] = ppr
-    socketio.emit('start_game', {"players" : room_players[room_id]}, room=room_id)
+            room_db[room_id]['players'] = ppr
+            room_db[room_id]['gameStatus'] = 1
+            room_db[room_id]['finishedUsers'] = []
+    socketio.emit('start_game', {"players" : room_db[room_id]['players']}, room=room_id)
 
 @socketio.on("time_changed")
 def time_changed(data):
     room_id = int(data['room_id'])
-    if room_id in rooms:
+    if room_id in room_db:
         socketio.emit('time_changed', {'newTime' : data['time']}, room=room_id)
 
-@socketio.on("score_added")
-def score_send(data):
+@socketio.on("submit_score")
+def submit_score(data):
     room_id = int(data['room_id'])
-    if room_id in rooms:
-        socketio.emit('score_added', {'player_id' : data['player_id'], 'score' : data['score']}, room=room_id)
+    user = data['user']
+    path = data['path']
+    guesses_used = int(data['guessesUsed'])
+    print('Path', path)
+    finished = len(path) > 2 and _check_teammates(path[-1], path[-2])['areTeammates']
+    if room_id not in room_db:
+        return
+    score = 0
+    for i in range(1, len(path)):
+        print(path[i - 1], path[i])
+        guess_data = _get_scoring_data(path[i - 1], path[i])
+        gPlayed = guess_data['Weight']
+        relevancy = guess_data['Relevancy']
+        score += (((0.7 * (1584 - gPlayed)/ 1584) + (0.3 * (9.622 - relevancy) / 9.622)) * 100)/guesses_used
+    if finished:
+        score += 100*(6 - guesses_used)
+
+    with thread_lock:
+        room_db[room_id]['scores'][user] = room_db[room_id]['scores'].get(user, 0) + int(score)
+    socketio.emit('user_score', {'score': room_db[room_id]['scores'][user]}, room=request.sid)
+    if len(room_db[room_id]['finishedUsers']) == len(room_db[room_id]['users']):
+        socketio.emit('scores_added', room_db[room_id]['scores'], room=room_id)
 
 @socketio.on("transition_time_changed")
 def transition_time(data):
     room_id = int(data['room_id'])
-    if room_id in rooms:
+    if room_id in room_db:
         socketio.emit('transition_time_changed', {'newTime' : data['time']}, room=room_id)
