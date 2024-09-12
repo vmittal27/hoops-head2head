@@ -10,7 +10,7 @@ function Scoreboard({scores, idToUser}) {
         Object.entries(scores).sort(([,a],[,b]) => b-a)
     );
 
-    return (
+    return (    
         <Container className='Scoreboard-Container'>
             <VStack>
                 <Text className='score-head'>Scoreboard</Text>

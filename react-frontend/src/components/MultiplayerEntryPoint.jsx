@@ -86,7 +86,7 @@ function MultiplayerEntryPoint({handleClick, handleSubmit, roomId, setRoomId, us
                     </NumberInput>
                     <Button className="Menu-Element" colorScheme="teal" size='lg' type="submit" isDisabled={!roomId}>Join Room</Button>
                 </Form>
-                <Text> Username: {username}</Text>
+                {/* <Text> Username: {username}</Text> */}
                 <Button onClick={handleChangeUsername} variant='link'>Change Username</Button>
             </Box>
         </>

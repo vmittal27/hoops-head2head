@@ -7,9 +7,6 @@ import '../css/SinglePlayer.css'
 const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, modalOpen, score, setScore, pics, setPics}) => {
 
     const API_BASE_URL = "http://localhost:5000"
-
-    const [wrongStreak, setWrongStreak] = useState(0); // for scoring
-
     // states for search bar
     const [value, setValue] = useState(""); 
     const [suggestions, setSuggestions] = useState([]);
@@ -18,7 +15,7 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
     const toast = useToast();
 
     // updates scores for a given guess
-    const processScoring = (areTeammates, guess) => {
+    const processScoring = (areTeammates, guess, over) => {
         if (areTeammates) {
             fetch(
                 `${API_BASE_URL}/scoring`, 
@@ -33,18 +30,15 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                     const gPlayed = scoreResponse['Weight'];
                     const relevancy = scoreResponse['Relevancy'];
 
-                    const addScore = ((0.7 * gPlayed / 1584) + (0.3 * relevancy / 9.622)) * 25;
+                    const addScore = (((0.7 * (1584 - gPlayed)/ 1584) + (0.3 * (9.622 - relevancy) / 9.622)) * 100)/(6-guesses);
 
-                    setScore(Math.ceil(score + addScore));
-                    setWrongStreak(0); 
+                    setScore(Math.ceil(score + addScore  + 100 * guesses * over));
                 })
                 .catch(error => console.log('Error getting score:', error))
+        } else{
+            setScore(score); 
         }
 
-        else {
-            setScore(score + 25 + (5 * wrongStreak));
-            setWrongStreak(wrongStreak + 1);
-        }
 
     }
 
@@ -59,7 +53,10 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
         )
             .then((response) => response.json())
             .then((response) => {
-                return response.areTeammates; 
+                if(response.areTeammates){
+                    return 1;
+                }
+                return 0;
             })
             .catch(error => console.log('Error checking teammates:', error))
     }
@@ -101,15 +98,18 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                             checkTeammates(data.lastPlayerID, guess)
                                 .then((gameOver) => {
                                     if (gameOver) {
-                                        setPlayers(p => [...p, data.lastPlayer])
+                                        setPlayers(p => [...p, data.lastPlayer]);
                                         modalOpen();
                                     }
+                                    processScoring(teammates, guess, gameOver);
+                                
                                 })
                         })
-    
+                        
                     }
                 
-                    processScoring(teammates, guess);
+                    
+                    // setScore(score + 100 * (guesses));
                 }); 
         }
         else {

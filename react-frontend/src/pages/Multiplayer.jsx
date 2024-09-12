@@ -149,7 +149,7 @@ function MultiPlayer() {
         socket.on('score_added', (data) => {
             setScoreBoard(prevScoreBoard => ({
 				...prevScoreBoard, 
-				[data.player_id]: (prevScoreBoard[data.player_id] || 0) + data.score
+				[data.player_id]: data.score
 			}));
 			console.log(data.score);
             console.log(scoreBoard);
@@ -339,6 +339,9 @@ function MultiPlayer() {
 			<div className='header'>
 				<a href="/"><Image src={logoImage} boxSize = '150' objectFit='cover' position='relative'/></a>
 				<Text fontWeight='bold' fontSize='3xl'> Hoops Head 2 Head </Text>
+				{/* (username != '' && ) */}
+				<Text position = 'absolute' right = '100px' fontWeight='bold'> Welcome, {username}! </Text> 
+				
 				<IconButton onClick={toggleColorMode} icon={colorMode === 'light' ? <MoonIcon/> : <SunIcon/>} position='absolute' right='50px'>
 					Toggle {colorMode === 'light' ? 'Dark' : 'Light'}
 				</IconButton>
@@ -414,16 +417,16 @@ function MultiPlayer() {
 							curRound < roundNum ? (
 								<>
 									<Heading size="lg">Round {curRound} Results</Heading>
-									<Heading size="md">Guest {socket.id.substring(0,5)} </Heading>
-									<Heading size="sm">Round Score: {score} </Heading>
+									<Heading size="md">{username} </Heading>
+									<Heading size="sm">Score: {score} </Heading>
 									<TransitionTimer startTime={transitionTime}/>
 									<Scoreboard scores = {scoreBoard} idToUser={idToUser}/>
 								</>
 							) : (
 								<>
 									<Heading size="lg">Final Results</Heading>
-									<Heading size="md">Guest {socket.id.substring(0,5)} </Heading>
-									<Heading size="sm">Round Score: {score} </Heading>
+									<Heading size="md"> {username} </Heading>
+									<Heading size="sm">Score: {score} </Heading>
 									<Scoreboard scores = {scoreBoard} idToUser={idToUser}/>
 									<Button onClick={resetGame}>Return to Lobby</Button> 
 								</>
