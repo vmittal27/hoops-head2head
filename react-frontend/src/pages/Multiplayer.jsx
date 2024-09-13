@@ -1,39 +1,20 @@
-import Chat from "../components/Chat";
+import { useEffect, useState, } from "react";
+import { useParams, useNavigate } from 'react-router-dom'
 import { io } from "socket.io-client";
-import { useEffect, useState, useCallback } from "react";
+
 import "../css/Multiplayer.css"
+import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
+
 import Loading from '../components/Loading'
 import MultiplayerScreen from "../components/MultiplayerPlayScreen";
 import MultiplayerEntryPoint from "../components/MultiplayerEntryPoint";
 import Lobby from '../components/Lobby.jsx'
 import Scoreboard from "../components/Scoreboard";
-import {Link, Image, Text, Container, NumberInput, NumberInputField, Button, Box, IconButton, useColorMode} from "@chakra-ui/react";
-import DifficultyButton from '../components/Difficulty'
-import { Heading, UnorderedList, ListItem, Flex } from "@chakra-ui/react";
-import {
-	Slider,
-	SliderTrack,
-	SliderFilledTrack,
-	SliderThumb,
-} from '@chakra-ui/react'
-import { MoonIcon, CopyIcon, SunIcon } from '@chakra-ui/icons'
-import { useParams, useNavigate } from 'react-router-dom'
-import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
-import { Form } from "react-router-dom";
+import Timer from "../components/Timer.jsx"
 
-import {
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalFooter,
-    ModalBody,
-	CircularProgress
-} from '@chakra-ui/react'
-import {
-	Stat,
-	StatNumber,
-} from '@chakra-ui/react'
+import { Image, Text, Container, Button, Heading, IconButton, useColorMode, CircularProgress} from "@chakra-ui/react";
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody} from '@chakra-ui/react'
+import { MoonIcon, SunIcon } from '@chakra-ui/icons'
 
 const socket = io("localhost:5000/", {
 	transports: ["websocket"],
@@ -42,6 +23,8 @@ const socket = io("localhost:5000/", {
 	},
 });
 
+const API_BASE_URL = "http://localhost:5000/"
+
 function MultiPlayer() {
 	const [roomId, setRoomId] = useState('');
 	const [joinRoomId, setJoinRoomId] = useState('');
@@ -49,27 +32,28 @@ function MultiPlayer() {
 	const [users, setUsers] = useState([]);
 	const [error, setError] = useState('');
 	const [difficulty, setDifficulty] = useState('easy');
-	const [roundTime, setRoundTime] = useState(75)
     const [roundNum, setRoundNum] = useState(5);
 	const [currentUser, setCurrentUser] = useState(null);
 	const [started, setStarted] = useState(false);
-	const [timeLeft, setTimeLeft] = useState(75); // Time left for the countdown
     const [isFinished, setIsFinished] = useState(false);
     const [numFinished, setNumFinished] = useState(0);
 	const [scoreBoard, setScoreBoard] = useState({})
 	const [lobby, setLobby] = useState(0);
     const [score, setScore] = useState(0);
 	const [curRound, setCurRound] = useState(1); 
-	const [transitionTime, setTransitionTime] = useState(10);
 	const [roundData, setRoundData] = useState([]);
     const [username, setUsername] = useState(localStorage.getItem('username') || '');
 	const [idToUser, setIdToUser] = useState({});
 	const [roundPath, setRoundPath] = useState([]);
 	const [roundGuessesUsed, setRoundGuessesUsed] = useState(0); 
+	const [roundTime, setRoundTime] = useState(75); 
+	const [roundEndTime, setRoundEndTime] = useState(null); 
+	const [roundTimeFinished, setRoundTimeFinished] = useState(false);
+	const [transitionEndTime, setTransitionEndTime] = useState(null); 
+	const [transitionTimeFinished, setTransitionTimeFinished] = useState(false);
+
 
 	const { colorMode, toggleColorMode } = useColorMode();
-
-	const API_BASE_URL = "http://localhost:3000/"
 
     const { roomIdUrl } = useParams();
     const navigate = useNavigate();
@@ -126,9 +110,8 @@ function MultiPlayer() {
 		
 		socket.on('settings_changed', (data) => {
 			setDifficulty(data.difficulty); 
-			setRoundTime(data.roundTime);
-            setTimeLeft(data.roundTime);
 			setRoundNum(data.roundNum)
+			setRoundTime(data.roundTime)
 			console.log(data.difficulty, data.roundNum);
 		});
 
@@ -136,13 +119,12 @@ function MultiPlayer() {
 			setRoundData(data.players);
 			setLobby(0); //nobody in lobby
 			setStarted(true); 
-			setTimeLeft(data.roundEnd);
-			// setRoundPath([data.players[curRound - 1].player_data.currPlayerID])
+			setRoundEndTime(new Date(data.roundEnd*1000)); 
 			console.log("game start test", data.players);
 		});
 
-		socket.on('time_changed', (data) => {
-			setTimeLeft(data.newTime);
+		socket.on('show_loading', () => {
+			setStarted(true);
 		})
 
         socket.on('user_finished', (data) => {
@@ -159,10 +141,6 @@ function MultiPlayer() {
 		})
 		
 		
-		socket.on('transition_time_changed', (data) => {
-			setTransitionTime(data.newTime);
-		})
-
 		socket.on('lobby_rejoined', (data) => {
 			setLobby((prevLobby) => prevLobby + 1);
 		})
@@ -171,10 +149,16 @@ function MultiPlayer() {
 			setCurRound((round) => round + 1);
 			setIsFinished(false);
 			setNumFinished(0);
-			setTransitionTime(10); 
-			setRoundTime(data.roundEnd)
-			console.log(data.roundEnd);
+			setTransitionEndTime(null); 
+			setTransitionTimeFinished(false);
+			setRoundEndTime(new Date(data.roundEnd*1000)); 
+			setRoundTimeFinished(false); 
 			// console.log("Set new transition time");
+		})
+
+		socket.on('new_round_at', (data) => {
+			setTransitionEndTime(new Date(data.time*1000)); 
+			console.log(new Date(data.time*1000));
 		})
 
 		return () => {
@@ -184,13 +168,13 @@ function MultiPlayer() {
 			socket.off('error');
 			socket.off('settings_changed');
 			socket.off('start_game');
-            socket.off('time_changed');
             socket.off('user_finished');
 			socket.off('user_score')
 			socket.off('scores_added');
-			socket.off('transition_time_changed');
 			socket.off('lobby_rejoined');
 			socket.off('start_new_round');
+			socket.off('new_round_at');
+			socket.off('show_loading')
 			localStorage.setItem('oldSocketId', socket.id);
 		};
 	}, [users]);
@@ -204,8 +188,8 @@ function MultiPlayer() {
 	}, [difficulty, roundTime, users, roundNum]);
     
     useEffect(() => {
-        console.log('isFinished changed')
-        if (isFinished) {
+		console.log(roundTimeFinished.toString()); 
+        if (isFinished || roundTimeFinished) {
             socket.emit('user_finished', {'id' : currentUser, 'room_id' : roomId});
 			window.scrollTo({
 				top: 0,
@@ -214,7 +198,13 @@ function MultiPlayer() {
 			});
 			socket.emit('submit_score', {'room_id': roomId, 'guessesUsed': roundGuessesUsed, 'user': currentUser, 'path': roundPath})
         }
-    }, [isFinished])
+    }, [isFinished, roundTimeFinished])
+
+	useEffect(() => {
+		if (transitionTimeFinished && currentUser === users[0]) {
+			socket.emit('start_new_round', {'room_id' : roomId});
+		}
+	}, [transitionTimeFinished]); 
 
 	const createRoom = async () => {
 		try {
@@ -255,7 +245,6 @@ function MultiPlayer() {
 
 	const startGame = () => {
 		setStarted(true);
-		setTimeLeft(roundTime);	
 		socket.emit('start_game', { room_id: roomId, rounds : roundNum, difficulty : difficulty});
 	};
 
@@ -264,121 +253,19 @@ function MultiPlayer() {
 		setIsFinished(false);
 		setCurRound(1);
 		setScore(0);
-		setTransitionTime(10);
 		const newScoreBoard = Object.fromEntries(
 			users.map(id => [id, 0])
 		);
 		setScoreBoard(newScoreBoard);
 		socket.emit('lobby_rejoined', {'room_id' : roomId})
-		setTimeLeft(roundTime);
 		setNumFinished(0); 
 	}
-
-	// const CountdownTimer = ( { startTime } ) => {
-
-	// 	const [time, setTime] = useState(startTime);
-	  
-	// 	useEffect(
-	// 		() => {
-	// 			if (time >= 0) {
-	// 				const timerId = setInterval(
-	// 					() => {setTime((prevTime) => prevTime - 1);},
-	// 					1000
-	// 				);
-	// 				socket.emit('time_changed', {'room_id' : roomId, 'time' : time});
-	// 				return () => clearInterval(timerId); // Cleanup interval on unmount
-	// 	  		} 
-	// 		}, 
-	// 		[time]
-	// 	);
-
-	// 	return (
-	// 		<div>
-    //         	{
-	// 				time <= 0 ? 
-	// 				<Text size='lg'>Time's up!</Text> : 
-	// 				<Stat><StatNumber>{new Date(timeLeft * 1000).toISOString().substring(14, 19)}</StatNumber></Stat>
-	// 			}
-	// 	  	</div>
-	// 	);
-	// };
-
-	const CountdownTimer = ({endTime}) => {
-		const [time, setTime] = useState(0);
-
-		useEffect(
-			() => {
-				if (endTime) {
-			  		const interval = setInterval(() => {
-						const now = new Date().getTime() / 1000;
-						const timeDiff = Math.max(0, trunc(endTime - now));  // Calculate remaining time in ms
-						setTime(timeDiff);
-		
-						if (timeDiff === 0) {
-				  			clearInterval(interval);  // Clear interval when the timer ends
-						}
-			  		}, 1000);
-		
-			  		return () => clearInterval(interval);
-				}
-		  	}, [endTime]
-		);
-
-		return (
-			<div>
-            	{
-					time <= 0 ? 
-					<Text size='lg'>Time's up!</Text> : 
-					<Stat><StatNumber>{new Date(time * 1000).toISOString().substring(14, 19)}</StatNumber></Stat>
-				}
-		  	</div>
-		);
-		
-	}
-
-	const TransitionTimer = ( { startTime } ) => {
-		const [time, setTime] = useState(startTime);
-	  
-		useEffect(
-			() => {
-		  		if (time >= 0) {
-					const timerId = setInterval(
-						() => {setTime((prevTime) => prevTime - 1);}, 
-						1000
-					);
-					socket.emit('transition_time_changed', {'room_id' : roomId, 'time' : time})
-					console.log("Current transition time", time);
-					return () => clearInterval(timerId); // Cleanup interval on unmount
-		 		} 
-				else {
-					setTimeLeft(roundTime); 
-					if (currentUser === users[0]) {
-						socket.emit('start_new_round', {'room_id' : roomId});
-					}
-					setTransitionTime(10); 
-				}
-			}, 
-			[time]
-		);
-
-		return (
-			<div>
-				{
-					time >= 0 ? 
-					<Stat><StatNumber>{new Date(time * 1000).toISOString().substring(14, 19)}</StatNumber></Stat> :
-					<Heading size='md'>Waiting for next round...</Heading>
-				}
-		  	</div>
-		);
-	};
-
 
 	return (
 		<Container className="App-Container">
 			<div className='header'>
 				<a href="/"><Image src={logoImage} boxSize = '150' objectFit='cover' position='relative'/></a>
 				<Text fontWeight='bold' fontSize='3xl'> Hoops Head 2 Head </Text>
-				{/* (username != '' && ) */}
 				<Text position = 'absolute' right = '100px' fontWeight='bold'> Welcome, {username}! </Text> 
 				
 				<IconButton onClick={toggleColorMode} icon={colorMode === 'light' ? <MoonIcon/> : <SunIcon/>} position='absolute' right='50px'>
@@ -423,10 +310,10 @@ function MultiPlayer() {
 						</>
 					) :
 					(
-						(timeLeft > 0 && numFinished < userCount)? (
+						(!roundTimeFinished && numFinished < userCount)? (
                         (roundData.length != 0)? (
 						<>
-							<CountdownTimer endTime={timeLeft} />
+							<Timer endTime={roundEndTime} setTimerFinished={setRoundTimeFinished}></Timer>
 							<Text>Round: {curRound}</Text>
 							<MultiplayerScreen data_m = {roundData[curRound-1].player_data} pics_m = {roundData[curRound-1].pictures} 
 							players_m = {roundData[curRound-1].players} //just need to make this data[curRound-1], etc.
@@ -441,7 +328,7 @@ function MultiPlayer() {
 										<Text fontSize='xl'>Players Finished: {numFinished}</Text>
 									</ModalBody>
 									<ModalFooter margin='auto'>
-										<Stat><StatNumber>{new Date(timeLeft * 1000).toISOString().substring(14, 19)}</StatNumber></Stat>
+										<Timer endTime={roundEndTime} setTimerFinished={setRoundTimeFinished}></Timer>
 									</ModalFooter>
 
 								</ModalContent>
@@ -449,7 +336,7 @@ function MultiPlayer() {
 						</>
                         ) : (
                             <>
-                            <Loading />
+                           		<Loading />
                             </>
                         )
 						) : (
@@ -458,7 +345,7 @@ function MultiPlayer() {
 									<Heading size="lg">Round {curRound} Results</Heading>
 									<Heading size="md">{username} </Heading>
 									<Heading size="sm">Score: {score} </Heading>
-									<TransitionTimer startTime={transitionTime}/>
+									<Timer endTime={transitionEndTime} setTimerFinished={setTransitionTimeFinished}></Timer>
 									<Scoreboard scores = {scoreBoard} idToUser={idToUser}/>
 								</>
 							) : (

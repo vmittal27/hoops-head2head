@@ -13,9 +13,7 @@ RUN_CLEANUP_THREAD = True
 
 # TODO
 # 1. Set settings to be in the database and accessible
-# 2. Set scores to be stored in the database
-# 3. Allow reconnections to get players too
-# 4. Time using backend not frontend
+# 2. Allow reconnections to get players too
 
 room_db: dict[int, dict[str, list | datetime | dict | None]] = {} 
 '''
@@ -54,10 +52,7 @@ Database schema:
 }
 '''
 
-# rooms = {} # contains data about the users in each room
-# room_players = {} # contains data about the basketball players assigned to each room
 socket_to_user = {} #maps socket id to username
-# rooms_usage_tracker: dict[int, datetime] = {} # keeps track of room usage
 
 thread_lock = threading.Lock()
 
@@ -120,9 +115,6 @@ def connected():
     """event listener when client connects to the server"""
     print(request.sid)
     print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - user connected (ID: {request.sid})")
-    # print(f'\tRooms: {rooms}')
-    # print(f'\tSocket-User Mapping: {socket_to_user}')
-    # print(socket_to_user)
 
 @socketio.on("disconnect")
 def disconnected():
@@ -199,7 +191,7 @@ def start_new_round(data):
             room_db[room_id]['gameStatus'] += 1
             room_db[room_id]['finishedUsers'] = [] # reset
             room_db[room_id]['roundEnd'] = datetime.now() + timedelta(seconds=room_db[room_id]['settings']['roundTime'])
-        socketio.emit('start_new_round', {'roundEnd': room_db[room_id]['roundEnd'].timestamp() / 1000}, room=room_id)
+        socketio.emit('start_new_round', {'roundEnd': room_db[room_id]['roundEnd'].timestamp()}, room=room_id)
 
 
 @socketio.on('lobby_rejoined')
@@ -241,6 +233,7 @@ def start_game(data):
     num_rounds = int(data['rounds'])
     room_id = int(data['room_id'])
     difficulty = data['difficulty']
+    socketio.emit('show_loading', room=room_id)
 
     if room_id in room_db:
         ppr = []
@@ -266,13 +259,8 @@ def start_game(data):
             room_db[room_id]['gameStatus'] = 1
             room_db[room_id]['finishedUsers'] = []
             room_db[room_id]['roundEnd'] = datetime.now() + timedelta(seconds=room_db[room_id]['settings']['roundTime'])
-    socketio.emit('start_game', {"players" : room_db[room_id]['players']}, room=room_id)
-
-@socketio.on("time_changed")
-def time_changed(data):
-    room_id = int(data['room_id'])
-    if room_id in room_db:
-        socketio.emit('time_changed', {'newTime' : data['time']}, room=room_id)
+            room_db[room_id]['scores'] = {user: 0 for user in room_db[room_id]['users']}
+    socketio.emit('start_game', {"players" : room_db[room_id]['players'], "roundEnd": room_db[room_id]['roundEnd'].timestamp()}, room=room_id)
 
 @socketio.on("submit_score")
 def submit_score(data):
@@ -280,13 +268,11 @@ def submit_score(data):
     user = data['user']
     path = data['path']
     guesses_used = int(data['guessesUsed'])
-    print('Path', path)
     finished = len(path) > 2 and _check_teammates(path[-1], path[-2])['areTeammates']
     if room_id not in room_db:
         return
     score = 0
     for i in range(1, len(path)):
-        print(path[i - 1], path[i])
         guess_data = _get_scoring_data(path[i - 1], path[i])
         gPlayed = guess_data['Weight']
         relevancy = guess_data['Relevancy']
@@ -299,9 +285,4 @@ def submit_score(data):
     socketio.emit('user_score', {'score': room_db[room_id]['scores'][user]}, room=request.sid)
     if len(room_db[room_id]['finishedUsers']) == len(room_db[room_id]['users']):
         socketio.emit('scores_added', room_db[room_id]['scores'], room=room_id)
-
-@socketio.on("transition_time_changed")
-def transition_time(data):
-    room_id = int(data['room_id'])
-    if room_id in room_db:
-        socketio.emit('transition_time_changed', {'newTime' : data['time']}, room=room_id)
+        socketio.emit('new_round_at', {'time': (datetime.now() + timedelta(seconds=10)).timestamp()}, room=room_id)
