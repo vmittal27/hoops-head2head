@@ -85,6 +85,9 @@ function MultiPlayer() {
 			console.log("users" + data.users);
 			setUsers(data.users);
 			setIdToUser(data.user_map);
+			setDifficulty(data.difficulty);
+			setRoundNum(data.roundNum);
+			setRoundTime(data.roundTime);
 			console.log("idToUser:", data.user_map);
 			const newScoreBoard = Object.fromEntries(
 				data.users.map(id => [id, 0])
@@ -106,6 +109,7 @@ function MultiPlayer() {
 		
 		socket.on('error', (data) => {
 			setError(data.message);
+			setRoomId('');
 		});
 		
 		socket.on('settings_changed', (data) => {

@@ -162,13 +162,23 @@ def on_join(data):
         update_room_usage(room=room_id)
         socket_to_user[request.sid] = data['username']
         socketio.emit('join_success', {"room_id": room_id, "user_count": len(room_db[room_id]['users'])}, room=request.sid)
+        emit_data = {
+            "user_count": len(room_db[room_id]['users']), 
+            "users" : room_db[room_id]['users'], 
+            "user_map" : {socket_id: socket_to_user[socket_id] for socket_id in room_db[room_id]['users']},
+            "difficulty" : 'easy',
+            "roundTime" : 75,
+            "roundNum" : 5
+        }
+        if 'settings' in room_db[room_id]:
+            settings = room_db[room_id]['settings']
+            emit_data["difficulty"] = settings['difficulty']
+            emit_data["roundTime"] = settings['roundTime']
+            emit_data["roundNum"] = settings['roundNum']
+        
         socketio.emit(
             'user_joined', 
-            {
-                "user_count": len(room_db[room_id]['users']), 
-                "users" : room_db[room_id]['users'], 
-                "user_map" : {socket_id: socket_to_user[socket_id] for socket_id in room_db[room_id]['users']}
-            },
+            emit_data,
             room=room_id
         )
     else:
