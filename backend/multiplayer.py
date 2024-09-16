@@ -278,6 +278,7 @@ def submit_score(data):
     user = data['user']
     path = data['path']
     guesses_used = int(data['guessesUsed'])
+    print(path)
     finished = len(path) > 2 and _check_teammates(path[-1], path[-2])['areTeammates']
     if room_id not in room_db:
         return
@@ -286,13 +287,15 @@ def submit_score(data):
         guess_data = _get_scoring_data(path[i - 1], path[i])
         gPlayed = guess_data['Weight']
         relevancy = guess_data['Relevancy']
-        score += (((0.7 * (1584 - gPlayed)/ 1584) + (0.3 * (9.622 - relevancy) / 9.622)) * 100)/guesses_used
+        score += (((0.7 * (1584 - gPlayed)/ 1584) + (0.3 * (9.622 - relevancy) / 9.622)) * 100)/((guesses_used+1)**(1.5))
     if finished:
-        score += 100*(6 - guesses_used)
+        score += 70*(6 - guesses_used)
+    
 
     with thread_lock:
         room_db[room_id]['scores'][user] = room_db[room_id]['scores'].get(user, 0) + int(score)
     socketio.emit('user_score', {'score': room_db[room_id]['scores'][user]}, room=request.sid)
+    print("room scores are", room_db[room_id]['scores'])
     if len(room_db[room_id]['finishedUsers']) == len(room_db[room_id]['users']):
         socketio.emit('scores_added', room_db[room_id]['scores'], room=room_id)
         socketio.emit('new_round_at', {'time': (datetime.now() + timedelta(seconds=10)).timestamp()}, room=room_id)

@@ -41,7 +41,8 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, 
 	const [optimalPath, setOptimalPath] = useState(path_m);
 
 	useEffect(() => {
-		setRoundPath([data_m.currPlayerID])
+		console.log("useEffect running", data_m.currPlayerID);
+		setRoundPath([data_m.currPlayerID]);
 	}, [])
 
 	useEffect(() => {

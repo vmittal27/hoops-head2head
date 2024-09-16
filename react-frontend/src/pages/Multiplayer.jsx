@@ -154,6 +154,7 @@ function MultiPlayer() {
 			setIsFinished(false);
 			setNumFinished(0);
 			setTransitionEndTime(null); 
+			setRoundPath([]);
 			setTransitionTimeFinished(false);
 			setRoundEndTime(new Date(data.roundEnd*1000)); 
 			setRoundTimeFinished(false); 
@@ -194,6 +195,7 @@ function MultiPlayer() {
     useEffect(() => {
 		console.log(roundTimeFinished.toString()); 
         if (isFinished || roundTimeFinished) {
+			console.log('emitting', roundPath, roundGuessesUsed);
             socket.emit('user_finished', {'id' : currentUser, 'room_id' : roomId});
 			window.scrollTo({
 				top: 0,
@@ -256,7 +258,15 @@ function MultiPlayer() {
 		setStarted(false); 
 		setIsFinished(false);
 		setCurRound(1);
+		setNumFinished(0);
 		setScore(0);
+		setRoundPath([]);
+		setRoundData([]);
+		setRoundEndTime(null);
+		setRoundTimeFinished(false);
+		setRoundGuessesUsed(0);
+		setTransitionEndTime(null);
+		setTransitionTimeFinished(false);
 		const newScoreBoard = Object.fromEntries(
 			users.map(id => [id, 0])
 		);

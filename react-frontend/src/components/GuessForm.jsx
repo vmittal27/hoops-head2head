@@ -30,9 +30,9 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                     const gPlayed = scoreResponse['Weight'];
                     const relevancy = scoreResponse['Relevancy'];
 
-                    const addScore = (((0.7 * (1584 - gPlayed)/ 1584) + (0.3 * (9.622 - relevancy) / 9.622)) * 100)/(6-guesses);
+                    const addScore = (((0.7 * (1584 - gPlayed)/ 1584) + (0.3 * (9.622 - relevancy) / 9.622)) * 100)/(6-guesses)**(1.5);
 
-                    setScore(Math.ceil(score + addScore  + 100 * guesses * over));
+                    setScore(Math.ceil(score + addScore  + 70 * guesses * over));
                 })
                 .catch(error => console.log('Error getting score:', error))
         } else{
