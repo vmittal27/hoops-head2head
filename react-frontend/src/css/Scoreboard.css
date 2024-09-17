@@ -7,6 +7,7 @@
     border-width: 0.2rem; 
     position: relative;
     padding: 1.3rem 1.3rem;
+    text-align: center;
 }
 
 .score {
@@ -19,5 +20,5 @@
     vertical-align: middle;
     font-size: x-large;
     font-weight: bold;
-    left: 12.2rem;
+    left: 10.4rem;
 }

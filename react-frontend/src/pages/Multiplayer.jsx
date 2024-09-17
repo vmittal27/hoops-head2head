@@ -13,7 +13,7 @@ import Scoreboard from "../components/Scoreboard";
 import Timer from "../components/Timer.jsx"
 
 import { Image, Text, Container, Button, Heading, IconButton, useColorMode, CircularProgress} from "@chakra-ui/react";
-import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody} from '@chakra-ui/react'
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, Box } from '@chakra-ui/react'
 import { MoonIcon, SunIcon } from '@chakra-ui/icons'
 
 const socket = io("localhost:5000/", {
@@ -280,7 +280,8 @@ function MultiPlayer() {
 			<div className='header'>
 				<a href="/"><Image src={logoImage} boxSize = '150' objectFit='cover' position='relative'/></a>
 				<Text fontWeight='bold' fontSize='3xl'> Hoops Head 2 Head </Text>
-				<Text position = 'absolute' right = '100px' fontWeight='bold'> Welcome, {username}! </Text> 
+
+				<Text fontWeight='bold' position='absolute' fontSize = 'xl' right='100px'> {username} </Text>
 				
 				<IconButton onClick={toggleColorMode} icon={colorMode === 'light' ? <MoonIcon/> : <SunIcon/>} position='absolute' right='50px'>
 					Toggle {colorMode === 'light' ? 'Dark' : 'Light'}

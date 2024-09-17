@@ -229,13 +229,13 @@ function SinglePlayer() {
 								<TabPanel>
 									<UnorderedList>
 										<ListItem>
-											Lowest score wins
+											A higher score is better
 										</ListItem>
 										<ListItem>
-											For correct guesses, obvious teammates add more points than guessing less well-known teammates do
+											For correct guesses, obvious teammates add less points than guessing less well-known teammates do
 										</ListItem>
 										<ListItem>
-											Incorrect guesses add the most points, with more points being added for a streak of wrong guesses
+											Incorrect guesses add 0 points, and each correct guess adds less points if more guesses are used
 										</ListItem>
 									</UnorderedList>
 								</TabPanel>
