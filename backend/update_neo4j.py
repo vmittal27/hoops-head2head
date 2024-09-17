@@ -17,10 +17,8 @@ driver = GraphDatabase.driver(uri, auth=(username, password))
 
 
 difficulties = {
-            'easy': (2.0, 100, 2020, 2024),
-            'medium': (1.1, 2.0, 2020, 2024),
-            'hard': (0.4, 1.1, 2020, 2024),
-            'extreme': (0.2, 1.5, 2000, 2020),
+            'normal': (0.7, 100, 2023, 2024),
+            'hard': (1, 2, 2010, 2022),
             'legacy': (4.2, float('inf'), 1947, 2024)
         }
 

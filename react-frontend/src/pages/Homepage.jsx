@@ -1,7 +1,7 @@
 import React from 'react'
 import { Container, Button, Heading, Image, Box, Text } from '@chakra-ui/react'
 import { Link } from 'react-router-dom'
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
+import { Flex, Spacer, Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 import { VStack, UnorderedList, ListItem } from '@chakra-ui/react'
 import {
 	Modal,
@@ -16,14 +16,28 @@ import {
 } from '@chakra-ui/react'
 import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
 import "../css/Homepage.css"
+import { IconButton, useColorMode, CircularProgress} from "@chakra-ui/react";
+import { MoonIcon, SunIcon, QuestionOutlineIcon } from '@chakra-ui/icons'
+
 
 
 function Homepage() {
 
     const { isOpen: isRulesOpen , onOpen: onRulesOpen, onClose: onRulesClose } = useDisclosure()
-
+	const { colorMode, toggleColorMode } = useColorMode();
     return (
+		<>
+		<Flex minWidth='100%' alignItems='center' justifyContent="flex-end" pt='10px' pr='10px' gap={3}>
+			<IconButton onClick={toggleColorMode} icon={colorMode === 'light' ? <MoonIcon/> : <SunIcon/>}>
+				Toggle {colorMode === 'light' ? 'Dark' : 'Light'}
+			</IconButton>
+			
+			<QuestionOutlineIcon onClick={onRulesOpen} className = "rules" boxSize={8} />
+
+		
+		</Flex>
         <Container className='maincontain'>
+			
             <Heading pos='relative'>Welcome to Hoops Head 2 Head!</Heading>
             <Container className='Homepage-Contain'>
                 <Link to='/singleplayer' ><Button flex='1'size='lg' variant='outline' className='Gamemode-Button'>Single Player</Button></Link>
@@ -33,10 +47,7 @@ function Homepage() {
             <Button onClick={onRulesOpen} flex='1'size='lg'variant='outline' className='Gamemode-Button'>Rules</Button>
             <Container>
             </Container>
-
-
-
-
+			
             
             <Modal blockScrollOnMount={false} size ={'lg'} isOpen={isRulesOpen} onClose={onRulesClose}>
 				<ModalOverlay/>
@@ -84,9 +95,7 @@ function Homepage() {
 				</ModalContent>
 			</Modal>
         </Container>
-
-
-
+		</>
         
     )
 }

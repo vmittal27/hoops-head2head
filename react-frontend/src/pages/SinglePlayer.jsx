@@ -5,8 +5,9 @@ import '../components/Difficulty'
 
 import '../css/SinglePlayer.css'
 import GuessForm from '../components/GuessForm'
-import { QuestionOutlineIcon } from '@chakra-ui/icons'
+import { MoonIcon, SunIcon, QuestionOutlineIcon } from '@chakra-ui/icons'
 import { VStack,Container, Heading, Text, UnorderedList, ListItem } from '@chakra-ui/react'
+import { IconButton, useColorMode, CircularProgress} from "@chakra-ui/react";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 import {
 	Modal,
@@ -34,13 +35,14 @@ function SinglePlayer() {
 	const [score, setScore] = useState(0);
 
 	const [players, setPlayers] = useState([]);
-	const [difficulty, setDifficulty] = useState('easy');
+	const [difficulty, setDifficulty] = useState('normal');
 
 	const[guesses, setGuesses] = useState(5);
 
 	const [optimalPath, setOptimalPath] = useState([]);
     const [roundPath, setRoundPath] = useState([]);
 	const API_BASE_URL = "http://localhost:5000/";
+	const { colorMode, toggleColorMode } = useColorMode();
 
 	
 	useEffect(() => {
@@ -169,6 +171,10 @@ function SinglePlayer() {
 				<QuestionOutlineIcon onClick={onRulesOpen} className = "rules" boxSize={8}/>
 
 				<div className = "score-box"><Heading size='md'>Score: {score}</Heading></div>
+
+				<IconButton onClick={toggleColorMode} icon={colorMode === 'light' ? <MoonIcon/> : <SunIcon/>}>
+					Toggle {colorMode === 'light' ? 'Dark' : 'Light'}
+				</IconButton>
 			</div>
 
 			<Modal size='lg' blockScrollOnMount={false} isOpen={isWinOpen}>

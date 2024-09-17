@@ -99,7 +99,7 @@ def create_room():
             'settings': {
                 'roundTime': 75,
                 'roundNum': 5, 
-                'difficulty': 'easy'
+                'difficulty': 'normal'
             }, 
             'gameStatus': 0, 
             'finishedUsers': [], 
@@ -166,7 +166,7 @@ def on_join(data):
             "user_count": len(room_db[room_id]['users']), 
             "users" : room_db[room_id]['users'], 
             "user_map" : {socket_id: socket_to_user[socket_id] for socket_id in room_db[room_id]['users']},
-            "difficulty" : 'easy',
+            "difficulty" : 'normal',
             "roundTime" : 75,
             "roundNum" : 5
         }
