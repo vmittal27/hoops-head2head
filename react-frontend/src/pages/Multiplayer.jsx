@@ -13,7 +13,7 @@ import Scoreboard from "../components/Scoreboard";
 import Timer from "../components/Timer.jsx"
 
 import { Image, Text, Container, Button, Heading, IconButton, useColorMode, CircularProgress, UnorderedList, ListItem} from "@chakra-ui/react";
-import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalFooter, ModalBody, useDisclosure, Box } from '@chakra-ui/react'
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalFooter, ModalBody, useDisclosure, Flex } from '@chakra-ui/react'
 import { MoonIcon, SunIcon, QuestionOutlineIcon } from '@chakra-ui/icons'
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 
@@ -278,64 +278,25 @@ function MultiPlayer() {
 	const { isOpen: isRulesOpen , onOpen: onRulesOpen, onClose: onRulesClose } = useDisclosure()
 
 	return (
-		<Container className="App-Container">
-			
-			<div className='header'>
-				<a href="/"><Image src={logoImage} boxSize = '150' objectFit='cover' position='relative'/></a>
-				<Text fontWeight='bold' fontSize='3xl'> Hoops Head 2 Head </Text>
+        <>
+        <Flex minWidth='100%' alignItems='center' justifyContent="space-between" py='10px' px='20px'>
+				<Flex alignItems='center' gap={3}>
+					<a href="/"><Image src={logoImage} boxSize='80px' objectFit='cover'/></a>
+					<Heading fontWeight='bold' fontSize='2xl'>Hoops Head 2 Head</Heading>
+				</Flex>
+				<Flex alignItems='center' gap={3}>
+					<Text fontWeight='bold' fontSize='xl'>{username}</Text>
+					<IconButton
+						onClick={toggleColorMode}
+						icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
+					>
+						Toggle {colorMode === 'light' ? 'Dark' : 'Light'}
+					</IconButton>
+					<QuestionOutlineIcon onClick={onRulesOpen} className="rules" boxSize={8} />
+				</Flex>
+			</Flex>
+		<Container className="App-Container" maxW="container.xl">
 
-				<Text fontWeight='bold' position='absolute' fontSize = 'xl' right='100px'> {username} </Text>
-				
-				<IconButton onClick={toggleColorMode} icon={colorMode === 'light' ? <MoonIcon/> : <SunIcon/>} position='absolute' right='50px'>
-					Toggle {colorMode === 'light' ? 'Dark' : 'Light'}
-				</IconButton>
-				<QuestionOutlineIcon onClick={onRulesOpen} className = "rules" boxSize={8} position='absolute' right='10px' />
-				<Modal blockScrollOnMount={false} size ={'lg'} isOpen={isRulesOpen} onClose={onRulesClose}>
-				<ModalOverlay/>
-				<ModalContent>
-					<ModalHeader>Rules</ModalHeader>
-					<ModalCloseButton color="black"/>
-					<ModalBody>
-						<Tabs variant='enclosed'>
-							<TabList>
-								<Tab>How to Play</Tab>
-								<Tab>Scoring</Tab>
-							</TabList>
-
-							<TabPanels>
-								<TabPanel>
-									<UnorderedList>
-										<ListItem>
-											Connect two NBA players based on mutual teammates
-										</ListItem>
-										<ListItem>
-											Complete the connection in as few guesses as possible
-										</ListItem>
-										<ListItem>
-											The game ends when the connection is complete or you have exhausted all your guesses
-										</ListItem>
-									</UnorderedList>
-								</TabPanel>
-								<TabPanel>
-									<UnorderedList>
-										<ListItem>
-											A higher score is better
-										</ListItem>
-										<ListItem>
-											For correct guesses, obvious teammates add less points than guessing less well-known teammates do
-										</ListItem>
-										<ListItem>
-											Incorrect guesses add 0 points, and each correct guess adds less points if more guesses are used
-										</ListItem>
-									</UnorderedList>
-								</TabPanel>
-							</TabPanels>
-						</Tabs>
-					</ModalBody>
-					<ModalFooter/>
-				</ModalContent>
-			</Modal>
-			</div>
 			{error && <Text style={{color: 'red'}}>{error}</Text>}
 			{!roomId ? 
 				(
@@ -427,6 +388,7 @@ function MultiPlayer() {
 			}
 			
 		</Container>
+        </>
 	);
 };
 

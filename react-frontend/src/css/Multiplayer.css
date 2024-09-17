@@ -4,15 +4,14 @@
     align-items: center;
     padding: 1em;
     text-align: center;
-    gap: 1em
+    gap: 1em;
+    width: 100%;
 }
 
-.header {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 100vw;
-}
+/* Remove or comment out the .header class if it's no longer needed */
+/* .header {
+    ...
+} */
 
 .Menu-Box {
     background-color: var(--chakra-colors-chakra-subtle-bg);

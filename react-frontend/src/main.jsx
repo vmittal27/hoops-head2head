@@ -7,6 +7,7 @@ import MultiPlayer from './pages/Multiplayer.jsx'
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import './css/index.css'
 import { extendTheme } from '@chakra-ui/react'
+import '@fontsource/calistoga/400.css'
 
 const router = createBrowserRouter([
     {
@@ -33,7 +34,12 @@ const config = {
   useSystemColorMode: true,
 }
 
-const theme = extendTheme({ config })
+const theme = extendTheme({ 
+    config,
+    fonts: {
+        heading: `'Caslistoga', sans-serif`,
+      }
+ })
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <ChakraProvider theme={theme}>
