@@ -4,12 +4,9 @@ import { useTheme } from '@chakra-ui/system'
 import Select from "react-select"
 import '../css/SinglePlayer.css'
 
-const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, modalOpen, score, setScore, pics, setPics}) => {
+const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, modalOpen, score, setScore, pics, setPics, gameMode, setRoundPath, setRoundGuessesUsed}) => {
 
     const API_BASE_URL = "http://localhost:5000"
-
-    const [wrongStreak, setWrongStreak] = useState(0); // for scoring
-
     // states for search bar
     const [value, setValue] = useState(""); 
     const [suggestions, setSuggestions] = useState([]);
@@ -18,7 +15,7 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
     const toast = useToast();
 
     // updates scores for a given guess
-    const processScoring = (areTeammates, guess) => {
+    const processScoring = (areTeammates, guess, over) => {
         if (areTeammates) {
             fetch(
                 `${API_BASE_URL}/scoring`, 
@@ -33,18 +30,15 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                     const gPlayed = scoreResponse['Weight'];
                     const relevancy = scoreResponse['Relevancy'];
 
-                    const addScore = ((0.7 * gPlayed / 1584) + (0.3 * relevancy / 9.622)) * 25;
+                    const addScore = (((0.7 * (1584 - gPlayed)/ 1584) + (0.3 * (9.622 - relevancy) / 9.622)) * 100)/(6-guesses)**(1.5);
 
-                    setScore(Math.ceil(score + addScore));
-                    setWrongStreak(0); 
+                    setScore(Math.ceil(score + addScore  + 70 * guesses * over));
                 })
                 .catch(error => console.log('Error getting score:', error))
+        } else{
+            setScore(score); 
         }
 
-        else {
-            setScore(score + 25 + (5 * wrongStreak));
-            setWrongStreak(wrongStreak + 1);
-        }
 
     }
 
@@ -59,8 +53,10 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
         )
             .then((response) => response.json())
             .then((response) => {
-                console.log(`${p1} and ${p2} are teammates: ${response.areTeammates}`);
-                return response.areTeammates; 
+                if(response.areTeammates){
+                    return 1;
+                }
+                return 0;
             })
             .catch(error => console.log('Error checking teammates:', error))
     }
@@ -76,7 +72,6 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
         )
         .then((response) => response.json())
             .then((response) => {
-                console.log(`${p1}'s JSON data:  ${response.name}`);
                 return {
                     'name' : response.name,
                     'id' : response.id,
@@ -89,7 +84,8 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
     const handleSubmit = (guess) => {
 
         if (guess) {
-
+            if (gameMode == 'multi')
+                setRoundGuessesUsed(6 - guesses)
             setGuesses(guesses - 1)
 
             checkTeammates(data.currPlayerID, guess)
@@ -99,22 +95,23 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                         .then((jsonData) => {
                             setPlayers(p => [...p, jsonData.name ]);
                             setData({...data, currPlayer : jsonData.name, currPlayerID: jsonData.id});
-                            setPics({...pics, currPlayerURL : jsonData.url});
-                            console.log(jsonData.name, jsonData.id, jsonData.url);
-                            console.log(data.currPlayer, pics.currPlayerURL);
+                            setRoundPath((prev) => [...prev, jsonData.id])
+                            setPics({...pics, currPlayerURL: jsonData.url});
                             checkTeammates(data.lastPlayerID, guess)
                                 .then((gameOver) => {
                                     if (gameOver) {
-                                        console.log('Game Complete! Well done!');
-                                        setPlayers(p => [...p, data.lastPlayer])
+                                        setPlayers(p => [...p, data.lastPlayer]);
+                                        setRoundPath((prev) => [...prev, data.lastPlayerID])
                                         modalOpen();
+                                        if (gameMode == 'single')
+                                            processScoring(teammates, guess, gameOver)
                                     }
+                                
                                 })
                         })
-    
+                        
                     }
                 
-                    processScoring(teammates, guess);
                 }); 
         }
         else {
@@ -155,12 +152,8 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
 
         if (action.action === 'select-option') {
             const data_len = players.length; 
-            
-            console.log(`Guessed ${option.value}`);
 
             handleSubmit(option.value);
-
-            console.log(`Score: ${score}`);
 
             if (players.length != data_len)
                 setValue('');
@@ -188,6 +181,10 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                     '&:hover': {
                         borderColor: optionBgHover,
                     }
+                }), 
+                container: (baseStyles, state) => ({
+                    ...baseStyles, 
+                    width: '20em'
                 }), 
                 menu: (baseStyles, state) => ({
                     ...baseStyles, 

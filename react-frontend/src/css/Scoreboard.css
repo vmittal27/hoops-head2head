@@ -1,0 +1,24 @@
+.Scoreboard-Container {
+    display: flex;
+    border-radius: 0.63rem;
+    background-color: var(--chakra-colors-chakra-subtle-bg);
+    width: 15.6rem;
+    border-color: #ff7f26;
+    border-width: 0.2rem; 
+    position: relative;
+    padding: 1.3rem 1.3rem;
+    text-align: center;
+}
+
+.score {
+    position: absolute;
+    right: 1.9rem;
+}
+
+.score-head {
+    position: relative;
+    vertical-align: middle;
+    font-size: x-large;
+    font-weight: bold;
+    left: 10.4rem;
+}

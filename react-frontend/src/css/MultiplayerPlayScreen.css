@@ -12,8 +12,6 @@
     flex-direction: row;
     align-items: center;
     width: 100vw;
-    justify-content: flex-start;
-    margin: 0;
 }
 
 .difficulty-buttons-group {
@@ -49,11 +47,11 @@
     cursor: pointer;
 }
 
-.right-container {
+.score-container {
     display: flex;
     align-items: center;
-    position: absolute; 
-    top: 0; 
+    position: fixed; 
+    bottom: 0; 
     right: 0; 
     padding: 1vw;
     gap: 1vw;

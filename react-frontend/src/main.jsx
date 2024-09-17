@@ -3,10 +3,11 @@ import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import SinglePlayer from './pages/SinglePlayer.jsx'
 import Homepage from './pages/Homepage.jsx'
-import Lobby from './pages/Lobby.jsx'
+import MultiPlayer from './pages/Multiplayer.jsx'
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import './css/index.css'
 import { extendTheme } from '@chakra-ui/react'
+import '@fontsource/calistoga/400.css'
 
 const router = createBrowserRouter([
     {
@@ -18,8 +19,12 @@ const router = createBrowserRouter([
         element: <SinglePlayer />
     },
     {
-        path:'/lobby',
-        element: <Lobby />
+        path:'/multiplayer',
+        element: <MultiPlayer />
+    },
+    {
+        path: '/multiplayer/:roomIdUrl',
+        element: <MultiPlayer />
     }
 ])
 
@@ -29,13 +34,16 @@ const config = {
   useSystemColorMode: true,
 }
 
-const theme = extendTheme({ config })
+const theme = extendTheme({ 
+    config,
+    fonts: {
+        heading: `'Caslistoga', sans-serif`,
+      }
+ })
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <ChakraProvider theme={theme}>
-      <RouterProvider router={router} />
-    </ChakraProvider>
-  </React.StrictMode>
+  <ChakraProvider theme={theme}>
+    <RouterProvider router={router} />
+  </ChakraProvider>
 
 )

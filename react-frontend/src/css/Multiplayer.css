@@ -1,0 +1,98 @@
+.App-Container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1em;
+    text-align: center;
+    gap: 1em;
+    width: 100%;
+}
+
+/* Remove or comment out the .header class if it's no longer needed */
+/* .header {
+    ...
+} */
+
+.Menu-Box {
+    background-color: var(--chakra-colors-chakra-subtle-bg);
+    border-radius: 0.938rem;
+    padding: 2em;
+    gap: 2em;
+    display: flex; 
+    flex-direction: column;
+    align-items: center;
+}
+
+.Form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+    padding: 1em;
+    border: solid var(--chakra-colors-chakra-border-color);
+    border-radius: 0.938rem;
+}
+
+.Menu-Element {
+    width: 10em; 
+}
+
+.Chat { 
+    list-style-type: none;
+}
+
+.selectDif {
+
+    background: var(--chakra-colors-chakra-subtle-bg); 
+    border-radius: 1.25rem;
+    border-color: #ff7f26;
+    border-width: 0.188rem; 
+    position: relative;
+    width: 90vw;  
+    top: 40%;
+    min-height: 12rem;
+    height: auto;
+    display: flex;
+}
+
+.bottomcontain {
+    width: 90vw; 
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+    min-height: 20rem;
+}
+
+.lobbycontain {
+    background: var(--chakra-colors-chakra-subtle-bg); 
+    border-radius: 1.25rem;
+    border-color: #ff7f26;
+    border-width: 0.188rem; 
+    min-height: 20rem;
+    max-width: 50%;
+    flex: 1;
+    margin-right: 1rem;
+}
+
+
+@media (max-width: 56rem) {
+    .selectDif {
+        max-width: 100%;
+        height: 20rem;
+    }
+}
+
+@media (max-width: 56rem) {
+    .bottomcontain {
+        flex-direction: column;
+        max-width: 100%;
+        
+    }
+
+    .lobbycontain, .chatclass {
+        max-width: 100%;
+        margin-bottom: 1.25rem;
+        min-width: 100%;
+    }
+}
