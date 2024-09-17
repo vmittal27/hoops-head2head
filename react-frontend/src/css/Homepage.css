@@ -1,9 +1,10 @@
-.Homepage-Container {
+.maincontain {
+    min-width: 90vw;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 1em;
+    margin-top: 10em;
 }
 
 .header {
@@ -12,13 +13,17 @@
     width: 100vw;
 }
   
-.Homepage-Box {
+.Homepage-Contain {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    width: auto;
+    flex: 1;
     align-items: center;
-    gap: 0.5em; 
+    justify-content: center;
 }
 
 .Gamemode-Button {
-    width: 8em;
+    width: 10em;
+    min-height: 4rem;
+    background-color: var(--chakra-colors-chakra-subtle-bg);
 }

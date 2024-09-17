@@ -96,7 +96,7 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                             setPlayers(p => [...p, jsonData.name ]);
                             setData({...data, currPlayer : jsonData.name, currPlayerID: jsonData.id});
                             setRoundPath((prev) => [...prev, jsonData.id])
-                            setPics({...pics, currPlayerURL : jsonData.url});
+                            setPics({...pics, currPlayerURL: jsonData.url});
                             checkTeammates(data.lastPlayerID, guess)
                                 .then((gameOver) => {
                                     if (gameOver) {

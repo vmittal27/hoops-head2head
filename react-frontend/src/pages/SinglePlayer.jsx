@@ -23,6 +23,7 @@ import {
 } from '@chakra-ui/react'
 
 import myImage from '../components/wedidit.jpeg'
+import loseImage from '../components/embiid.jpeg'
 import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
 import defaultImage from '../components/default-pic.png'
 import DifficultyButton from '../components/Difficulty'
@@ -38,7 +39,9 @@ function SinglePlayer() {
 	const[guesses, setGuesses] = useState(5);
 
 	const [optimalPath, setOptimalPath] = useState([]);
+    const [roundPath, setRoundPath] = useState([]);
 	const API_BASE_URL = "http://localhost:5000/";
+
 	
 	useEffect(() => {
 		// Using fetch to fetch the api from flask server it will be redirected to proxy
@@ -56,6 +59,7 @@ function SinglePlayer() {
 	
 			.then(
 				(data) => {
+                    setScore(0)
 					setData(
 						{
 							currPlayer: data["Player 1"]["name"], lastPlayer: data["Player 2"]["name"],
@@ -69,6 +73,7 @@ function SinglePlayer() {
 
 					//adding initial player to player list
 					setPlayers([data["Player 1"]["name"]]);
+                    setRoundPath([data["Player 1"]["id"]]);
 
 				}
 			)
@@ -84,6 +89,7 @@ function SinglePlayer() {
     const { isOpen: isWinOpen , onOpen: onWinOpen, onClose: onWinClose } = useDisclosure()
     const { isOpen: isLoseOpen , onOpen: onLoseOpen, onClose: onLoseClose } = useDisclosure()
 
+
 	return (
 		<Container className='App-Container'>
             <div class='header'>
@@ -93,7 +99,7 @@ function SinglePlayer() {
                 <Text fontWeight='bold' fontSize='3xl'> Hoops Head 2 Head </Text>
             </div>
 
-			<Text fontWeight='bold' fontSize='xl'> Single Player Mode </Text>
+			{/* <Text fontWeight='bold' fontSize='xl'> Single Player Mode </Text> */}
 			<DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty} />
 
 			<GuessForm
@@ -109,13 +115,14 @@ function SinglePlayer() {
 				pics={pics}
 				setPics={setPics}
 				gameMode={'single'}
+                setRoundPath={setRoundPath}
 			/>
 	
 			<Text align= 'center'>Remaining Guesses: {guesses}</Text>
 
 			<div className='path'>
                 <VStack spacing={4} align="stretch">
-				<Text fontSize='xl' fontWeight='bold'>Current Path</Text>
+				<Text fontSize='xl' fontWeight='bold'>Current Path:</Text>
                 <Text fontWeight='bold'>{
 					players.map(
 						(player, index) => (
@@ -164,11 +171,11 @@ function SinglePlayer() {
 				<div className = "score-box"><Heading size='md'>Score: {score}</Heading></div>
 			</div>
 
-			<Modal blockScrollOnMount={false} isOpen={isWinOpen} onClose={onWinClose}>
+			<Modal size='lg' blockScrollOnMount={false} isOpen={isWinOpen}>
 				<ModalOverlay/>
-				<ModalContent backgroundColor="green.300">
+				<ModalContent backgroundColor="green.500">
 					<ModalHeader>YOU DID ITTTTTT!</ModalHeader>
-					<ModalCloseButton/>
+					{/* <ModalCloseButton/> */}
 					<ModalBody>
 						<Image src={myImage} alt="Description of Image" />
 						<Text mb='1rem'>
@@ -179,6 +186,7 @@ function SinglePlayer() {
 									{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
 								</React.Fragment>
 							))}</Text>
+                            <br />
 							The shortest path was:
 							<Text fontWeight='bold'>{optimalPath.map((player, index) => (
 								<React.Fragment key={index}>
@@ -189,13 +197,13 @@ function SinglePlayer() {
 						</Text>
 
 						<Text mb='1rem'>
-							Score:<Text as="span" fontWeight='bold'>{score}</Text>
+							Score: <Text as="span" fontWeight='bold'>{score}</Text>
 						</Text>
 					</ModalBody>
 
 					<ModalFooter>
-						<Button variant='ghost' mr={3} onClick={onWinClose}>Close</Button>
-						<Button colorScheme='blue' onClick={() => window.location.reload()}>Restart</Button>
+						{/* <Button variant='ghost' mr={3} onClick={onWinClose}>Close</Button> */}
+						<Button colorScheme='blue' onClick={() => window.location.reload()}>Play Again</Button>
 					</ModalFooter>
 				</ModalContent>
 			</Modal>
@@ -245,34 +253,49 @@ function SinglePlayer() {
 					<ModalFooter/>
 				</ModalContent>
 			</Modal>
-
-			<Modal closeOnOverlayClick={false} isOpen={guesses===0} onClose={onLoseClose}>
+            
+            <Modal size='lg' closeOnOverlayClick={false} isOpen={guesses===0}>
 				<ModalOverlay/>
-				<ModalContent>
-					<ModalHeader>Game Over!</ModalHeader>
-
-					<ModalCloseButton />
-
+				<ModalContent backgroundColor="red.500">
+					<ModalHeader>It's never been more over</ModalHeader>
+					{/* <ModalCloseButton/> */}
 					<ModalBody>
+						<Image src={loseImage} alt="Description of Image" />
 						<Text mb='1rem'>
-							You ran out of guesses!
-							<br/><br/>The shortest path was:<br/>
-							<Text fontWeight='bold'>
-								{optimalPath.join(' ➡️ ')}
-							</Text>
+							Your path was:
+							<Text fontWeight='bold'>{players.map((player, index) => (
+								<React.Fragment key={index}>
+                                    {player}
+                                    {index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
+                                </React.Fragment>
+							))}</Text>
+                            <br />
+							The shortest path was:
+							<Text fontWeight='bold'>{optimalPath.map((player, index) => (
+								<React.Fragment key={index}>
+									{player}
+									{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
+								</React.Fragment>
+							))}</Text>
+						</Text>
+
+						<Text mb='1rem'>
+							Score: <Text as="span" fontWeight='bold'>{score}</Text>
 						</Text>
 					</ModalBody>
 
 					<ModalFooter>
-						<Button variant='ghost' mr={3} onClick={onLoseClose}>Close</Button>
-						<Button colorScheme='blue' onClick={() => window.location.reload()}>Restart</Button>
+						{/* <Button variant='ghost' mr={3} onClick={onLoseClose}>Close</Button> */}
+						<Button colorScheme='blue' onClick={() => window.location.reload()}>Play Again</Button>
 					</ModalFooter>
-
 				</ModalContent>
 			</Modal>
+            
 		</Container>		
 			
 	)
 }
 
 export default SinglePlayer;
+
+                    
