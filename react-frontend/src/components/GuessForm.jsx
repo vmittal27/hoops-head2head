@@ -182,6 +182,10 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                         borderColor: optionBgHover,
                     }
                 }), 
+                container: (baseStyles, state) => ({
+                    ...baseStyles, 
+                    width: '20em'
+                }), 
                 menu: (baseStyles, state) => ({
                     ...baseStyles, 
                     backgroundColor: menuBg

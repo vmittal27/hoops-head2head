@@ -47,11 +47,11 @@
     cursor: pointer;
 }
 
-.right-container {
+.score-container {
     display: flex;
     align-items: center;
-    position: absolute; 
-    top: 0; 
+    position: fixed; 
+    bottom: 0; 
     right: 0; 
     padding: 1vw;
     gap: 1vw;

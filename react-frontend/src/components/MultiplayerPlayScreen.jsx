@@ -20,7 +20,9 @@ import {
 	useDisclosure,
 	Button,
 	Image,
-    Icon
+    Icon, 
+	Box, 
+	Flex
 } from '@chakra-ui/react'
 
 import myImage from '../components/wedidit.jpeg'
@@ -92,7 +94,21 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, 
 				setRoundGuessesUsed={setRoundGuessesUsed}
 			/>
 	
-			<Text align= 'center'>Remaining Guesses: {guesses}</Text>
+			<Box>
+				<Flex align="center">
+					<Text>Remaining Guesses:</Text>
+					{Array.from({ length: guesses }).map((_, index) => (
+						<Box
+							key={index}
+							borderRadius="50%"
+							bg="gray.500"
+							w="1em"
+							h="1em"
+							mx={1}
+						/>
+					))}
+				</Flex>
+			</Box>
 
 			<div className='path'>
                 <VStack spacing={4} align="stretch">
@@ -134,9 +150,7 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, 
 					<Text fontSize='xl' align= 'center'> {data.lastPlayer} </Text>
 				</div>
 			</div>
-			<div className='right-container'>
-				<QuestionOutlineIcon onClick={onRulesOpen} className = "rules" boxSize={8}/>
-
+			<div className='score-container'>
 				<div className = "score-box">
 					<Heading size='md'>Score: {score}</Heading>
 				</div>
