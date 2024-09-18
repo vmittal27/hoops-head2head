@@ -190,9 +190,11 @@ function SinglePlayer() {
 						<Text fontSize='xl' align= 'center'> {data.lastPlayer} </Text>
 					</div>
 				</div>
-				{/* <div className='right-container'>
-
-				</div> */}
+				<div className='score-container'>
+					<div className = "score-box">
+						<Heading size='md'>Score: {score}</Heading>
+					</div>
+				</div>
 
 				<Modal size='lg' blockScrollOnMount={false} isOpen={isWinOpen}>
 					<ModalOverlay/>
