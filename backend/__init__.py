@@ -9,9 +9,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 CORS(app,resources={r"/*":{"origins":"http://localhost:5173"}})
 socketio = SocketIO(app,cors_allowed_origins="http://localhost:5173")
-
+from backend import neo4j_routes
+from backend import multiplayer
 
 if __name__ == '__main__':
     socketio.run(app, debug=True,port=5000)
-from backend import neo4j_routes
-from backend import multiplayer

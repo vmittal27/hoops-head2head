@@ -200,22 +200,6 @@ def get_player_json_data():
         else:
             return jsonify({'error': 'Player not found'}), 404
 
-socketio = SocketIO(app)
-
-# WebSocket event handlers
-@socketio.on('connect')
-def handle_connect():
-    print('Client connected')
-
-@socketio.on('disconnect')
-def handle_disconnect():
-    print('Client disconnected')
-
-@socketio.on('message')
-def handle_message(data):
-    print('Received message: ' + data)
-    emit('response', 'Server received: ' + data)
-
 def close_driver():
     driver.close()
 
