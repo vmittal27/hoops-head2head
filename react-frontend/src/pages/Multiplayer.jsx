@@ -11,11 +11,11 @@ import MultiplayerEntryPoint from "../components/MultiplayerEntryPoint";
 import Lobby from '../components/Lobby.jsx'
 import Scoreboard from "../components/Scoreboard";
 import Timer from "../components/Timer.jsx"
+import RulesModal from "../components/RulesModal.jsx";
 
-import { Image, Text, Container, Button, Heading, IconButton, useColorMode, CircularProgress, UnorderedList, ListItem} from "@chakra-ui/react";
-import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalFooter, ModalBody, useDisclosure, Flex } from '@chakra-ui/react'
+import { Image, Text, Container, Button, Heading, IconButton, useColorMode, CircularProgress} from "@chakra-ui/react";
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, useDisclosure, Flex } from '@chakra-ui/react'
 import { MoonIcon, SunIcon, QuestionOutlineIcon } from '@chakra-ui/icons'
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 
 const socket = io("localhost:5000/", {
 	transports: ["websocket"],
@@ -295,6 +295,7 @@ function MultiPlayer() {
 					<QuestionOutlineIcon onClick={onRulesOpen} className="rules" boxSize={8} />
 				</Flex>
 			</Flex>
+		<RulesModal onOpen={onRulesOpen} isOpen={isRulesOpen} onClose={onRulesClose}/>
 		<Container className="App-Container" maxW="container.xl">
 
 			{error && <Text style={{color: 'red'}}>{error}</Text>}

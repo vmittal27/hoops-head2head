@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import '../components/Difficulty'
 
 import '../css/SinglePlayer.css'
 import GuessForm from '../components/GuessForm'
 import { MoonIcon, SunIcon, QuestionOutlineIcon } from '@chakra-ui/icons'
-import { VStack,Container, Heading, Text, UnorderedList, ListItem } from '@chakra-ui/react'
-import { IconButton, useColorMode, CircularProgress} from "@chakra-ui/react";
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
+import { VStack,Container, Heading, Text } from '@chakra-ui/react'
+import { IconButton, useColorMode } from "@chakra-ui/react";
 import {
 	Modal,
 	ModalOverlay,
@@ -16,7 +14,6 @@ import {
 	ModalHeader,
 	ModalFooter,
 	ModalBody,
-	ModalCloseButton,
 	useDisclosure,
 	Button,
 	Image,
@@ -29,6 +26,7 @@ import loseImage from '../components/embiid.jpeg'
 import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
 import defaultImage from '../components/default-pic.png'
 import DifficultyButton from '../components/Difficulty'
+import RulesModal from '../components/RulesModal'
 
 function SinglePlayer() {
 	const [data, setData] = useState([{currPlayer: "", lastPlayer: "", currPlayerID: "", lastPlayerID: ""}]);
@@ -200,7 +198,6 @@ function SinglePlayer() {
 					<ModalOverlay/>
 					<ModalContent backgroundColor="green.500">
 						<ModalHeader>YOU DID ITTTTTT!</ModalHeader>
-						{/* <ModalCloseButton/> */}
 						<ModalBody>
 							<Image src={myImage} alt="Description of Image" />
 							<Text mb='1rem'>
@@ -227,63 +224,17 @@ function SinglePlayer() {
 						</ModalBody>
 
 						<ModalFooter>
-							{/* <Button variant='ghost' mr={3} onClick={onWinClose}>Close</Button> */}
 							<Button colorScheme='blue' onClick={() => window.location.reload()}>Play Again</Button>
 						</ModalFooter>
 					</ModalContent>
 				</Modal>
 
-				<Modal blockScrollOnMount={false} size ={'lg'} isOpen={isRulesOpen} onClose={onRulesClose}>
-					<ModalOverlay/>
-					<ModalContent>
-						<ModalHeader>Rules</ModalHeader>
-						<ModalCloseButton color="black"/>
-						<ModalBody>
-							<Tabs variant='enclosed'>
-								<TabList>
-									<Tab>How to Play</Tab>
-									<Tab>Scoring</Tab>
-								</TabList>
-
-								<TabPanels>
-									<TabPanel>
-										<UnorderedList>
-											<ListItem>
-												Connect two NBA players based on mutual teammates
-											</ListItem>
-											<ListItem>
-												Complete the connection in as few guesses as possible
-											</ListItem>
-											<ListItem>
-												The game ends when the connection is complete or you have exhausted all your guesses
-											</ListItem>
-										</UnorderedList>
-									</TabPanel>
-									<TabPanel>
-										<UnorderedList>
-											<ListItem>
-												A higher score is better
-											</ListItem>
-											<ListItem>
-												For correct guesses, obvious teammates add less points than guessing less well-known teammates do
-											</ListItem>
-											<ListItem>
-												Incorrect guesses add 0 points, and each correct guess adds less points if more guesses are used
-											</ListItem>
-										</UnorderedList>
-									</TabPanel>
-								</TabPanels>
-							</Tabs>
-						</ModalBody>
-						<ModalFooter/>
-					</ModalContent>
-				</Modal>
+				<RulesModal onOpen={onRulesOpen} onClose={onRulesClose} isOpen={isRulesOpen}/>
 				
 				<Modal size='lg' closeOnOverlayClick={false} isOpen={guesses===0}>
 					<ModalOverlay/>
 					<ModalContent backgroundColor="red.500">
 						<ModalHeader>It's never been more over</ModalHeader>
-						{/* <ModalCloseButton/> */}
 						<ModalBody>
 							<Image src={loseImage} alt="Description of Image" />
 							<Text mb='1rem'>
@@ -310,7 +261,6 @@ function SinglePlayer() {
 						</ModalBody>
 
 						<ModalFooter>
-							{/* <Button variant='ghost' mr={3} onClick={onLoseClose}>Close</Button> */}
 							<Button colorScheme='blue' onClick={() => window.location.reload()}>Play Again</Button>
 						</ModalFooter>
 					</ModalContent>
