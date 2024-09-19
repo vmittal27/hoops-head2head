@@ -94,15 +94,15 @@ function Homepage() {
 							<Flex
 								flexDirection='column'
 								width='fit-content'
-								bg='var(--chakra-colors-chakra-subtle-bg)'
+								bg={colorMode === 'light' ? '#d1d6de' : 'var(--chakra-colors-chakra-subtle-bg)'}
 								gap='2em' padding='2em'
 								borderRadius='0.938rem'
 								opacity={0}
 								animation={`${fadeIn} 0.5s ease-in-out 1s forwards`}
 								style={{animationFillMode: 'forwards', pointerEvents: 'auto'}}
 							>
-								<Link to='/singleplayer' ><Button colorScheme='teal' flex='1'size='lg' width='10em' minHeight='4rem'>Single Player</Button></Link>
-								<Link to='/multiplayer'><Button flex='1' size='lg' colorScheme='teal' width='10em' minHeight='4rem'>Multiplayer</Button></Link>
+								<Link to='/singleplayer' ><Button colorScheme='blue' flex='1'size='lg' width='10em' minHeight='4rem'>Single Player</Button></Link>
+								<Link to='/multiplayer'><Button flex='1' size='lg' colorScheme='purple' width='10em' minHeight='4rem'>Multiplayer</Button></Link>
 							</Flex>
 							<Image src={gordonRightImg} opacity={0} boxSize='30vw'  animation={`${slideInRight} 0.5s ease-in-out 1s forwards`}/>
 						</>

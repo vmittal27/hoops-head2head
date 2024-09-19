@@ -78,13 +78,13 @@ function MultiplayerEntryPoint({handleClick, handleSubmit, roomId, setRoomId, us
             </Modal>
             <Heading fontWeight='bold' size='lg'> Multiplayer </Heading>
             <Box className="Menu-Box">
-                <Button className="Menu-Element" colorScheme="teal" size='lg' onClick={handleClick}>Create a Room</Button>
+                <Button className="Menu-Element" minWidth='10em' colorScheme="teal" size='lg' onClick={handleClick}>Create Room</Button>
                 <Form className='Form' onSubmit={handleSubmit}>
-                    <Text fontSize='xl'>Join a Room</Text>
+                    {/* <Text fontSize='xl'>Join a Room</Text> */}
                     <NumberInput className='Menu-Element' colorScheme="teal" size='lg' min={100001} max={999999}>
-                        <NumberInputField minWidth='10em' placeholder="Room ID" value={roomId} onChange={(e) => setRoomId(e.target.value)}/>
+                        <NumberInputField textAlign='center' minWidth='10em' placeholder="Room ID" value={roomId} onChange={(e) => setRoomId(e.target.value)}/>
                     </NumberInput>
-                    <Button className="Menu-Element" colorScheme="teal" size='lg' type="submit" isDisabled={!roomId}>Join Room</Button>
+                    <Button className="Menu-Element" minWidth='10em' colorScheme="teal" size='lg' type="submit" isDisabled={!roomId}>Join Room</Button>
                 </Form>
                 {/* <Text> Username: {username}</Text> */}
                 <Button onClick={handleChangeUsername} variant='link'>Change Username</Button>

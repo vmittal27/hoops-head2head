@@ -30,16 +30,23 @@ const router = createBrowserRouter([
 
 
 const config = {
-  initialColorMode: 'system',
-  useSystemColorMode: true,
+  initialColorMode: 'dark',
+  useSystemColorMode: false,
 }
 
 const theme = extendTheme({ 
     config,
     fonts: {
-        heading: `'Caslistoga', sans-serif`,
-      }
- })
+      heading: `'Caslistoga', sans-serif`,
+    },
+    styles: {
+      global: (props) => ({
+        body: {
+          bg: props.colorMode === 'light' ? "#ebe9e4" : "#1A202B"
+        },
+      }),
+    },
+ });
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <ChakraProvider theme={theme}>
