@@ -1,5 +1,5 @@
 import React from 'react'
-import { Heading, List, ListItem, Flex, Container, Text, VStack } from "@chakra-ui/react";
+import { Heading, List, ListItem, Flex, Container, Text, VStack, Box } from "@chakra-ui/react";
 import "../css/Scoreboard.css"
 
 
@@ -11,21 +11,28 @@ function Scoreboard({scores, idToUser}) {
     );
 
     return (    
-        <Container className='Scoreboard-Container'>
-            <VStack>
-                <Text className='score-head'>Scoreboard</Text>
-                <List fontWeight="bold" styleType="none" fontSize="xl" mx="10px">
-                    {Object.keys(sortedDict).map((player_id) => (
+        <Box
+            borderRadius='0.63em'
+            bg='var(--chakra-colors-chakra-subtle-bg)'
+            width='30vw'
+            borderColor='#ff7f26'
+            borderWidth='0.2rem'
+            padding='1.3rem'
+            display='flex'
+            flexDir='column'
+        >
+            <Text fontSize='xl' fontWeight='bold'>Scoreboard</Text>
+            <List fontWeight="bold" styleType="none" fontSize="xl" mx="10px">
+                {Object.keys(sortedDict).map((player_id) => (
                     <ListItem>
-                        <Flex alignItems='center'>
-                            <Text fontSize='xl'>{idToUser[player_id]}</Text>
-                            <Heading fontWeight='bold'fontSize='xl' className='score'>{scores[player_id]}</Heading>
+                        <Flex flexDir='row' justifyContent='space-between'>
+                            <Text>{idToUser[player_id]}</Text>
+                            <Text fontWeight='bold'fontSize='xl'>{scores[player_id]}</Text>
                         </Flex>
                     </ListItem>
-                    ))}
-                </List>
-            </VStack>
-        </Container>
+                ))}
+            </List>
+        </Box>
     )
 }
 
