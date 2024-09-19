@@ -17,14 +17,8 @@ import { Image, Text, Container, Button, Heading, IconButton, useColorMode, Circ
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, useDisclosure, Flex } from '@chakra-ui/react'
 import { MoonIcon, SunIcon, QuestionOutlineIcon } from '@chakra-ui/icons'
 
-const socket = io("localhost:5000/", {
-	transports: ["websocket"],
-	cors: {
-		origin: "http://localhost:5173/",
-	},
-});
+const socket = io();
 
-const API_BASE_URL = "http://localhost:5000/"
 
 function MultiPlayer() {
 	const [roomId, setRoomId] = useState('');
@@ -215,7 +209,7 @@ function MultiPlayer() {
 
 	const createRoom = async () => {
 		try {
-			const response = await fetch(`${API_BASE_URL}/create_room`, { method: 'POST' });
+			const response = await fetch(`/create_room`, { method: 'POST' });
 			const data = await response.json();
 			console.log("room id" + data.room_id);
 			joinRoom(data.room_id);

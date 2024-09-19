@@ -40,13 +40,12 @@ function SinglePlayer() {
 
 	const [optimalPath, setOptimalPath] = useState([]);
     const [roundPath, setRoundPath] = useState([]);
-	const API_BASE_URL = "http://localhost:5000/";
 	const { colorMode, toggleColorMode } = useColorMode();
 
 	
 	useEffect(() => {
 		// Using fetch to fetch the api from flask server it will be redirected to proxy
-		fetch(API_BASE_URL + "players/" + difficulty)
+		fetch("/players/" + difficulty)
 			
 			.then(
 				(res) => {

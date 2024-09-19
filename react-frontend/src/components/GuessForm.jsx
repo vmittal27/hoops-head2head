@@ -6,7 +6,6 @@ import '../css/SinglePlayer.css'
 
 const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, modalOpen, score, setScore, pics, setPics, gameMode, setRoundPath, setRoundGuessesUsed}) => {
 
-    const API_BASE_URL = "http://localhost:5000"
     // states for search bar
     const [value, setValue] = useState(""); 
     const [suggestions, setSuggestions] = useState([]);
@@ -18,7 +17,7 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
     const processScoring = (areTeammates, guess, over) => {
         if (areTeammates) {
             fetch(
-                `${API_BASE_URL}/scoring`, 
+                `/scoring`, 
                 {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -44,7 +43,7 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
 
     const checkTeammates = async (p1, p2) => {
         return fetch(
-            `${API_BASE_URL}/check`,
+            `/check`,
             {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -63,7 +62,7 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
 
     const getJson = async (p1) => {
         return fetch(
-            `${API_BASE_URL}/player`,
+            `/player`,
             {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -133,7 +132,7 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
         if (inputValue) {
             setIsLoading(true);
 
-            fetch(`${API_BASE_URL}/autocomplete?search=${inputValue}`)
+            fetch(`/autocomplete?search=${inputValue}`)
                 .then((response) => response.json())
                 .then((data) =>{
                     const results = []
