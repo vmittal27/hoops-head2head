@@ -82,7 +82,7 @@ function MultiplayerEntryPoint({handleClick, handleSubmit, roomId, setRoomId, us
                 <Form className='Form' onSubmit={handleSubmit}>
                     <Text fontSize='xl'>Join a Room</Text>
                     <NumberInput className='Menu-Element' colorScheme="teal" size='lg' min={100001} max={999999}>
-                        <NumberInputField placeholder="Room ID" value={roomId} onChange={(e) => setRoomId(e.target.value)}/>
+                        <NumberInputField minWidth='10em' placeholder="Room ID" value={roomId} onChange={(e) => setRoomId(e.target.value)}/>
                     </NumberInput>
                     <Button className="Menu-Element" colorScheme="teal" size='lg' type="submit" isDisabled={!roomId}>Join Room</Button>
                 </Form>
