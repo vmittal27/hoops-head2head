@@ -205,7 +205,7 @@ function SinglePlayer() {
 								<Text fontWeight='bold'>{players.map((player, index) => (
 									<React.Fragment key={index}>
 										{player}
-										{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
+										{index < players.length - 1 && ' ➡️ '}
 									</React.Fragment>
 								))}</Text>
 								<br />
@@ -213,7 +213,7 @@ function SinglePlayer() {
 								<Text fontWeight='bold'>{optimalPath.map((player, index) => (
 									<React.Fragment key={index}>
 										{player}
-										{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
+										{index < players.length - 1 &&' ➡️ '}
 									</React.Fragment>
 								))}</Text>
 							</Text>
@@ -242,15 +242,15 @@ function SinglePlayer() {
 								<Text fontWeight='bold'>{players.map((player, index) => (
 									<React.Fragment key={index}>
 										{player}
-										{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
+										{index < players.length - 1 && ' ➡️ '}
 									</React.Fragment>
 								))}</Text>
 								<br />
 								The shortest path was:
 								<Text fontWeight='bold'>{optimalPath.map((player, index) => (
 									<React.Fragment key={index}>
-										{player}
-										{index < players.length - 1 && <span role="img" aria-label="right arrow"> ➡️ </span>}
+									{player}
+									{index < optimalPath.length - 1 && ' ➡️ '}
 									</React.Fragment>
 								))}</Text>
 							</Text>
