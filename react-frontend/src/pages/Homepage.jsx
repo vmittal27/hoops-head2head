@@ -1,26 +1,15 @@
 import {React, useState, useEffect} from 'react'
 import { Container, Button, Heading, Image } from '@chakra-ui/react'
 import { Link } from 'react-router-dom'
-import { Flex, Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
-import { UnorderedList, ListItem} from '@chakra-ui/react'
-import {
-	Modal,
-	ModalOverlay,
-	ModalContent,
-	ModalHeader,
-	ModalFooter,
-	ModalBody,
-	ModalCloseButton,
-	useDisclosure,
-    Icon
-} from '@chakra-ui/react'
+import { Flex, useDisclosure} from '@chakra-ui/react'
 import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
 import gordonRightImg from '../components/gordon.png'
 import lavineLeftImg from '../components/lavine.png'
 import "../css/Homepage.css"
 import { IconButton, useColorMode} from "@chakra-ui/react";
 import { MoonIcon, SunIcon, QuestionOutlineIcon } from '@chakra-ui/icons'
-
+import { keyframes } from '@chakra-ui/react'
+import RulesModal from '../components/RulesModal'
 
 
 function Homepage() {
@@ -32,21 +21,38 @@ function Homepage() {
 		const [curWidth, setCurWidth] = useState(0);
 		
 		useEffect(() => {
-		  function handleWindowResize() {
-			setCurWidth(window.innerWidth);
-		  }
+			function handleWindowResize() {
+				setCurWidth(window.innerWidth);
+		  	}
 		  
-		  window.addEventListener("resize", (handleWindowResize));
+		  	window.addEventListener("resize", (handleWindowResize));
 		  
-		  handleWindowResize();
+		  	handleWindowResize();
 		  
-		  return () => { 
-			window.removeEventListener("resize", handleWindowResize);
-		  }
+			return () => { 
+				window.removeEventListener("resize", handleWindowResize);
+			}
 		}, [setCurWidth]);
 		
 		return curWidth > min;
-	  }
+	}
+
+	const fadeIn = keyframes`
+		from {opacity: 0;}
+		to {opacity: 1;}
+	`;
+
+	const slideInLeft = keyframes`
+		from {transform: translateX(-100vw); opacity: 1;}
+		to {transform: translateX(0); opacity: 1;}
+	`;
+
+	const slideInRight = keyframes`
+		from {transform: translateX(100vw); opacity: 1;}
+		to {transform: translateX(0); opacity: 1;}
+	`;
+
+
 
     return (
 		<>
@@ -65,29 +71,40 @@ function Homepage() {
 					<QuestionOutlineIcon onClick={onRulesOpen} className="rules" boxSize={8} />
 				</Flex>
 			</Flex>
+			<RulesModal onOpen={onRulesOpen} onClose={onRulesClose} isOpen={isRulesOpen}/>
 			<Container
 				display='flex'
 				flexDirection='column'
 				justifyContent='center'
 				alignItems='center'
 			>
-				<Heading size='xl' textAlign='center' mb='3vh'>Welcome to Hoops Head 2 Head</Heading>
+				<Heading
+					size='xl'
+					textAlign='center' 
+					mb='3vh'
+					animation={`${fadeIn} 1s ease-in-out forwards`}
+				>
+					Welcome to Hoops Head 2 Head
+				</Heading>
 				<Flex flexDirection='row' justifyContent='center' alignItems='center' gap='5vw'>
 					{wideScreen(800) ? 
 					(
 						<>
-							<Image src={lavineLeftImg} boxSize='30vw'/>
+							<Image src={lavineLeftImg} opacity={0} boxSize='30vw' animation={`${slideInLeft} 0.5s ease-in-out 1s forwards`}/>
 							<Flex
 								flexDirection='column'
 								width='fit-content'
 								bg='var(--chakra-colors-chakra-subtle-bg)'
 								gap='2em' padding='2em'
 								borderRadius='0.938rem'
+								opacity={0}
+								animation={`${fadeIn} 0.5s ease-in-out 1s forwards`}
+								style={{animationFillMode: 'forwards', pointerEvents: 'auto'}}
 							>
 								<Link to='/singleplayer' ><Button colorScheme='teal' flex='1'size='lg' width='10em' minHeight='4rem'>Single Player</Button></Link>
 								<Link to='/multiplayer'><Button flex='1' size='lg' colorScheme='teal' width='10em' minHeight='4rem'>Multiplayer</Button></Link>
 							</Flex>
-							<Image src={gordonRightImg} boxSize='30vw'/>
+							<Image src={gordonRightImg} opacity={0} boxSize='30vw'  animation={`${slideInRight} 0.5s ease-in-out 1s forwards`}/>
 						</>
 					): 
 					(
@@ -98,6 +115,8 @@ function Homepage() {
 								bg='var(--chakra-colors-chakra-subtle-bg)'
 								gap='2em' padding='2em'
 								borderRadius='0.938rem'
+								opacity={0}
+								animation={`${fadeIn} 0.5s ease-in-out 1s forwards`}
 							>
 								<Link to='/singleplayer' ><Button colorScheme='teal' flex='1'size='lg' width='10em' minHeight='4rem'>Single Player</Button></Link>
 								<Link to='/multiplayer'><Button flex='1' size='lg' colorScheme='teal' width='10em' minHeight='4rem'>Multiplayer</Button></Link>
@@ -105,57 +124,10 @@ function Homepage() {
 						</>
 					)}
 				</Flex>
-
-				<Modal blockScrollOnMount={false} size ={'lg'} isOpen={isRulesOpen} onClose={onRulesClose}>
-					<ModalOverlay/>
-					<ModalContent>
-						<ModalHeader>Rules</ModalHeader>
-						<ModalCloseButton color="black"/>
-						<ModalBody>
-							<Tabs variant='enclosed'>
-								<TabList>
-									<Tab>How to Play</Tab>
-									<Tab>Scoring</Tab>
-								</TabList>
-
-								<TabPanels>
-									<TabPanel>
-										<UnorderedList>
-											<ListItem>
-												Connect two NBA players based on mutual teammates
-											</ListItem>
-											<ListItem>
-												Complete the connection in as few guesses as possible
-											</ListItem>
-											<ListItem>
-												The game ends when the connection is complete or you have exhausted all your guesses
-											</ListItem>
-										</UnorderedList>
-									</TabPanel>
-									<TabPanel>
-										<UnorderedList>
-											<ListItem>
-												A higher score is better
-											</ListItem>
-											<ListItem>
-												For correct guesses, obvious teammates add less points than guessing less well-known teammates do
-											</ListItem>
-											<ListItem>
-												Incorrect guesses add 0 points, and each correct guess adds less points if more guesses are used
-											</ListItem>
-										</UnorderedList>
-									</TabPanel>
-								</TabPanels>
-							</Tabs>
-						</ModalBody>
-						<ModalFooter/>
-					</ModalContent>
-				</Modal>
-
 			</Container>
 		</>
         
     )
 }
 
-export default Homepage
+export default Homepage;
