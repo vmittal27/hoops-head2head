@@ -22,6 +22,7 @@ Database schema:
     room_id: {
         'users': list[str], 
         'lastUsed': datetime,
+        'lobby' : 0 #number of players in the lobby
         'players': [{
             'player_data': {
                 'currPlayer': str,
@@ -94,6 +95,7 @@ def create_room():
         room_db[room_id] = {
             'users': [], 
             'lastUsed': datetime.now(),
+            'lobby' : 0,
             'players': None, 
             'scores': {}, 
             'settings': {
@@ -118,25 +120,29 @@ def connected():
 
 @socketio.on("disconnect")
 def disconnected():
-    """event listener when client disconnects to the server"""
+    """event listener when client disconnects from the server"""
     user_id = request.sid
     for room_id in room_db:
         if user_id in room_db[room_id]['users']:
             with thread_lock:
                 room_db[room_id]['users'].remove(user_id)
-
+                if user_id in room_db[room_id]['scores']:
+                    del room_db[room_id]['scores'][user_id]
             if user_id in socket_to_user:
                 with thread_lock:
                     del socket_to_user[user_id]
 
             update_room_usage(room=room_id)
+            leave_info = {
+                "user_count": len(room_db[room_id]['users']), 
+                "users" : room_db[room_id]['users'], 
+                "user_map" : {socket_id: socket_to_user[socket_id] for socket_id in room_db[room_id]['users']},
+            }
+            if 'scores' in room_db[room_id]:
+                leave_info["scores"] = room_db[room_id]['scores']
             socketio.emit(
                 'leave', 
-                {
-                    "user_count": len(room_db[room_id]['users']), 
-                    "users" : room_db[room_id]['users'], 
-                    "user_map" : {socket_id: socket_to_user[socket_id] for socket_id in room_db[room_id]['users']}
-                },
+                leave_info,
                 room=room_id
             )
             break
@@ -154,11 +160,14 @@ def handle_message(data):
 @socketio.on('user_joined') #when a user joins, emit username from the backend
 def on_join(data):
     room_id = int(data['room_id'])
-
+    if room_id in room_db and room_db[room_id]['gameStatus'] != 0:
+        socketio.emit('error', {"message" : "Game still in progress. Please join once finished."}, room=request.sid)
+        return
     if room_id in room_db:
         join_room(room_id)
         with thread_lock:
             room_db[room_id]['users'].append(request.sid)
+            room_db[room_id]['lobby'] += 1
         update_room_usage(room=room_id)
         socket_to_user[request.sid] = data['username']
         socketio.emit('join_success', {"room_id": room_id, "user_count": len(room_db[room_id]['users'])}, room=request.sid)
@@ -208,7 +217,11 @@ def start_new_round(data):
 def lobby_rejoined(data):
     room_id = int(data['room_id'])
     if room_id in room_db:
-        socketio.emit('lobby_rejoined', data, room=room_id)
+        with thread_lock:
+            room_db[room_id]['lobby'] += 1
+        if room_db[room_id]['lobby'] == len(room_db[room_id]["users"]):
+            room_db[room_id]['gameStatus'] = 0
+        socketio.emit('lobby_rejoined', room_db[room_id]['lobby'], room=room_id)
 
 @socketio.on('leave')
 def on_leave(data):
@@ -224,7 +237,8 @@ def on_leave(data):
             {
                 "user_count": len(room_db[room_id]['users']), 
                 "users" : room_db[room_id]['users'], 
-                "user_map" : {socket_id: socket_to_user[socket_id] for socket_id in room_db[room_id]['users']}
+                "user_map" : {socket_id: socket_to_user[socket_id] for socket_id in room_db[room_id]['users']},
+                "socket_id" : request.sid
             },
             room=room_id
         )
@@ -270,6 +284,7 @@ def start_game(data):
             room_db[room_id]['finishedUsers'] = []
             room_db[room_id]['roundEnd'] = datetime.now() + timedelta(seconds=room_db[room_id]['settings']['roundTime'])
             room_db[room_id]['scores'] = {user: 0 for user in room_db[room_id]['users']}
+            room_db[room_id]['lobby'] = 0
     socketio.emit('start_game', {"players" : room_db[room_id]['players'], "roundEnd": room_db[room_id]['roundEnd'].timestamp()}, room=room_id)
 
 @socketio.on("submit_score")

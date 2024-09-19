@@ -92,14 +92,15 @@ function MultiPlayer() {
 		
 		socket.on('leave', (data) => {
 			setUserCount(data.user_count);
-			setLobby(data.user_count);
 			setUsers(data.users);
 			setIdToUser(data.user_map);
-			const newScoreBoard = Object.fromEntries(
-				data.users.map(id => [id, 0])
-			);
-			setScoreBoard(newScoreBoard);
-			
+			if(data.scores){
+				setScoreBoard(data.scores);
+			}
+			// const { [data.socket_id]: removed, ...updatedScoreBoard } = scoreBoard; 
+			// // Update the scoreboard state with the new one
+			// setScoreBoard(updatedScoreBoard);		
+			// console.log("test scoreboard leave", updatedScoreBoard);	
 		});
 		
 		socket.on('error', (data) => {
@@ -262,6 +263,7 @@ function MultiPlayer() {
 		setRoundGuessesUsed(0);
 		setTransitionEndTime(null);
 		setTransitionTimeFinished(false);
+		setLobby(oldLobby => (oldLobby+1))
 		const newScoreBoard = Object.fromEntries(
 			users.map(id => [id, 0])
 		);
