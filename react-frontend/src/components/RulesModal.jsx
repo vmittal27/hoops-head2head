@@ -12,22 +12,27 @@ import {
     Tab,
     TabPanel, 
     UnorderedList,
-    ListItem
+    ListItem,
+    Link,
+    Text
 
 } from '@chakra-ui/react'
+
+// import { ExternalLinkIcon } from '@chakra-ui/icons';
 
 function RulesModal({isOpen, onOpen, onClose}) {
     return (
         <Modal blockScrollOnMount={false} size ={'lg'} isOpen={isOpen} onClose={onClose}>
             <ModalOverlay/>
             <ModalContent>
-                <ModalHeader>Rules</ModalHeader>
+                <ModalHeader>About</ModalHeader>
                 <ModalCloseButton color="black"/>
                 <ModalBody>
                     <Tabs variant='enclosed'>
                         <TabList>
                             <Tab>How to Play</Tab>
                             <Tab>Scoring</Tab>
+                            <Tab>About</Tab>
                         </TabList>
 
                         <TabPanels>
@@ -41,6 +46,9 @@ function RulesModal({isOpen, onOpen, onClose}) {
                                     </ListItem>
                                     <ListItem>
                                         The game ends when the connection is complete or you have exhausted all your guesses
+                                    </ListItem>
+                                    <ListItem>
+                                        Currently, player connections are updated to before the 2024 NBA offseason
                                     </ListItem>
                                 </UnorderedList>
                             </TabPanel>
@@ -56,6 +64,17 @@ function RulesModal({isOpen, onOpen, onClose}) {
                                         Incorrect guesses add 0 points, and each correct guess adds less points if more guesses are used
                                     </ListItem>
                                 </UnorderedList>
+                            </TabPanel>
+                            <TabPanel>
+                                Hoops Head 2 Head was made by Sriram, Shrivas, Siddarth, and Viresh, 4 students at the University of Chicago.
+                                <br/>
+                                <br/>
+                                <Text>
+                                    You can see the source code for this game{' '}
+                                    <Link color='teal.500' href='https://github.com/vmittal27/hoops-head2head' isExternal>
+                                         here.
+                                    </Link>
+                                </Text>
                             </TabPanel>
                         </TabPanels>
                     </Tabs>
