@@ -6,11 +6,9 @@ from flask_socketio import emit,join_room, leave_room
 from backend import app, socketio
 from flask import jsonify, request
 from .neo4j_routes import _get_players, _get_scoring_data, _check_teammates
-import tracemalloc
-CLEANUP_INTERVAL = 15 # cleans rooms every 10 mins
+CLEANUP_INTERVAL = 600 # cleans rooms every 10 mins
 ROOM_TIMEOUT = 300 # closes rooms after 5 minutes of 0 players
 RUN_CLEANUP_THREAD = True
-tracemalloc.start()
 
 # TODO
 # 1. Set settings to be in the database and accessible
@@ -62,7 +60,6 @@ def clean_rooms():
     while RUN_CLEANUP_THREAD:
 
         time.sleep(CLEANUP_INTERVAL)
-        print(tracemalloc.get_traced_memory())
         with thread_lock:
 
             now = datetime.now()
