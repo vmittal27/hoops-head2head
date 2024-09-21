@@ -85,7 +85,6 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
         if (guess) {
             if (gameMode == 'multi')
                 setRoundGuessesUsed(6 - guesses)
-            setGuesses(guesses - 1)
 
             checkTeammates(data.currPlayerID, guess)
                 .then((teammates) => {
@@ -105,10 +104,16 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                                         if (gameMode == 'single')
                                             processScoring(teammates, guess, gameOver)
                                     }
-                                
+
+                                    setGuesses(guesses - 1)
+
                                 })
                         })
                         
+                    }
+
+                    else {
+                        setGuesses(guesses - 1)
                     }
                 
                 }); 

@@ -230,7 +230,7 @@ function SinglePlayer() {
 
 				<RulesModal onOpen={onRulesOpen} onClose={onRulesClose} isOpen={isRulesOpen}/>
 				
-				<Modal size='lg' closeOnOverlayClick={false} isOpen={guesses===0}>
+				<Modal size='lg' closeOnOverlayClick={false} isOpen={guesses===0 && !isWinOpen}>
 					<ModalOverlay/>
 					<ModalContent backgroundColor="red.500">
 						<ModalHeader>It's never been more over</ModalHeader>
