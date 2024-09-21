@@ -126,6 +126,8 @@ def disconnected():
                 room_db[room_id]['users'].remove(user_id)
                 if user_id in room_db[room_id]['scores']:
                     del room_db[room_id]['scores'][user_id]
+                if room_db[room_id]['gameStatus'] == 0:
+                    room_db[room_id]['lobby'] -= 1
             if user_id in socket_to_user:
                 with thread_lock:
                     del socket_to_user[user_id]
@@ -135,6 +137,7 @@ def disconnected():
                 "user_count": len(room_db[room_id]['users']), 
                 "users" : room_db[room_id]['users'], 
                 "user_map" : {socket_id: socket_to_user[socket_id] for socket_id in room_db[room_id]['users']},
+                "lobby": room_db[room_id]['lobby']
             }
             if 'scores' in room_db[room_id]:
                 leave_info["scores"] = room_db[room_id]['scores']
@@ -145,6 +148,7 @@ def disconnected():
             )
             break
     print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - user disconnected (ID: {request.sid})")
+    print("current leave info is", leave_info)
 
 @socketio.on('message')
 def handle_message(data):
@@ -175,7 +179,7 @@ def on_join(data):
             "user_map" : {socket_id: socket_to_user[socket_id] for socket_id in room_db[room_id]['users']},
             "difficulty" : 'normal',
             "roundTime" : 75,
-            "roundNum" : 5
+            "roundNum" : 5,
         }
         if 'settings' in room_db[room_id]:
             settings = room_db[room_id]['settings']
@@ -188,6 +192,7 @@ def on_join(data):
             emit_data,
             room=room_id
         )
+        print(emit_data)
     else:
         socketio.emit('error', {"message": "Room not found"}, room=request.sid)
 
@@ -228,6 +233,8 @@ def on_leave(data):
         leave_room(room_id)
         with thread_lock:
             room_db[room_id]['users'].remove(request.sid)
+            if room_db[room_id]['gameStatus'] == 0:
+                room_db[room_id]['lobby'] -= 1
         update_room_usage(room=room_id)
 
         socketio.emit(
@@ -236,10 +243,12 @@ def on_leave(data):
                 "user_count": len(room_db[room_id]['users']), 
                 "users" : room_db[room_id]['users'], 
                 "user_map" : {socket_id: socket_to_user[socket_id] for socket_id in room_db[room_id]['users']},
-                "socket_id" : request.sid
+                "socket_id" : request.sid,
+                "lobby" : room_db[room_id]['lobby']
             },
             room=room_id
         )
+        print("player left:", room_db[room_id]['lobby'])
         del socket_to_user[request.sid]
 
 @socketio.on('settings_changed')

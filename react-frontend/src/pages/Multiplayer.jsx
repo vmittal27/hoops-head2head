@@ -83,7 +83,7 @@ function MultiPlayer() {
 			setDifficulty(data.difficulty);
 			setRoundNum(data.roundNum);
 			setRoundTime(data.roundTime);
-			console.log("idToUser:", data.user_map);
+			// console.log("idToUser:", data.user_map);
 			const newScoreBoard = Object.fromEntries(
 				data.users.map(id => [id, 0])
 			);
@@ -94,9 +94,12 @@ function MultiPlayer() {
 			setUserCount(data.user_count);
 			setUsers(data.users);
 			setIdToUser(data.user_map);
+			setLobby(data.lobby);
 			if(data.scores){
 				setScoreBoard(data.scores);
 			}
+			console.log("player left", lobby, userCount);
+			// setLobby((prevLobby) => (prevLobby-1));
 			// const { [data.socket_id]: removed, ...updatedScoreBoard } = scoreBoard; 
 			// // Update the scoreboard state with the new one
 			// setScoreBoard(updatedScoreBoard);		
@@ -118,6 +121,7 @@ function MultiPlayer() {
 		socket.on('start_game', (data) => {
 			setRoundData(data.players);
 			setLobby(0); //nobody in lobby
+			console.log(lobby, userCount);
 			setStarted(true); 
 			setRoundEndTime(new Date(data.roundEnd*1000)); 
 			console.log("game start test", data.players);
@@ -133,7 +137,7 @@ function MultiPlayer() {
 
         socket.on('scores_added', (data) => {
 			setScoreBoard(data); 
-			console.log(data);
+			// console.log(data);
         })
 
 		socket.on('user_score', (data) => {
@@ -159,7 +163,7 @@ function MultiPlayer() {
 
 		socket.on('new_round_at', (data) => {
 			setTransitionEndTime(new Date(data.time*1000)); 
-			console.log(new Date(data.time*1000));
+			// console.log(new Date(data.time*1000));
 		})
 
 		return () => {
@@ -183,7 +187,7 @@ function MultiPlayer() {
 	useEffect(() => {
 		if (currentUser === users[0]) {
 			socket.emit('settings_changed', {'room_id' : roomId, 'difficulty': difficulty, 'roundTime' : roundTime, 'roundNum': roundNum})
-			console.log(difficulty, roundTime);
+			// console.log(difficulty, roundTime);
 		}
 		
 	}, [difficulty, roundTime, users, roundNum]);
@@ -191,7 +195,7 @@ function MultiPlayer() {
     useEffect(() => {
 		console.log(roundTimeFinished.toString()); 
         if (isFinished || roundTimeFinished) {
-			console.log('emitting', roundPath, roundGuessesUsed);
+			// console.log('emitting', roundPath, roundGuessesUsed);
             socket.emit('user_finished', {'id' : currentUser, 'room_id' : roomId});
 			window.scrollTo({
 				top: 0,
@@ -212,7 +216,7 @@ function MultiPlayer() {
 		try {
 			const response = await fetch(`/create_room`, { method: 'POST' });
 			const data = await response.json();
-			console.log("room id" + data.room_id);
+			// console.log("room id" + data.room_id);
 			joinRoom(data.room_id);
             localStorage.setItem('roomId', data.room_id);
             navigate(`/multiplayer/${data.room_id}`)
@@ -263,7 +267,7 @@ function MultiPlayer() {
 		setRoundGuessesUsed(0);
 		setTransitionEndTime(null);
 		setTransitionTimeFinished(false);
-		setLobby(oldLobby => (oldLobby+1))
+		// setLobby(oldLobby => (oldLobby+1))
 		const newScoreBoard = Object.fromEntries(
 			users.map(id => [id, 0])
 		);
