@@ -1,2 +1,0 @@
-FLASK_APP=hoops.py
-FLASK_ENV=development

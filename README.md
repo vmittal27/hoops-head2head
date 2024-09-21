@@ -1,21 +1,14 @@
 # hoops-head2head
 
-## Virtual Environment 
-Set up a virtual environment:
 
+## How to Run
 
-    virtualenv venv
+After installing the required dependencies, build the static site by running the following command in the `react-frontend` folder
+```sh
+yarn vite build
+```
 
-    source venv/bin/activate
-
-    pip3 install -r requirements.txt
-
-
-
-## Run Web Scraper
-
-In order to run the web scraper, run the following code from the root of the repository. 
-
-    python3 BasketballReferenceWebScraper.py
-
-This will create a `teammates.csv` file containing the data.
+Then, boot up the web server with the following command from the root:
+```sh
+gunicorn --worker-class eventlet -w 1 -b localhost:3000 backend:app
+```

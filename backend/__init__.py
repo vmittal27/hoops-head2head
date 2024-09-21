@@ -9,6 +9,3 @@ app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 from backend import multiplayer
 from backend import neo4j_routes
-
-if __name__ == '__main__':
-    socketio.run(app, debug=True, port=3000)
