@@ -30,13 +30,15 @@ import logoImage from '../components/hoopsh2hlogo1-removebg-preview.png'
 import defaultImage from '../components/default-pic.png'	
 import DifficultyButton from './Difficulty'
 
-function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, setIsFinished, score, setScore, setRoundPath, setRoundGuessesUsed}) {
+function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, blind_m, setIsFinished, 
+	score, setScore, setRoundPath, setRoundGuessesUsed}) {
 	const [data, setData] = useState(data_m)
 	const [pics, setPics] = useState(pics_m)
 
 	const [players, setPlayers] = useState(players_m)
 	const [difficulty, setDifficulty] = useState(difficulty_m)
 	const [timeLeft, setTimeLeft] = useState(time_m);
+	const [blind, setBlind] = useState(blind_m);
 
 	const[guesses, setGuesses] = useState(5);
 
@@ -133,7 +135,9 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, 
 						objectFit='contain' 
 						boxSize='180'
 					/>
-					<Text fontSize='xl' align= 'center'>{data.currPlayer} </Text>
+					{blind === false && (
+						<Text fontSize='xl' align= 'center'>{data.currPlayer} </Text>
+					)}
 				</div>
 
 				<div className='player'> 
@@ -147,7 +151,9 @@ function Multiplayer({ data_m, pics_m, players_m, path_m, difficulty_m, time_m, 
 						objectFit='contain' 
 						boxSize='180'
 					/>
-					<Text fontSize='xl' align= 'center'> {data.lastPlayer} </Text>
+					{blind === false && (
+						<Text fontSize='xl' align= 'center'>{data.lastPlayer} </Text>
+					)}
 				</div>
 			</div>
 			<div className='score-container'>

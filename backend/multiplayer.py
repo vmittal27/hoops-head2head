@@ -43,7 +43,8 @@ Database schema:
         'settings': {
             'roundTime': int, 
             'roundNum': int, 
-            'difficulty': str
+            'difficulty': str,
+            'blind' : bool #initially false, whether player names are displayed or not
         }, 
         'gameStatus': int # one of 0 (not started), -1 (game finished), or round number
         'finishedUsers': list[str] 
@@ -99,7 +100,8 @@ def create_room():
             'settings': {
                 'roundTime': 75,
                 'roundNum': 5, 
-                'difficulty': 'normal'
+                'difficulty': 'normal',
+                'blind' : False
             }, 
             'gameStatus': 0, 
             'finishedUsers': [], 
@@ -148,7 +150,7 @@ def disconnected():
             )
             break
     print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - user disconnected (ID: {request.sid})")
-    print("current leave info is", leave_info)
+    # print("current leave info is", leave_info)
 
 @socketio.on('message')
 def handle_message(data):
@@ -186,6 +188,7 @@ def on_join(data):
             emit_data["difficulty"] = settings['difficulty']
             emit_data["roundTime"] = settings['roundTime']
             emit_data["roundNum"] = settings['roundNum']
+            emit_data["blind"] = settings['blind']
         
         socketio.emit(
             'user_joined', 
@@ -253,10 +256,10 @@ def on_leave(data):
 
 @socketio.on('settings_changed')
 def handle_difficulty_change(data):
-    room_id, difficulty, roundTime, roundNum = data['room_id'], data['difficulty'], data['roundTime'], data['roundNum']
+    room_id, difficulty, roundTime, roundNum, blind = data['room_id'], data['difficulty'], data['roundTime'], data['roundNum'], data['blind']
     if room_id in room_db:
         with thread_lock:
-            room_db[room_id]['settings'] = {'difficulty' : difficulty, 'roundTime' : roundTime, 'roundNum': roundNum}
+            room_db[room_id]['settings'] = {'difficulty' : difficulty, 'roundTime' : roundTime, 'roundNum': roundNum, 'blind' : blind}
         socketio.emit('settings_changed', room_db[room_id]['settings'], room=room_id)
 
 @socketio.on("start_game")

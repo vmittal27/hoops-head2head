@@ -27,6 +27,7 @@ function MultiPlayer() {
 	const [users, setUsers] = useState([]);
 	const [error, setError] = useState('');
 	const [difficulty, setDifficulty] = useState('normal');
+	const [blind, setBlind] = useState(false);
     const [roundNum, setRoundNum] = useState(5);
 	const [currentUser, setCurrentUser] = useState(null);
 	const [started, setStarted] = useState(false);
@@ -46,7 +47,6 @@ function MultiPlayer() {
 	const [roundTimeFinished, setRoundTimeFinished] = useState(false);
 	const [transitionEndTime, setTransitionEndTime] = useState(null); 
 	const [transitionTimeFinished, setTransitionTimeFinished] = useState(false);
-
 
 	const { colorMode, toggleColorMode } = useColorMode();
 
@@ -186,7 +186,8 @@ function MultiPlayer() {
 
 	useEffect(() => {
 		if (currentUser === users[0]) {
-			socket.emit('settings_changed', {'room_id' : roomId, 'difficulty': difficulty, 'roundTime' : roundTime, 'roundNum': roundNum})
+			socket.emit('settings_changed', {'room_id' : roomId, 'difficulty': difficulty, 'roundTime' : 
+											roundTime, 'blind' : blind, 'roundNum': roundNum})
 			// console.log(difficulty, roundTime);
 		}
 		
@@ -325,6 +326,8 @@ function MultiPlayer() {
 								setDifficulty={setDifficulty}
 								roundTime={roundTime}
 								setRoundTime={setRoundTime}
+								blind={blind}
+								setBlind={setBlind}
 								roundNum={roundNum}
 								setRoundNum={setRoundNum}
 								username={username}
@@ -343,7 +346,7 @@ function MultiPlayer() {
 							<Text>Round: {curRound}</Text>
 							<MultiplayerScreen data_m = {roundData[curRound-1].player_data} pics_m = {roundData[curRound-1].pictures} 
 							players_m = {roundData[curRound-1].players} //just need to make this data[curRound-1], etc.
-							path_m = {roundData[curRound-1].path} difficulty_m = {difficulty} time_m = {roundTime} setIsFinished={setIsFinished}
+							path_m = {roundData[curRound-1].path} difficulty_m = {difficulty} time_m = {roundTime} blind_m = {blind} setIsFinished={setIsFinished}
                             score = {score} setScore = {setScore} setRoundPath={setRoundPath} setRoundGuessesUsed={setRoundGuessesUsed}/>
 							<Modal isOpen={isFinished} closeOnOverlayClick={false} isCentered={true} size='lg'>
 								<ModalOverlay />

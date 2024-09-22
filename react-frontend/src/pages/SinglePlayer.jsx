@@ -42,7 +42,8 @@ function SinglePlayer() {
     const [roundPath, setRoundPath] = useState([]);
 	const { colorMode, toggleColorMode } = useColorMode();
 
-	
+	const [blind, setBlind] = useState(false);
+	console.log("blind mode is", blind);
 	useEffect(() => {
 		// Using fetch to fetch the api from flask server it will be redirected to proxy
 		fetch("/players/" + difficulty)
@@ -109,7 +110,7 @@ function SinglePlayer() {
 			</Flex>
 			<Container className='App-Container'>
 
-				<DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty} />
+				<DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty} blind={blind} setBlind={setBlind} />
 
 				<GuessForm
 					guesses={guesses}
@@ -170,7 +171,9 @@ function SinglePlayer() {
 							objectFit='contain' 
 							boxSize='180'
 						/>
-						<Text fontSize='xl' align= 'center'>{data.currPlayer} </Text>
+						{blind === false && (
+							<Text fontSize='xl' align= 'center'>{data.currPlayer} </Text>
+						)}
 					</div>
 
 					<div className='player'> 
@@ -184,7 +187,9 @@ function SinglePlayer() {
 							objectFit='contain' 
 							boxSize='180'
 						/>
-						<Text fontSize='xl' align= 'center'> {data.lastPlayer} </Text>
+						{blind === false && (
+							<Text fontSize='xl' align= 'center'> {data.lastPlayer} </Text>
+						)}
 					</div>
 				</div>
 				<div className='score-container'>

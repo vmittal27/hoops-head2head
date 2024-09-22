@@ -44,7 +44,7 @@ export default function Chat({ idToUser, socket, roomId }) {
       </UnorderedList>
       <UnorderedList styleType="''" mt='10px' overflowY='auto' maxHeight='120px'>
         {messages.map((message, ind) => (
-            <ListItem key={ind}>
+            <ListItem key={ind} textAlign="left">
                 {idToUser[message[1]]}: {message[0]}
             </ListItem>
         ))}

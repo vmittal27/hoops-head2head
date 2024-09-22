@@ -1,6 +1,6 @@
 import {Heading, Container, Flex, Button, Text, UnorderedList, ListItem, IconButton} from '@chakra-ui/react'
 import {Slider, SliderTrack, SliderFilledTrack, SliderThumb} from '@chakra-ui/react'
-import { CopyIcon } from '@chakra-ui/icons'
+import { CopyIcon, StarIcon } from '@chakra-ui/icons'
 import Chat from './Chat.jsx'
 import DifficultyButton from './Difficulty.jsx'
 import '../css/Multiplayer.css'
@@ -8,7 +8,7 @@ import '../css/Multiplayer.css'
 function Lobby({
     roomId, leaveRoom, // room information
     userCount, users, currentUser, idToUser, // users information
-    difficulty, setDifficulty, roundTime, setRoundTime, roundNum, setRoundNum, // game settings
+    difficulty, setDifficulty, blind, setBlind, roundTime, setRoundTime, roundNum, setRoundNum, // game settings
     socket, lobby, startGame
 }) {
 
@@ -27,10 +27,13 @@ function Lobby({
             <Heading fontWeight='bold' size='lg'> Multiplayer </Heading>
             <Container class="selectDif">
                 <Container>
+                <Flex direction="column" align="center" justify="center" m="10px">
                     <Heading fontWeight='bold' size='lg' m='10px'>Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Heading>
                     {currentUser === users[0] && (
-                        <DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty} roomId = {roomId} />
+                        <DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty}
+                        blind={blind} setBlind={setBlind} roomId = {roomId} />
                     )}
+                </Flex>
                 </Container>
                 <Container>
                     <Heading fontWeight='bold' size='md' m='10px'>Round Length: {roundTime} seconds</Heading>
@@ -61,10 +64,13 @@ function Lobby({
                         <IconButton icon={<CopyIcon />} onClick={copyRoom}></IconButton>
                         <Button onClick={leaveRoom} marginRight='0' right='2rem' marginLeft='auto' position='relative'>Leave Room</Button>
                     </Flex>
-                    <Text fontSize='lg' textAlign='left' mx='10px' my='5px'>Players: {userCount}</Text>
+                    <Text fontSize='lg' textAlign='left' mx='10px' my='5px'>Players: {userCount} ({lobby} in lobby)</Text>
                     <UnorderedList styleType="''" textAlign='left' fontSize='lg' mx='10px'>
-                        {users.map((user) => {
-                            return <ListItem >{idToUser[user]}</ListItem>;
+                        {users.map((user,index) => {
+                            return <ListItem key={user}>
+                                    {idToUser[user]} 
+                                    {index === 0 && (<StarIcon />)  }
+                                </ListItem>
                         })}
                     </UnorderedList>
                 </Container>    
