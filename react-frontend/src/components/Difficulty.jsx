@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect} from 'react'
-import { Button, ButtonGroup, Switch, VStack } from '@chakra-ui/react'
+import { Button, ButtonGroup, Heading, Switch, VStack } from '@chakra-ui/react'
 import '../css/SinglePlayer.css'
 
 
@@ -16,9 +16,7 @@ const DifficultyButton = ({ changeDifficulty, difficulty, roomId, blind, setBlin
             <Button className={difficulty === 'hard' ? "selected-difficulty-button": "difficulty-button"} onClick={() => changeDifficulty('hard')}>Hard</Button>
             <Button className={difficulty === 'legacy' ? "selected-difficulty-button": "difficulty-button"} onClick={() => changeDifficulty('legacy')}>Legacy</Button>
         </ButtonGroup>
-        <Switch isChecked={blind} onChange={() => setBlind((oldBlind) => !oldBlind)}>
-            Hide Player Names?
-        </Switch>
+        <Heading fontWeight='bold' size='md' m='10px'>Hide Player Names <Switch isChecked={blind} onChange={() => setBlind((oldBlind) => !oldBlind)}></Switch></Heading>
       </VStack>
     );
 };

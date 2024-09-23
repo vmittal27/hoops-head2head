@@ -41,11 +41,13 @@ function SinglePlayer() {
 	const [optimalPath, setOptimalPath] = useState([]);
     const [roundPath, setRoundPath] = useState([]);
 	const { colorMode, toggleColorMode } = useColorMode();
+	const [getNewPlayers, setGetNewPlayers] = useState(false); 
 
 	const [blind, setBlind] = useState(false);
 	console.log("blind mode is", blind);
 	useEffect(() => {
 		// Using fetch to fetch the api from flask server it will be redirected to proxy
+		setGetNewPlayers(false);
 		fetch("/players/" + difficulty)
 			
 			.then(
@@ -80,7 +82,7 @@ function SinglePlayer() {
 			)
 
 			.catch((error) => {console.error("Error fetching data:", error);});
-	}, [difficulty]);
+	}, [difficulty, getNewPlayers]);
 
     useEffect(() => {
         gsap.fromTo('#curr-image', {borderColor: '#6ba9fa'}, {borderColor: '#ffffff', duration: 1})
@@ -141,6 +143,7 @@ function SinglePlayer() {
 							/>
 						))}
 					</Flex>
+					<Button mt='0.5em' onClick={() => setGetNewPlayers(true)}>Refresh Players</Button>
 				</Box>
 
 				<div className='path'>
@@ -228,7 +231,8 @@ function SinglePlayer() {
 						</ModalBody>
 
 						<ModalFooter>
-							<Button colorScheme='blue' onClick={() => window.location.reload()}>Play Again</Button>
+							<Button mr={4} colorScheme='blue' onClick={() => window.location.reload()}>Play Again</Button>
+							<Button colorScheme='blue'><a href='/'>Return to Home</a></Button>
 						</ModalFooter>
 					</ModalContent>
 				</Modal>
@@ -265,7 +269,8 @@ function SinglePlayer() {
 						</ModalBody>
 
 						<ModalFooter>
-							<Button colorScheme='blue' onClick={() => window.location.reload()}>Play Again</Button>
+							<Button mr={4} colorScheme='blue' onClick={() => window.location.reload()}>Play Again</Button>
+							<Button colorScheme='blue'><a href='/'>Return to Home</a></Button>
 						</ModalFooter>
 					</ModalContent>
 				</Modal>

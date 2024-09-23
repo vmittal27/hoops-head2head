@@ -30,7 +30,7 @@ function Lobby({
             <Container class="selectDif">
                 <Container>
                 <Flex direction="column" align="center" justify="center" m="10px">
-                    <Heading fontWeight='bold' size='lg' m='10px'>Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Heading>
+                    <Heading fontWeight='bold' size='md' m='10px'>Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Heading>
                     {currentUser === users[0] && (
                         <DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty}
                         blind={blind} setBlind={setBlind} roomId = {roomId} />

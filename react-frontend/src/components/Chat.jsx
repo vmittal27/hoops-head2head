@@ -62,11 +62,6 @@ export default function Chat({ idToUser, socket, roomId }) {
             onChange={handleText} 
             onKeyDown={handleKeyDown} 
         />
-        <InputRightElement width='4.5rem'>
-            <Button onClick={handleSubmit} h='1.75rem' size='sm' mt='20px'>
-                Send
-            </Button>
-        </InputRightElement>
       </InputGroup>
     </Container>
   );
