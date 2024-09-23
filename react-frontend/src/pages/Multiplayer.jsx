@@ -202,7 +202,7 @@ function MultiPlayer() {
     
     useEffect(() => {
 		console.log(roundTimeFinished.toString()); 
-        if (isFinished || roundTimeFinished) {
+        if (isFinished != roundTimeFinished) {
 			// console.log('emitting', roundPath, roundGuessesUsed);
             socket.emit('user_finished', {'id' : currentUser, 'room_id' : roomId});
 			window.scrollTo({
