@@ -96,6 +96,9 @@ function MultiPlayer() {
 			setIdToUser(data.user_map);
 			setLobby(data.lobby);
 			if(data.scores){
+				console.log("Scoreboard Changed");
+				console.log("\tOld: ", scoreBoard)
+				console.log("\tNew: ", data.scores)
 				setScoreBoard(data.scores);
 			}
 			console.log("player left", lobby, userCount);
@@ -136,11 +139,15 @@ function MultiPlayer() {
         })
 
         socket.on('scores_added', (data) => {
+			console.log("Scoreboard Changed");
+			console.log("\tOld: ", scoreBoard)
+			console.log("\tNew: ", data)
 			setScoreBoard(data); 
 			// console.log(data);
         })
 
 		socket.on('user_score', (data) => {
+			console.log("User score added")
 			setScore(data.score);
 		})
 		
@@ -272,6 +279,9 @@ function MultiPlayer() {
 		const newScoreBoard = Object.fromEntries(
 			users.map(id => [id, 0])
 		);
+		console.log("Scoreboard Changed");
+		console.log("\tOld: ", scoreBoard)
+		console.log("\tNew: ", newScoreBoard)
 		setScoreBoard(newScoreBoard);
 		socket.emit('lobby_rejoined', {'room_id' : roomId})
 		setNumFinished(0); 

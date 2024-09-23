@@ -1,6 +1,8 @@
 import {Heading, Container, Flex, Button, Text, UnorderedList, ListItem, IconButton} from '@chakra-ui/react'
 import {Slider, SliderTrack, SliderFilledTrack, SliderThumb} from '@chakra-ui/react'
-import { CopyIcon, StarIcon } from '@chakra-ui/icons'
+import { CopyIcon } from '@chakra-ui/icons'
+import { Icon } from '@chakra-ui/react'
+import { FaCrown } from "react-icons/fa";
 import Chat from './Chat.jsx'
 import DifficultyButton from './Difficulty.jsx'
 import '../css/Multiplayer.css'
@@ -68,8 +70,8 @@ function Lobby({
                     <UnorderedList styleType="''" textAlign='left' fontSize='lg' mx='10px'>
                         {users.map((user,index) => {
                             return <ListItem key={user}>
-                                    {idToUser[user]} 
-                                    {index === 0 && (<StarIcon />)  }
+                                    <Text>{idToUser[user]} {' '}
+                                    {index === 0 && (<Icon as={FaCrown} color='gold'/>)}</Text>
                                 </ListItem>
                         })}
                     </UnorderedList>
