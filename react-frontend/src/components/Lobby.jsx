@@ -66,7 +66,14 @@ function Lobby({
                         <IconButton icon={<CopyIcon />} onClick={copyRoom}></IconButton>
                         <Button onClick={leaveRoom} marginRight='0' right='2rem' marginLeft='auto' position='relative'>Leave Room</Button>
                     </Flex>
-                    <Text fontSize='lg' textAlign='left' mx='10px' my='5px'>Players: {userCount} ({lobby} in lobby)</Text>
+                    <Flex direction="row">
+                    <Text fontSize='lg' textAlign='left' mx='10px' my='5px'>Players: {userCount}</Text>
+                    {userCount - lobby === 1 ? (
+                        <Text fontSize='lg' textAlign='left' my='5px' display="inline"> (Waiting for 1 player)</Text>
+                    ) : userCount - lobby > 1 ? (
+                        <Text fontSize='lg' textAlign='left' my='5px' display="inline">(Waiting for {userCount - lobby} players)</Text>
+                    ) : null}
+                    </Flex>
                     <UnorderedList styleType="''" textAlign='left' fontSize='lg' mx='10px'>
                         {users.map((user,index) => {
                             return <ListItem key={user}>
