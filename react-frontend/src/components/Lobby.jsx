@@ -31,31 +31,25 @@ function Lobby({
                 <Container>
                 <Flex direction="column" align="center" justify="center" m="10px">
                     <Heading fontWeight='bold' size='md' m='10px'>Current Difficulty: {difficulty[0].toUpperCase() + difficulty.slice(1)} </Heading>
-                    {currentUser === users[0] && (
-                        <DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty}
-                        blind={blind} setBlind={setBlind} roomId = {roomId} />
-                    )}
+                    <DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty}
+                    blind={blind} setBlind={setBlind} roomId = {roomId} isDisabled={currentUser !== users[0]} />
                 </Flex>
                 </Container>
                 <Container>
                     <Heading fontWeight='bold' size='md' m='10px'>Round Length: {roundTime} seconds</Heading>
-                    {currentUser === users[0] && (
-                        <Slider defaultValue={roundTime} min={30} max={120} step={5} onChangeEnd={(val) => setRoundTime(val)}>
-                            <SliderTrack>
-                                <SliderFilledTrack bg='#c76f0a'/>
-                            </SliderTrack>
-                            <SliderThumb />
-                        </Slider>
-                    )}
+                    <Slider isDisabled = {currentUser !== users[0]} value={roundTime} min={30} max={120} step={5} onChange={(val) => setRoundTime(val)} onChangeEnd={(val) => setRoundTime(val)}>
+                        <SliderTrack>
+                            <SliderFilledTrack bg='#c76f0a'/>
+                        </SliderTrack>
+                        <SliderThumb />
+                    </Slider>
                     <Heading fontWeight='bold' size='md' m='10px'>Number of Rounds: {roundNum}</Heading>
-                    {currentUser === users[0] && (
-                        <Slider defaultValue={roundNum} min={1} max={10} step={1} onChangeEnd={(val) => setRoundNum(val)}>
-                            <SliderTrack>
-                                <SliderFilledTrack bg='#c76f0a'/>
-                            </SliderTrack>
-                            <SliderThumb />
-                        </Slider>
-                    )}
+                    <Slider isDisabled = {currentUser !== users[0]} value={roundNum} min={1} max={10} step={1} onChange={(val) => setRoundNum(val)} onChangeEnd={(val) => setRoundNum(val)}>
+                        <SliderTrack>
+                            <SliderFilledTrack bg='#c76f0a'/>
+                        </SliderTrack>
+                        <SliderThumb />
+                    </Slider>
                 </Container>
             </Container>
             <Container class='bottomcontain'>
