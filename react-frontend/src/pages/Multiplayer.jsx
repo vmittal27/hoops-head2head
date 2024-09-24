@@ -83,6 +83,7 @@ function MultiPlayer() {
 			setDifficulty(data.difficulty);
 			setRoundNum(data.roundNum);
 			setRoundTime(data.roundTime);
+			setBlind(data.blind)
 			// console.log("idToUser:", data.user_map);
 			const newScoreBoard = Object.fromEntries(
 				data.users.map(id => [id, 0])
@@ -102,11 +103,6 @@ function MultiPlayer() {
 				setScoreBoard(data.scores);
 			}
 			console.log("player left", lobby, userCount);
-			// setLobby((prevLobby) => (prevLobby-1));
-			// const { [data.socket_id]: removed, ...updatedScoreBoard } = scoreBoard; 
-			// // Update the scoreboard state with the new one
-			// setScoreBoard(updatedScoreBoard);		
-			// console.log("test scoreboard leave", updatedScoreBoard);	
 		});
 		
 		socket.on('error', (data) => {
@@ -118,6 +114,7 @@ function MultiPlayer() {
 			setDifficulty(data.difficulty); 
 			setRoundNum(data.roundNum)
 			setRoundTime(data.roundTime)
+			setBlind(data.blind)
 			console.log(data.difficulty, data.roundNum);
 		});
 
@@ -198,7 +195,7 @@ function MultiPlayer() {
 			// console.log(difficulty, roundTime);
 		}
 		
-	}, [difficulty, roundTime, users, roundNum]);
+	}, [difficulty, blind, roundTime, users, roundNum]);
     
     useEffect(() => {
 		console.log(roundTimeFinished.toString()); 
