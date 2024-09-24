@@ -44,6 +44,11 @@ function SinglePlayer() {
 	const [getNewPlayers, setGetNewPlayers] = useState(false); 
 
 	const [blind, setBlind] = useState(false);
+    const showRules = !localStorage.getItem('rulesShown')
+    localStorage.setItem('rulesShown', true)
+
+    
+
 	console.log("blind mode is", blind);
 	useEffect(() => {
 		// Using fetch to fetch the api from flask server it will be redirected to proxy
@@ -88,7 +93,7 @@ function SinglePlayer() {
         gsap.fromTo('#curr-image', {borderColor: '#6ba9fa'}, {borderColor: '#ffffff', duration: 1})
     },[data])
 
-	const { isOpen: isRulesOpen , onOpen: onRulesOpen, onClose: onRulesClose } = useDisclosure()
+	const { isOpen: isRulesOpen , onOpen: onRulesOpen, onClose: onRulesClose } = useDisclosure({ defaultIsOpen: showRules})
     const { isOpen: isWinOpen , onOpen: onWinOpen, onClose: onWinClose } = useDisclosure()
     const { isOpen: isLoseOpen , onOpen: onLoseOpen, onClose: onLoseClose } = useDisclosure()
 

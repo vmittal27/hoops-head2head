@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Heading, UnorderedList, ListItem, Input, InputGroup, InputRightElement, Container, Button, DarkMode } from "@chakra-ui/react";
+import { Heading, UnorderedList, ListItem, Input, InputGroup, InputRightElement, Container, Button, DarkMode, Text, Flex } from "@chakra-ui/react";
 
 export default function Chat({ idToUser, socket, roomId }) {
   const [message, setMessage] = useState("");
@@ -38,14 +38,14 @@ export default function Chat({ idToUser, socket, roomId }) {
 
 
   return (
-    <Container bg='var(--chakra-colors-chakra-subtle-bg)' flex='1' minHeight='20rem' float='right' overflow-x= 'hidden' maxWidth='100%'position='relative'borderRadius='20px' borderWidth='3px' borderColor='#ff7f26' >
+    <Container bg='var(--chakra-colors-chakra-subtle-bg)' flex='1' overflowX='auto' minHeight='20rem' float='right' overflow-x= 'hidden' maxWidth='100%'position='relative'borderRadius='20px' borderWidth='3px' borderColor='#ff7f26' >
       <Heading size='lg' mt='10px'>Chat</Heading>
       <UnorderedList styleType="''" mt='10px' overflowY='auto' maxHeight='120px'>
       </UnorderedList>
       <UnorderedList styleType="''" mt='10px' overflowY='auto' maxHeight='120px'>
         {messages.map((message, ind) => (
             <ListItem key={ind} textAlign="left">
-                {idToUser[message[1]]}: {message[0]}
+                <Text as='span'><Text as='span' fontWeight='bold'>{idToUser[message[1]]}: </Text>{message[0]}</Text>
             </ListItem>
         ))}
     </UnorderedList>

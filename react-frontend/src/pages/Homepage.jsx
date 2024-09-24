@@ -103,6 +103,7 @@ function Homepage() {
 							>
 								<Link to='/singleplayer' ><Button colorScheme='blue' flex='1'size='lg' width='10em' minHeight='4rem'>Single Player</Button></Link>
 								<Link to='/multiplayer'><Button flex='1' size='lg' colorScheme='purple' width='10em' minHeight='4rem'>Multiplayer</Button></Link>
+                                <Button flex='1' size='lg' colorScheme='teal' width='10em' minHeight='4rem' onClick={onRulesOpen}>How to Play</Button>
 							</Flex>
 							<Image src={gordonRightImg} opacity={0} boxSize='30vw'  animation={`${slideInRight} 0.5s ease-in-out 1s forwards`}/>
 						</>
