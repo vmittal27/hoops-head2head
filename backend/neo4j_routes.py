@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import jsonify, request, send_from_directory
 from neo4j import GraphDatabase
 from backend import app
 from flask_socketio import SocketIO, emit
@@ -105,14 +105,6 @@ def _get_players(difficulty):
         neighbors = len(path) == 2 # true if direct neighbors, false otherwise
 
     return {"Player 1": p1, "Player 2": p2, "Path": path}
-    
-@app.route('/')
-def welcome():
-    """
-    Default screen for the standard URL
-    """
-    return "Welcome to Hoops H2H!"
-
 
 @app.route('/players/<difficulty>')
 def get_players(difficulty):
@@ -199,6 +191,25 @@ def get_player_json_data():
             })
         else:
             return jsonify({'error': 'Player not found'}), 404
+
+@app.route('/')
+def index():
+    """
+    Default screen for the standard URL
+    """
+    return app.send_static_file('index.html')
+
+@app.route('/singleplayer')
+def singleplayer():
+    return app.send_static_file('index.html')
+
+@app.route('/multiplayer')
+def multiplayer():
+    return app.send_static_file('index.html')
+
+@app.route('/multiplayer/<path:subpath>')
+def multiplayerId(subpath):
+    return app.send_static_file('index.html')
 
 def close_driver():
     driver.close()

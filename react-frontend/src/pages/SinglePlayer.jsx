@@ -37,16 +37,24 @@ function SinglePlayer() {
 	const [difficulty, setDifficulty] = useState('normal');
 
 	const[guesses, setGuesses] = useState(5);
+    const[guessStatus, setGuessStatus] = useState(null)
 
 	const [optimalPath, setOptimalPath] = useState([]);
     const [roundPath, setRoundPath] = useState([]);
-	const API_BASE_URL = "http://localhost:5000/";
 	const { colorMode, toggleColorMode } = useColorMode();
+	const [getNewPlayers, setGetNewPlayers] = useState(false); 
 
-	
+	const [blind, setBlind] = useState(false);
+    const showRules = !localStorage.getItem('rulesShown')
+    localStorage.setItem('rulesShown', true)
+
+    
+
+	console.log("blind mode is", blind);
 	useEffect(() => {
 		// Using fetch to fetch the api from flask server it will be redirected to proxy
-		fetch(API_BASE_URL + "players/" + difficulty)
+		setGetNewPlayers(false);
+		fetch("/players/" + difficulty)
 			
 			.then(
 				(res) => {
@@ -80,13 +88,13 @@ function SinglePlayer() {
 			)
 
 			.catch((error) => {console.error("Error fetching data:", error);});
-	}, [difficulty]);
+	}, [difficulty, getNewPlayers]);
 
     useEffect(() => {
         gsap.fromTo('#curr-image', {borderColor: '#6ba9fa'}, {borderColor: '#ffffff', duration: 1})
     },[data])
 
-	const { isOpen: isRulesOpen , onOpen: onRulesOpen, onClose: onRulesClose } = useDisclosure()
+	const { isOpen: isRulesOpen , onOpen: onRulesOpen, onClose: onRulesClose } = useDisclosure({ defaultIsOpen: showRules})
     const { isOpen: isWinOpen , onOpen: onWinOpen, onClose: onWinClose } = useDisclosure()
     const { isOpen: isLoseOpen , onOpen: onLoseOpen, onClose: onLoseClose } = useDisclosure()
 
@@ -110,7 +118,7 @@ function SinglePlayer() {
 			</Flex>
 			<Container className='App-Container'>
 
-				<DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty} />
+				<DifficultyButton changeDifficulty={setDifficulty} difficulty={difficulty} blind={blind} setBlind={setBlind} />
 
 				<GuessForm
 					guesses={guesses}
@@ -141,6 +149,7 @@ function SinglePlayer() {
 							/>
 						))}
 					</Flex>
+					<Button mt='0.5em' onClick={() => setGetNewPlayers(true)}>Refresh Players</Button>
 				</Box>
 
 				<div className='path'>
@@ -171,7 +180,9 @@ function SinglePlayer() {
 							objectFit='contain' 
 							boxSize='180'
 						/>
-						<Text fontSize='xl' align= 'center'>{data.currPlayer} </Text>
+						{blind === false && (
+							<Text fontSize='xl' align= 'center'>{data.currPlayer} </Text>
+						)}
 					</div>
 
 					<div className='player'> 
@@ -185,7 +196,9 @@ function SinglePlayer() {
 							objectFit='contain' 
 							boxSize='180'
 						/>
-						<Text fontSize='xl' align= 'center'> {data.lastPlayer} </Text>
+						{blind === false && (
+							<Text fontSize='xl' align= 'center'> {data.lastPlayer} </Text>
+						)}
 					</div>
 				</div>
 				<div className='score-container'>
@@ -224,14 +237,15 @@ function SinglePlayer() {
 						</ModalBody>
 
 						<ModalFooter>
-							<Button colorScheme='blue' onClick={() => window.location.reload()}>Play Again</Button>
+							<Button mr={4} colorScheme='blue' onClick={() => window.location.reload()}>Play Again</Button>
+							<Button colorScheme='blue'><a href='/'>Return to Home</a></Button>
 						</ModalFooter>
 					</ModalContent>
 				</Modal>
 
 				<RulesModal onOpen={onRulesOpen} onClose={onRulesClose} isOpen={isRulesOpen}/>
 				
-				<Modal size='lg' closeOnOverlayClick={false} isOpen={guesses===0}>
+				<Modal size='lg' closeOnOverlayClick={false} isOpen={guesses===0 && !isWinOpen}>
 					<ModalOverlay/>
 					<ModalContent backgroundColor="red.500">
 						<ModalHeader>It's never been more over</ModalHeader>
@@ -261,7 +275,8 @@ function SinglePlayer() {
 						</ModalBody>
 
 						<ModalFooter>
-							<Button colorScheme='blue' onClick={() => window.location.reload()}>Play Again</Button>
+							<Button mr={4} colorScheme='blue' onClick={() => window.location.reload()}>Play Again</Button>
+							<Button colorScheme='blue'><a href='/'>Return to Home</a></Button>
 						</ModalFooter>
 					</ModalContent>
 				</Modal>

@@ -17,14 +17,8 @@ import { Image, Text, Container, Button, Heading, IconButton, useColorMode, Circ
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, useDisclosure, Flex } from '@chakra-ui/react'
 import { MoonIcon, SunIcon, QuestionOutlineIcon } from '@chakra-ui/icons'
 
-const socket = io("localhost:5000/", {
-	transports: ["websocket"],
-	cors: {
-		origin: "http://localhost:5173/",
-	},
-});
+const socket = io();
 
-const API_BASE_URL = "http://localhost:5000/"
 
 function MultiPlayer() {
 	const [roomId, setRoomId] = useState('');
@@ -33,6 +27,7 @@ function MultiPlayer() {
 	const [users, setUsers] = useState([]);
 	const [error, setError] = useState('');
 	const [difficulty, setDifficulty] = useState('normal');
+	const [blind, setBlind] = useState(false);
     const [roundNum, setRoundNum] = useState(5);
 	const [currentUser, setCurrentUser] = useState(null);
 	const [started, setStarted] = useState(false);
@@ -52,7 +47,6 @@ function MultiPlayer() {
 	const [roundTimeFinished, setRoundTimeFinished] = useState(false);
 	const [transitionEndTime, setTransitionEndTime] = useState(null); 
 	const [transitionTimeFinished, setTransitionTimeFinished] = useState(false);
-
 
 	const { colorMode, toggleColorMode } = useColorMode();
 
@@ -89,7 +83,8 @@ function MultiPlayer() {
 			setDifficulty(data.difficulty);
 			setRoundNum(data.roundNum);
 			setRoundTime(data.roundTime);
-			console.log("idToUser:", data.user_map);
+			setBlind(data.blind)
+			// console.log("idToUser:", data.user_map);
 			const newScoreBoard = Object.fromEntries(
 				data.users.map(id => [id, 0])
 			);
@@ -98,14 +93,16 @@ function MultiPlayer() {
 		
 		socket.on('leave', (data) => {
 			setUserCount(data.user_count);
-			setLobby(data.user_count);
 			setUsers(data.users);
 			setIdToUser(data.user_map);
-			const newScoreBoard = Object.fromEntries(
-				data.users.map(id => [id, 0])
-			);
-			setScoreBoard(newScoreBoard);
-			
+			setLobby(data.lobby);
+			if(data.scores){
+				console.log("Scoreboard Changed");
+				console.log("\tOld: ", scoreBoard)
+				console.log("\tNew: ", data.scores)
+				setScoreBoard(data.scores);
+			}
+			console.log("player left", lobby, userCount);
 		});
 		
 		socket.on('error', (data) => {
@@ -117,12 +114,14 @@ function MultiPlayer() {
 			setDifficulty(data.difficulty); 
 			setRoundNum(data.roundNum)
 			setRoundTime(data.roundTime)
+			setBlind(data.blind)
 			console.log(data.difficulty, data.roundNum);
 		});
 
 		socket.on('start_game', (data) => {
 			setRoundData(data.players);
 			setLobby(0); //nobody in lobby
+			console.log(lobby, userCount);
 			setStarted(true); 
 			setRoundEndTime(new Date(data.roundEnd*1000)); 
 			console.log("game start test", data.players);
@@ -137,11 +136,15 @@ function MultiPlayer() {
         })
 
         socket.on('scores_added', (data) => {
+			console.log("Scoreboard Changed");
+			console.log("\tOld: ", scoreBoard)
+			console.log("\tNew: ", data)
 			setScoreBoard(data); 
-			console.log(data);
+			// console.log(data);
         })
 
 		socket.on('user_score', (data) => {
+			console.log("User score added")
 			setScore(data.score);
 		})
 		
@@ -164,7 +167,7 @@ function MultiPlayer() {
 
 		socket.on('new_round_at', (data) => {
 			setTransitionEndTime(new Date(data.time*1000)); 
-			console.log(new Date(data.time*1000));
+			// console.log(new Date(data.time*1000));
 		})
 
 		return () => {
@@ -187,16 +190,17 @@ function MultiPlayer() {
 
 	useEffect(() => {
 		if (currentUser === users[0]) {
-			socket.emit('settings_changed', {'room_id' : roomId, 'difficulty': difficulty, 'roundTime' : roundTime, 'roundNum': roundNum})
-			console.log(difficulty, roundTime);
+			socket.emit('settings_changed', {'room_id' : roomId, 'difficulty': difficulty, 'roundTime' : 
+											roundTime, 'blind' : blind, 'roundNum': roundNum})
+			// console.log(difficulty, roundTime);
 		}
 		
-	}, [difficulty, roundTime, users, roundNum]);
+	}, [difficulty, blind, roundTime, users, roundNum]);
     
     useEffect(() => {
 		console.log(roundTimeFinished.toString()); 
-        if (isFinished || roundTimeFinished) {
-			console.log('emitting', roundPath, roundGuessesUsed);
+        if (isFinished != roundTimeFinished) {
+			// console.log('emitting', roundPath, roundGuessesUsed);
             socket.emit('user_finished', {'id' : currentUser, 'room_id' : roomId});
 			window.scrollTo({
 				top: 0,
@@ -215,9 +219,9 @@ function MultiPlayer() {
 
 	const createRoom = async () => {
 		try {
-			const response = await fetch(`${API_BASE_URL}/create_room`, { method: 'POST' });
+			const response = await fetch(`/create_room`, { method: 'POST' });
 			const data = await response.json();
-			console.log("room id" + data.room_id);
+			// console.log("room id" + data.room_id);
 			joinRoom(data.room_id);
             localStorage.setItem('roomId', data.room_id);
             navigate(`/multiplayer/${data.room_id}`)
@@ -268,9 +272,13 @@ function MultiPlayer() {
 		setRoundGuessesUsed(0);
 		setTransitionEndTime(null);
 		setTransitionTimeFinished(false);
+		// setLobby(oldLobby => (oldLobby+1))
 		const newScoreBoard = Object.fromEntries(
 			users.map(id => [id, 0])
 		);
+		console.log("Scoreboard Changed");
+		console.log("\tOld: ", scoreBoard)
+		console.log("\tNew: ", newScoreBoard)
 		setScoreBoard(newScoreBoard);
 		socket.emit('lobby_rejoined', {'room_id' : roomId})
 		setNumFinished(0); 
@@ -325,6 +333,8 @@ function MultiPlayer() {
 								setDifficulty={setDifficulty}
 								roundTime={roundTime}
 								setRoundTime={setRoundTime}
+								blind={blind}
+								setBlind={setBlind}
 								roundNum={roundNum}
 								setRoundNum={setRoundNum}
 								username={username}
@@ -343,7 +353,7 @@ function MultiPlayer() {
 							<Text>Round: {curRound}</Text>
 							<MultiplayerScreen data_m = {roundData[curRound-1].player_data} pics_m = {roundData[curRound-1].pictures} 
 							players_m = {roundData[curRound-1].players} //just need to make this data[curRound-1], etc.
-							path_m = {roundData[curRound-1].path} difficulty_m = {difficulty} time_m = {roundTime} setIsFinished={setIsFinished}
+							path_m = {roundData[curRound-1].path} difficulty_m = {difficulty} time_m = {roundTime} blind_m = {blind} setIsFinished={setIsFinished}
                             score = {score} setScore = {setScore} setRoundPath={setRoundPath} setRoundGuessesUsed={setRoundGuessesUsed}/>
 							<Modal isOpen={isFinished} closeOnOverlayClick={false} isCentered={true} size='lg'>
 								<ModalOverlay />

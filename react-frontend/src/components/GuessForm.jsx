@@ -6,7 +6,6 @@ import '../css/SinglePlayer.css'
 
 const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, modalOpen, score, setScore, pics, setPics, gameMode, setRoundPath, setRoundGuessesUsed}) => {
 
-    const API_BASE_URL = "http://localhost:5000"
     // states for search bar
     const [value, setValue] = useState(""); 
     const [suggestions, setSuggestions] = useState([]);
@@ -18,7 +17,7 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
     const processScoring = (areTeammates, guess, over) => {
         if (areTeammates) {
             fetch(
-                `${API_BASE_URL}/scoring`, 
+                `/scoring`, 
                 {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -44,7 +43,7 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
 
     const checkTeammates = async (p1, p2) => {
         return fetch(
-            `${API_BASE_URL}/check`,
+            `/check`,
             {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -63,7 +62,7 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
 
     const getJson = async (p1) => {
         return fetch(
-            `${API_BASE_URL}/player`,
+            `/player`,
             {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -86,13 +85,19 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
         if (guess) {
             if (gameMode == 'multi')
                 setRoundGuessesUsed(6 - guesses)
-            setGuesses(guesses - 1)
 
             checkTeammates(data.currPlayerID, guess)
                 .then((teammates) => {
                     if (teammates) {
                         getJson(guess)
                         .then((jsonData) => {
+                            toast({
+                                title: "Valid connection!",
+                                status: "success", 
+                                isClosable: true, 
+                                position: 'bottom-left'
+                
+                            })
                             setPlayers(p => [...p, jsonData.name ]);
                             setData({...data, currPlayer : jsonData.name, currPlayerID: jsonData.id});
                             setRoundPath((prev) => [...prev, jsonData.id])
@@ -106,10 +111,23 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                                         if (gameMode == 'single')
                                             processScoring(teammates, guess, gameOver)
                                     }
-                                
+
+                                    setGuesses(guesses - 1)
+
                                 })
                         })
                         
+                    }
+
+                    else {
+                        toast({
+                            title: "Invalid connection!",
+                            status: "error", 
+                            isClosable: true, 
+                            position: 'bottom-left'
+            
+                        })
+                        setGuesses(guesses - 1)
                     }
                 
                 }); 
@@ -133,7 +151,7 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
         if (inputValue) {
             setIsLoading(true);
 
-            fetch(`${API_BASE_URL}/autocomplete?search=${inputValue}`)
+            fetch(`/autocomplete?search=${inputValue}`)
                 .then((response) => response.json())
                 .then((data) =>{
                     const results = []
