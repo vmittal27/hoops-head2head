@@ -37,7 +37,6 @@ function SinglePlayer() {
 	const [difficulty, setDifficulty] = useState('normal');
 
 	const[guesses, setGuesses] = useState(5);
-    const[guessStatus, setGuessStatus] = useState(null)
 
 	const [optimalPath, setOptimalPath] = useState([]);
     const [roundPath, setRoundPath] = useState([]);
