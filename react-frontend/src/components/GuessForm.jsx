@@ -91,6 +91,13 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                     if (teammates) {
                         getJson(guess)
                         .then((jsonData) => {
+                            toast({
+                                title: "Valid connection!",
+                                status: "success", 
+                                isClosable: true, 
+                                position: 'bottom-left'
+                
+                            })
                             setPlayers(p => [...p, jsonData.name ]);
                             setData({...data, currPlayer : jsonData.name, currPlayerID: jsonData.id});
                             setRoundPath((prev) => [...prev, jsonData.id])
@@ -113,6 +120,13 @@ const GuessForm = ({guesses, setGuesses, players, setPlayers, data, setData, mod
                     }
 
                     else {
+                        toast({
+                            title: "Invalid connection!",
+                            status: "error", 
+                            isClosable: true, 
+                            position: 'bottom-left'
+            
+                        })
                         setGuesses(guesses - 1)
                     }
                 
