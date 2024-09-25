@@ -1,5 +1,7 @@
 import random
-import threading
+# import threading
+import eventlet
+from eventlet.green import threading
 import time
 from datetime import datetime, timedelta
 from flask_socketio import emit,join_room, leave_room
@@ -60,9 +62,10 @@ thread_lock = threading.Lock()
 def clean_rooms():
     while RUN_CLEANUP_THREAD:
 
-        time.sleep(CLEANUP_INTERVAL)
+        # time.sleep(CLEANUP_INTERVAL)
+        eventlet.sleep(CLEANUP_INTERVAL)
         with thread_lock:
-
+            print("Running cleanup thread")
             now = datetime.now()
             room_ids = list(room_db.keys())
 
@@ -72,8 +75,9 @@ def clean_rooms():
 
                     print(f"Deleted room {room_id} due to inactivity.")
 
-cleanup_thread = threading.Thread(target=clean_rooms, daemon=True)
-cleanup_thread.start()
+# cleanup_thread = threading.Thread(target=clean_rooms, daemon=True)
+# cleanup_thread.start()
+cleanup_thread = eventlet.spawn(clean_rooms)
 
 def generate_room_id(n):
     #n digit code, usually use n=6
