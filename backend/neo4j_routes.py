@@ -2,6 +2,8 @@ from flask import jsonify, request, send_from_directory
 from neo4j import GraphDatabase
 from backend import app
 from flask_socketio import SocketIO, emit
+import threading
+import time
 
 def read_credentials(file):
     credentials = {}
@@ -105,6 +107,15 @@ def _get_players(difficulty):
         neighbors = len(path) == 2 # true if direct neighbors, false otherwise
 
     return {"Player 1": p1, "Player 2": p2, "Path": path}
+
+def ping_neo4j():
+    while True:
+        _get_players(difficulty='normal')
+        print("Pinged Neo4j")
+        time.sleep(24*60*60)
+
+ping_thread = threading.Thread(target=ping_neo4j, daemon=True)
+ping_thread.start()
 
 @app.route('/players/<difficulty>')
 def get_players(difficulty):
